@@ -41,10 +41,20 @@
 
         .controls { display: flex; justify-content: center; align-items: center; gap: 25px; margin-top: 10px; }
         .play-btn { background: var(--green); border: none; width: 70px; height: 70px; border-radius: 50%; font-size: 1.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: black; transition: 0.2s; box-shadow: 0 5px 15px rgba(66, 230, 149, 0.3); }
-        .play-btn:active { transform: scale(0.9); }
         
-        .footer { margin-top: 30px; font-size: 0.9rem; line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
-        .footer b { color: var(--accent); font-size: 1.1rem; text-shadow: 0 2px 5px rgba(241, 196, 15, 0.2); }
+        /* الحقوق المطلوبة: خط صغير، لون واحد، تحت خط */
+        .footer { 
+            margin-top: 30px; 
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .footer-text {
+            color: var(--accent);
+            font-size: 0.75rem;
+            text-decoration: underline;
+            letter-spacing: 0.5px;
+        }
+        
         .repeat-status { font-size: 0.8rem; color: var(--accent); margin-top: 5px; font-weight: bold; }
     </style>
 </head>
@@ -79,9 +89,7 @@
     </div>
 
     <div class="footer">
-        الحقوق محفوظة <br>
-        صدقة جارية لوجه الله تعالى <br>
-        <b>أبو نواف</b>
+        <div class="footer-text">الحقوق محفوظة - صدقة جارية لوجه الله تعالى - أبو نواف</div>
     </div>
 </div>
 
@@ -154,7 +162,6 @@
     playBtn.onclick = () => {
         if(!reciterSelect.value || !surahSelect.value) return;
         const targetUrl = `${reciterSelect.value}${surahSelect.value}.mp3`;
-        
         if(audio.src !== targetUrl) {
             audio.src = targetUrl;
             currentRepeat = 1;
