@@ -16,10 +16,8 @@
         .active-mode { background: var(--accent); color: black; box-shadow: 0 0 15px var(--accent); }
         .full-width { grid-column: span 2; }
         
-        /* ضبط مربع البحث والقوائم لمنع البروز */
         input[type="text"], select { width: 100%; padding: 14px; border-radius: 12px; border: none; margin-bottom: 10px; background: white; color: #333; font-size: 1rem; font-weight: bold; box-sizing: border-box; text-align: right; outline: none; }
         
-        /* إعدادات الأطفال */
         #childFeatures { display: none; background: rgba(52, 152, 219, 0.15); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px dashed var(--blue); text-align: right; }
         .feat-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 0.85rem; }
         .feat-row select { width: 45%; padding: 8px; margin: 0; font-size: 0.85rem; }
@@ -65,14 +63,8 @@
                 <option value="0">تكرار لانهائي</option>
             </select>
         </div>
-        <div class="feat-row">
-            <span>📂 مراجعة من:</span>
-            <select id="surahFrom"></select>
-        </div>
-        <div class="feat-row">
-            <span>📂 مراجعة إلى:</span>
-            <select id="surahTo"></select>
-        </div>
+        <div class="feat-row"><span>📂 مراجعة من:</span><select id="surahFrom"></select></div>
+        <div class="feat-row"><span>📂 مراجعة إلى:</span><select id="surahTo"></select></div>
     </div>
 
     <input type="text" id="searchReciter" placeholder="🔍  ابحث عن قارئ...">
@@ -134,7 +126,7 @@
     let currentMode = 'مرتل';
     let verseCount = 0;
 
-    const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
+    const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","الم معارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
     function toggleModal(s) { document.getElementById('featModal').style.display = s ? 'flex' : 'none'; }
 
@@ -153,21 +145,23 @@
     }
 
     async function init() {
-        const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
-        const data = await res.json();
-        allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
-        
-        const last = JSON.parse(localStorage.getItem('lastSession'));
-        if (last) {
-            currentMode = last.mode || 'مرتل';
-            filterReciters(); loadSurahs(currentMode === 'معلم');
-            reciterSelect.value = last.server; surahSelect.value = last.surah;
-            audio.src = `${last.server}${last.surah}.mp3`;
-            audio.currentTime = last.time;
-            statusLabel.innerText = "🔄 تم استعادة آخر موقع تلقائياً";
-        } else {
-            filterReciters(); loadSurahs(false);
-        }
+        try {
+            const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
+            const data = await res.json();
+            allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+            
+            const last = JSON.parse(localStorage.getItem('lastSession'));
+            if (last) {
+                currentMode = last.mode || 'مرتل';
+                updateModeUI();
+                filterReciters(); loadSurahs(currentMode === 'معلم');
+                reciterSelect.value = last.server; surahSelect.value = last.surah;
+                audio.src = `${last.server}${last.surah}.mp3`;
+                audio.currentTime = last.time;
+            } else {
+                filterReciters(); loadSurahs(false);
+            }
+        } catch(e) { statusLabel.innerText = "خطأ في جلب البيانات"; }
     }
 
     function filterReciters(term = "") {
@@ -179,7 +173,11 @@
         }
         let allG = document.createElement('optgroup'); allG.label = "📋 القائمة";
         allReciters.filter(r => r.name.includes(term)).forEach(r => {
-            let m = r.moshaf.find(x => currentMode === 'معلم' ? x.name.includes("معلم") : (currentMode === 'مجود' ? x.name.includes("مجود") : x.name.includes("مرتل")));
+            let m = r.moshaf.find(x => {
+                if(currentMode === 'معلم') return x.name.includes("معلم");
+                if(currentMode === 'مجود') return x.name.includes("مجود");
+                return x.name.includes("مرتل") || x.name === "حفص عن عاصم";
+            });
             if(m) allG.add(new Option(r.name, m.server));
         });
         reciterSelect.add(allG);
@@ -213,24 +211,28 @@
                 surahSelect.selectedIndex++; play(); return;
             }
         }
-        let sRep = parseInt(document.getElementById('repeatSelect').value);
-        // منطق تكرار السورة المعتاد هنا
         document.getElementById('nextBtn').click();
     };
 
     setInterval(() => {
-        if(!audio.paused) localStorage.setItem('lastSession', JSON.stringify({server: reciterSelect.value, surah: surahSelect.value, time: audio.currentTime, mode: currentMode}));
+        if(!audio.paused && reciterSelect.value) localStorage.setItem('lastSession', JSON.stringify({server: reciterSelect.value, surah: surahSelect.value, time: audio.currentTime, mode: currentMode}));
     }, 2000);
 
-    document.getElementById('childMode').onclick = function() { currentMode = 'معلم'; document.getElementById('childFeatures').style.display = 'block'; updateUI(this); loadSurahs(true); filterReciters(); };
-    document.getElementById('allMode').onclick = function() { currentMode = 'مرتل'; document.getElementById('childFeatures').style.display = 'none'; updateUI(this); loadSurahs(false); filterReciters(); };
-    document.getElementById('mojawadMode').onclick = function() { currentMode = 'مجود'; document.getElementById('childFeatures').style.display = 'none'; updateUI(this); loadSurahs(false); filterReciters(); };
+    function updateModeUI() {
+        document.querySelectorAll('.mode-btn').forEach(x => x.classList.remove('active-mode'));
+        let id = currentMode === 'معلم' ? 'childMode' : (currentMode === 'مجود' ? 'mojawadMode' : 'allMode');
+        document.getElementById(id).classList.add('active-mode');
+        document.getElementById('childFeatures').style.display = currentMode === 'معلم' ? 'block' : 'none';
+    }
 
-    function updateUI(b) { document.querySelectorAll('.mode-btn').forEach(x => x.classList.remove('active-mode')); b.classList.add('active-mode'); }
+    document.getElementById('childMode').onclick = function() { currentMode = 'معلم'; updateModeUI(); loadSurahs(true); filterReciters(); };
+    document.getElementById('allMode').onclick = function() { currentMode = 'مرتل'; updateModeUI(); loadSurahs(false); filterReciters(); };
+    document.getElementById('mojawadMode').onclick = function() { currentMode = 'مجود'; updateModeUI(); loadSurahs(false); filterReciters(); };
+
     reciterSelect.onchange = play; surahSelect.onchange = play;
     playBtn.onclick = () => audio.paused ? audio.play() : audio.pause();
-    document.getElementById('nextBtn').onclick = () => { surahSelect.selectedIndex++; play(); };
-    document.getElementById('prevBtn').onclick = () => { surahSelect.selectedIndex--; play(); };
+    document.getElementById('nextBtn').onclick = () => { if(surahSelect.selectedIndex < surahSelect.options.length-1) { surahSelect.selectedIndex++; play(); } };
+    document.getElementById('prevBtn').onclick = () => { if(surahSelect.selectedIndex > 0) { surahSelect.selectedIndex--; play(); } };
     document.getElementById('searchReciter').oninput = (e) => filterReciters(e.target.value);
     
     document.getElementById('addFav').onclick = () => {
@@ -251,4 +253,3 @@
 </script>
 </body>
 </html>
-
