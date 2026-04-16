@@ -6,7 +6,7 @@
     <title>إذاعة القرآن الكريم الجامعة</title>
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2663/2663339.png" type="image/png">
     <style>
-        :root { --accent: #f1c40f; --green: #42e695; --red: #ff4757; }
+        :root { --accent: #f1c40f; --green: #42e695; --blue: #3498db; }
         body {
             margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif;
             background: linear-gradient(135deg, #1e3c72, #2a5298);
@@ -22,9 +22,10 @@
         }
         .main-title { color: var(--accent); font-weight: bold; margin-bottom: 25px; font-size: 1.6rem; text-shadow: 0 2px 10px rgba(241, 196, 15, 0.3); }
         
-        .sections-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        .mode-btn { padding: 14px; border-radius: 12px; border: none; cursor: pointer; background: #333; color: white; font-weight: bold; font-size: 1rem; transition: 0.3s; width: 100%; }
-        .active-mode { background: var(--accent); color: black; box-shadow: 0 0 15px var(--accent); }
+        .sections-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+        .mode-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; background: #333; color: white; font-weight: bold; font-size: 0.85rem; transition: 0.3s; }
+        .active-mode { background: var(--accent); color: black; box-shadow: 0 0 10px var(--accent); }
+        .full-width { grid-column: span 2; }
 
         input[type="text"], select {
             width: 100%; padding: 14px; border-radius: 12px; border: none;
@@ -33,8 +34,8 @@
         }
 
         .repeat-box { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
-        .repeat-box label { font-size: 0.9rem; font-weight: bold; }
-        .repeat-box select { width: auto; margin: 0; padding: 5px 10px; background: white; color: black; }
+        .repeat-box label { font-size: 0.85rem; font-weight: bold; }
+        .repeat-box select { width: auto; margin: 0; padding: 5px 10px; background: white; color: black; font-size: 0.9rem; }
 
         .progress-box { margin: 15px 0; display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
         input[type="range"] { flex: 1; cursor: pointer; accent-color: var(--green); }
@@ -42,18 +43,8 @@
         .controls { display: flex; justify-content: center; align-items: center; gap: 25px; margin-top: 10px; }
         .play-btn { background: var(--green); border: none; width: 70px; height: 70px; border-radius: 50%; font-size: 1.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: black; transition: 0.2s; box-shadow: 0 5px 15px rgba(66, 230, 149, 0.3); }
         
-        /* الحقوق المطلوبة: خط صغير، لون واحد، تحت خط */
-        .footer { 
-            margin-top: 30px; 
-            padding-top: 15px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        .footer-text {
-            color: var(--accent);
-            font-size: 0.75rem;
-            text-decoration: underline;
-            letter-spacing: 0.5px;
-        }
+        .footer { margin-top: 30px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .footer-text { color: var(--accent); font-size: 0.75rem; text-decoration: underline; letter-spacing: 0.5px; }
         
         .repeat-status { font-size: 0.8rem; color: var(--accent); margin-top: 5px; font-weight: bold; }
     </style>
@@ -64,8 +55,9 @@
     <div class="main-title">إذاعة القرآن الكريم الجامعة</div>
 
     <div class="sections-container">
-        <button class="mode-btn active-mode" id="allMode">📖 القرآن الكريم كامل</button>
-        <button class="mode-btn" id="childMode">👶 قسم الأطفال (المصحف المعلم)</button>
+        <button class="mode-btn active-mode" id="allMode">📖 المصحف المرتل</button>
+        <button class="mode-btn" id="mojawadMode">🎤 المصحف المجود</button>
+        <button class="mode-btn full-width" id="childMode">👶 قسم الأطفال (المصحف المعلم)</button>
     </div>
 
     <input type="text" id="searchReciter" placeholder="🔍 ابحث عن اسم القارئ...">
@@ -121,25 +113,24 @@
             const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
             const data = await res.json();
             allReciters = data.reciters;
-            filterReciters(false); 
+            filterReciters('مرتل'); 
             loadSurahs(false);
         } catch(e) { reciterSelect.innerHTML = '<option>فشل التحميل</option>'; }
     }
 
-    function filterReciters(isChildMode) {
+    function filterReciters(mode) {
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
         allReciters.forEach(r => {
             if(r.moshaf && r.moshaf.length > 0) {
-                const teacher = r.moshaf.find(m => m.name.toLowerCase().includes("معلم"));
-                if(isChildMode && teacher) {
+                let foundMoshaf;
+                if(mode === 'معلم') foundMoshaf = r.moshaf.find(m => m.name.includes("معلم"));
+                else if(mode === 'مجود') foundMoshaf = r.moshaf.find(m => m.name.includes("مجود"));
+                else foundMoshaf = r.moshaf.find(m => m.name.includes("مرتل") || m.name === "حفص عن عاصم");
+
+                if(foundMoshaf) {
                     const opt = document.createElement('option');
-                    opt.value = teacher.server;
-                    opt.text = r.name + " (المعلم)";
-                    reciterSelect.appendChild(opt);
-                } else if(!isChildMode) {
-                    const opt = document.createElement('option');
-                    opt.value = r.moshaf[0].server;
-                    opt.text = r.name;
+                    opt.value = foundMoshaf.server;
+                    opt.text = r.name + ` (${mode})`;
                     reciterSelect.appendChild(opt);
                 }
             }
@@ -218,10 +209,13 @@
     function formatTime(s) { let m=Math.floor(s/60), sc=Math.floor(s%60); return `${m}:${sc<10?'0'+sc:sc}`; }
 
     document.getElementById('allMode').onclick = function() {
-        filterReciters(false); loadSurahs(false); updateActiveBtn(this);
+        filterReciters('مرتل'); loadSurahs(false); updateActiveBtn(this);
+    };
+    document.getElementById('mojawadMode').onclick = function() {
+        filterReciters('مجود'); loadSurahs(false); updateActiveBtn(this);
     };
     document.getElementById('childMode').onclick = function() {
-        filterReciters(true); loadSurahs(true); updateActiveBtn(this);
+        filterReciters('معلم'); loadSurahs(true); updateActiveBtn(this);
     };
 
     function updateActiveBtn(btn) {
@@ -231,18 +225,26 @@
         currentRepeat = 1;
         updateStatus();
         playBtn.innerText = "▶";
+        document.getElementById('searchReciter').value = '';
     }
 
     document.getElementById('searchReciter').oninput = (e) => {
         const term = e.target.value.toLowerCase();
-        const isChildMode = document.getElementById('childMode').classList.contains('active-mode');
+        let mode = 'مرتل';
+        if(document.getElementById('mojawadMode').classList.contains('active-mode')) mode = 'مجود';
+        if(document.getElementById('childMode').classList.contains('active-mode')) mode = 'معلم';
+        
         reciterSelect.innerHTML = '<option value="">-- نتائج البحث --</option>';
         allReciters.filter(r => r.name.toLowerCase().includes(term)).forEach(r => {
-            const m = isChildMode ? r.moshaf.find(m => m.name.toLowerCase().includes("معلم")) : r.moshaf[0];
-            if(m) {
+            let found;
+            if(mode === 'معلم') found = r.moshaf.find(m => m.name.includes("معلم"));
+            else if(mode === 'مجود') found = r.moshaf.find(m => m.name.includes("مجود"));
+            else found = r.moshaf.find(m => m.name.includes("مرتل") || m.name === "حفص عن عاصم");
+            
+            if(found) {
                 const opt = document.createElement('option');
-                opt.value = m.server;
-                opt.text = r.name + (isChildMode ? " (المعلم)" : "");
+                opt.value = found.server;
+                opt.text = r.name + ` (${mode})`;
                 reciterSelect.appendChild(opt);
             }
         });
