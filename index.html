@@ -3,133 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مصحف أبو نواف الجامع</title>
+    <title>مصحف أبو نواف - تعليم الأطفال</title>
     <style>
-        :root {
-            --bg-image: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-        }
-
+        :root { --accent: #f1c40f; --child-bg: #4facfe; }
         body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg-image);
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            padding: 20px;
-            transition: background 0.5s ease;
+            margin: 0; font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            background-size: cover; min-height: 100vh;
+            display: flex; justify-content: center; align-items: center; color: white; padding: 20px;
         }
-
         .container {
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(15px);
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            width: 100%;
-            max-width: 450px;
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(15px);
+            padding: 25px; border-radius: 25px; text-align: center;
+            width: 100%; max-width: 450px; border: 1px solid rgba(255,255,255,0.2);
         }
-
-        .header-section h2 { color: #f1c40f; margin: 0; font-size: 1.8rem; }
-        .owner { color: #42e695; margin-bottom: 20px; font-weight: bold; letter-spacing: 1px; }
-
-        .search-box {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: none;
-            margin-bottom: 15px;
-            font-size: 1rem;
-            outline: none;
-            box-sizing: border-box;
+        .header h2 { color: var(--accent); margin: 0; }
+        .owner { color: #42e695; font-size: 0.9rem; margin-bottom: 15px; }
+        
+        /* قسم جزء عم للأطفال */
+        .kids-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px; padding: 15px; margin-bottom: 20px;
+            border: 1px dashed var(--accent);
         }
+        .kids-section h3 { margin: 0 0 10px 0; font-size: 1rem; color: #4facfe; }
 
-        select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            outline: none;
-            border: 2px solid transparent;
+        select, input {
+            width: 100%; padding: 12px; border-radius: 10px; border: none;
+            margin-bottom: 10px; font-weight: bold; outline: none;
         }
-
-        /* تنسيق أزرار الخلفيات */
-        .bg-selector {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .bg-opt {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            border: 2px solid white;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .bg-opt:hover { transform: scale(1.2); }
-
         .play-btn {
-            background: #42e695;
-            border: none;
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            font-size: 1.8rem;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(66, 230, 149, 0.4);
-            transition: 0.3s;
+            background: #42e695; border: none; width: 65px; height: 65px;
+            border-radius: 50%; font-size: 1.5rem; cursor: pointer; transition: 0.3s;
         }
-
-        .play-btn:hover { background: #34d082; transform: scale(1.05); }
-
-        .footer { margin-top: 25px; font-size: 0.85rem; opacity: 0.8; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
+        .play-btn:hover { transform: scale(1.1); }
+        .footer { margin-top: 20px; font-size: 0.7rem; opacity: 0.6; }
+        
+        .btn-group { display: flex; gap: 10px; margin-bottom: 10px; }
+        .mode-btn { 
+            flex: 1; padding: 8px; border-radius: 8px; border: none; 
+            cursor: pointer; font-weight: bold; background: #555; color: white;
+        }
+        .active-mode { background: var(--accent); color: black; }
     </style>
 </head>
-<body id="bodyBg">
+<body>
 
 <div class="container">
-    <div class="header-section">
-        <h2>القرآن الكريم</h2>
-        <div class="owner">بإشراف أبو نواف</div>
+    <div class="header">
+        <h2>مصحف أبو نواف</h2>
+        <div class="owner">تعليم الناشئة والقرآن الكريم</div>
     </div>
 
-    <div class="bg-selector">
-        <div class="bg-opt" onclick="changeBg('linear-gradient(135deg, #1e3c72, #2a5298)')" style="background: #1e3c72;" title="أزرق ليلي"></div>
-        <div class="bg-opt" onclick="changeBg('linear-gradient(135deg, #134e5e, #71b280)')" style="background: #134e5e;" title="أخضر هادئ"></div>
-        <div class="bg-opt" onclick="changeBg('linear-gradient(135deg, #2c3e50, #000000)')" style="background: #2c3e50;" title="أسود فخم"></div>
-        <div class="bg-opt" onclick="changeBg('url(\'https://images.unsplash.com/photo-1590075865003-e48277adc4e8?q=80&w=1000\')')" style="background: url('https://images.unsplash.com/photo-1590075865003-e48277adc4e8?q=10&w=50'); background-size: cover;" title="خلفية مساجد"></div>
-        <div class="bg-opt" onclick="changeBg('linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d)')" style="background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);" title="الخلفية الأصلية"></div>
+    <div class="kids-section">
+        <h3>👶 ركن الطفل (جزء عم)</h3>
+        <div class="btn-group">
+            <button class="mode-btn active-mode" id="allMode">المصحف كامل</button>
+            <button class="mode-btn" id="ammaMode">جزء عم فقط</button>
+        </div>
+        <p id="modeDesc" style="font-size: 0.8rem; color: #ccc;">تصفح المصحف كاملاً</p>
     </div>
 
-    <input type="text" id="searchReciter" class="search-box" placeholder="ابحث عن اسم القارئ...">
-    
-    <select id="reciterSelect">
-        <option value="">-- اختر القارئ --</option>
-    </select>
+    <input type="text" id="searchReciter" placeholder="ابحث عن القارئ...">
+    <select id="reciterSelect"><option>جاري التحميل...</option></select>
+    <select id="surahSelect"></select>
 
-    <select id="surahSelect">
-        <option value="">-- اختر السورة --</option>
-    </select>
+    <button id="playBtn" class="play-btn">▶</button>
 
-    <div class="controls">
-        <button id="playBtn" class="play-btn">▶</button>
-    </div>
-
-    <div class="footer">جميع الحقوق محفوظة - أبو نواف © 2026</div>
+    <div class="footer">إعداد وإشراف أبو نواف © 2026</div>
 </div>
 
 <audio id="audioPlayer"></audio>
@@ -140,30 +81,19 @@
     const searchInput = document.getElementById('searchReciter');
     const playBtn = document.getElementById('playBtn');
     const audio = document.getElementById('audioPlayer');
-    const bodyBg = document.getElementById('bodyBg');
+    const ammaBtn = document.getElementById('ammaMode');
+    const allBtn = document.getElementById('allMode');
+    const modeDesc = document.getElementById('modeDesc');
 
     let allReciters = [];
-
-    // وظيفة تغيير الخلفية
-    function changeBg(bg) {
-        bodyBg.style.background = bg;
-        bodyBg.style.backgroundSize = "cover";
-        localStorage.setItem('userBg', bg); // حفظ الاختيار
-    }
-
-    // استعادة الخلفية المحفوظة
-    if(localStorage.getItem('userBg')) {
-        changeBg(localStorage.getItem('userBg'));
-    }
+    const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغان","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
     async function init() {
-        try {
-            const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
-            const data = await res.json();
-            allReciters = data.reciters;
-            populateReciters(allReciters);
-            loadSurahs();
-        } catch (e) { console.log("Error loading reciters"); }
+        const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
+        const data = await res.json();
+        allReciters = data.reciters;
+        populateReciters(allReciters);
+        loadSurahs(false); 
     }
 
     function populateReciters(list) {
@@ -178,15 +108,32 @@
         });
     }
 
-    function loadSurahs() {
-        const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
+    function loadSurahs(isAmmaOnly) {
+        surahSelect.innerHTML = '';
+        const start = isAmmaOnly ? 77 : 0; // جزء عم يبدأ من سورة النبأ (78)
         surahNames.forEach((name, index) => {
-            const option = document.createElement('option');
-            option.value = (index + 1).toString().padStart(3, '0');
-            option.text = `${index + 1}. ${name}`;
-            surahSelect.appendChild(option);
+            if (index >= start || index === 0) { // نبقي الفاتحة دائماً
+                const option = document.createElement('option');
+                option.value = (index + 1).toString().padStart(3, '0');
+                option.text = `${index + 1}. ${name}`;
+                surahSelect.appendChild(option);
+            }
         });
     }
+
+    ammaBtn.onclick = () => {
+        loadSurahs(true);
+        ammaBtn.classList.add('active-mode');
+        allBtn.classList.remove('active-mode');
+        modeDesc.innerText = "وضع الأطفال: جزء عم فقط (من النبأ إلى الناس)";
+    };
+
+    allBtn.onclick = () => {
+        loadSurahs(false);
+        allBtn.classList.add('active-mode');
+        ammaBtn.classList.remove('active-mode');
+        modeDesc.innerText = "تصفح المصحف كاملاً";
+    };
 
     searchInput.oninput = () => {
         const filtered = allReciters.filter(r => r.name.includes(searchInput.value));
@@ -197,19 +144,12 @@
         const server = reciterSelect.value;
         const surah = surahSelect.value;
         if (!server || !surah) return alert("اختر القارئ والسورة");
-        const finalUrl = `${server}${surah}.mp3`;
-        if (audio.src !== finalUrl) {
-            audio.src = finalUrl;
-            audio.play();
-            playBtn.innerText = "⏸";
-        } else {
-            if (audio.paused) { audio.play(); playBtn.innerText = "⏸"; }
-            else { audio.pause(); playBtn.innerText = "▶"; }
-        }
+        const url = `${server}${surah}.mp3`;
+        if (audio.src !== url) { audio.src = url; audio.play(); playBtn.innerText = "⏸"; }
+        else { audio.paused ? (audio.play(), playBtn.innerText = "⏸") : (audio.pause(), playBtn.innerText = "▶"); }
     };
 
     init();
 </script>
-
 </body>
 </html>
