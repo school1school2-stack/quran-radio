@@ -3,136 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مصحف أبو نواف - تعليم الأطفال</title>
+    <title>مصحف أبو نواف - ركن أطفال داوود</title>
     <style>
         :root { --accent: #f1c40f; --green: #42e695; }
         body {
             margin: 0; font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            background-size: cover; background-attachment: fixed;
-            min-height: 100vh; display: flex; justify-content: center; align-items: center; color: white; padding: 20px;
+            background: #1a1a2e; min-height: 100vh;
+            display: flex; justify-content: center; align-items: center; color: white; padding: 20px;
         }
         .container {
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(15px);
-            padding: 20px; border-radius: 25px; text-align: center;
-            width: 100%; max-width: 480px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px);
+            padding: 20px; border-radius: 20px; text-align: center;
+            width: 100%; max-width: 500px; border: 2px solid var(--accent);
         }
-        .owner { color: var(--green); font-weight: bold; margin-bottom: 15px; }
-
-        /* إطار اليوتيوب المدمج */
-        .video-container {
-            position: relative; width: 100%; padding-bottom: 56.25%; /* نسبة 16:9 */
-            height: 0; border-radius: 15px; overflow: hidden; 
-            margin-bottom: 20px; border: 2px solid var(--accent); display: none;
+        .video-box {
+            position: relative; width: 100%; padding-bottom: 56.25%;
+            height: 0; border-radius: 15px; overflow: hidden; margin-bottom: 20px;
+            background: #000; border: 1px solid #333;
         }
-        .video-container iframe {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
-        }
-
-        select, input[type="text"] {
+        .video-box iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        
+        select {
             width: 100%; padding: 12px; border-radius: 10px; border: none;
-            margin-bottom: 10px; font-weight: bold; outline: none;
+            margin-bottom: 15px; font-weight: bold; background: #fff; color: #333;
         }
-
-        .mode-btn { padding: 8px 20px; border-radius: 10px; border: none; cursor: pointer; background: #444; color: white; margin: 5px; font-weight: bold; }
-        .active-mode { background: var(--accent); color: black; }
-
-        .footer { margin-top: 20px; font-size: 0.7rem; opacity: 0.5; }
+        .mode-title { color: var(--accent); margin-bottom: 10px; font-weight: bold; }
+        .footer { margin-top: 15px; font-size: 0.8rem; opacity: 0.7; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="owner">مصحف أبو نواف الجامع</div>
+    <div style="color:var(--green); font-weight:bold; margin-bottom:10px;">إشراف أبو نواف</div>
+    <div class="mode-title">📺 قناة داوود للأطفال - اختر السورة</div>
 
-    <div class="video-container" id="videoWrapper">
-        <iframe id="dawoodPlayer" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-    </div>
-    
-    <div style="margin-bottom: 15px;">
-        <button class="mode-btn active-mode" id="allMode">المصحف كامل</button>
-        <button class="mode-btn" id="ammaMode">قناة داوود (أطفال) 👶</button>
+    <div class="video-box">
+        <iframe id="dawoodFrame" src="https://www.youtube.com/embed/Uf0S7FcfXOI" allowfullscreen></iframe>
     </div>
 
-    <input type="text" id="searchReciter" placeholder="ابحث عن القارئ...">
-    <select id="reciterSelect"></select>
-    <select id="surahSelect" onchange="updateVideo()"></select>
+    <label for="dawoodSurah">اختر السورة لتعلمها مع داوود:</label>
+    <select id="dawoodSurah" onchange="changeDawoodVideo()">
+        <option value="Uf0S7FcfXOI">سورة النبأ</option>
+        <option value="W_X_7m6Y0vE">سورة النازعات</option>
+        <option value="6M5y1_v_L8A">سورة عبس</option>
+        <option value="p7NfP8XGZ-g">سورة التكوير</option>
+        <option value="mKInYFzG32U">سورة الانفطار</option>
+        <option value="exfH6-Cj_68">سورة المطففين</option>
+        <option value="R08S5vG80p8">سورة الشمس</option>
+        <option value="YfV7-h7fV_M">سورة الناس</option>
+        <option value="lzEuix0DYhY">مشاهدة القناة كاملة</option>
+    </select>
 
-    <div style="margin-top: 15px;">
-        <button id="playBtn" style="background: var(--green); border: none; width: 60px; height: 60px; border-radius: 50%; font-size: 1.5rem; cursor: pointer;">▶</button>
-    </div>
-
-    <div class="footer">إشراف أبو نواف - لتعليم القرآن الكريم © 2026</div>
+    <div class="footer">تعليم القرآن للأطفال بأسلوب ممتع - 2026</div>
 </div>
 
-<audio id="audioPlayer"></audio>
-
 <script>
-    const videoWrapper = document.getElementById('videoWrapper');
-    const dawoodPlayer = document.getElementById('dawoodPlayer');
-    const surahSelect = document.getElementById('surahSelect');
-    const reciterSelect = document.getElementById('reciterSelect');
-    const audio = document.getElementById('audioPlayer');
-    let isKidsMode = false;
-
-    // قائمة روابط فيديوهات قناة داوود لجزء عم (أمثلة)
-    const dawoodVideos = {
-        "078": "Uf0S7FcfXOI", // النبأ
-        "079": "W_X_7m6Y0vE", // النازعات
-        "080": "6M5y1_v_L8A", // عبس
-        "091": "R08S5vG80p8", // الشمس
-        "114": "YfV7-h7fV_M"  // الناس
-        // يمكن إضافة بقية الروابط هنا بنفس الطريقة
-    };
-
-    async function init() {
-        const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
-        const data = await res.json();
-        populateReciters(data.reciters);
-        loadSurahs(false);
-    }
-
-    function populateReciters(list) {
-        reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
-        list.forEach(r => { if(r.moshaf) { const opt = document.createElement('option'); opt.value = r.moshaf[0].server; opt.text = r.name; reciterSelect.appendChild(opt); } });
-    }
-
-    function loadSurahs(kids) {
-        isKidsMode = kids;
-        surahSelect.innerHTML = '';
-        videoWrapper.style.display = kids ? 'block' : 'none';
-        const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القللم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
+    function changeDawoodVideo() {
+        const select = document.getElementById('dawoodSurah');
+        const iframe = document.getElementById('dawoodFrame');
+        const videoId = select.value;
         
-        const start = kids ? 77 : 0;
-        surahNames.forEach((n, i) => {
-            if(i >= start || i === 0) {
-                const opt = document.createElement('option');
-                opt.value = (i+1).toString().padStart(3,'0');
-                opt.text = n;
-                surahSelect.appendChild(opt);
-            }
-        });
-        if(kids) updateVideo();
+        // تحديث الرابط ليعمل الفيديو الجديد فوراً داخل الموقع
+        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
     }
-
-    function updateVideo() {
-        if(!isKidsMode) return;
-        const id = surahSelect.value;
-        // إذا وجدنا فيديو مخصص للسورة، وإلا نعرض فيديو القناة الرئيسي
-        const videoId = dawoodVideos[id] || "Uf0S7FcfXOI"; 
-        dawoodPlayer.src = `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0`;
-    }
-
-    document.getElementById('playBtn').onclick = () => {
-        const url = `${reciterSelect.value}${surahSelect.value}.mp3`;
-        if(audio.src !== url) { audio.src = url; audio.play(); }
-        else { audio.paused ? audio.play() : audio.pause(); }
-    };
-
-    document.getElementById('ammaMode').onclick = function() { loadSurahs(true); this.classList.add('active-mode'); document.getElementById('allMode').classList.remove('active-mode'); };
-    document.getElementById('allMode').onclick = function() { loadSurahs(false); this.classList.add('active-mode'); document.getElementById('ammaMode').classList.remove('active-mode'); };
-
-    init();
 </script>
+
 </body>
 </html>
