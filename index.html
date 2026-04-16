@@ -3,66 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>إذاعة القرآن الكريم الجامعة</title>
+    <title>مصحف أبو نواف المعلم</title>
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2663/2663339.png" type="image/png">
-    
     <style>
         :root { --accent: #f1c40f; --green: #42e695; --red: #ff4757; }
-        
         body {
-            margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif;
             background: linear-gradient(135deg, #1e3c72, #2a5298);
             background-size: cover; background-attachment: fixed;
             min-height: 100vh; display: flex; justify-content: center; 
-            align-items: center; color: white; padding: 10px;
-            box-sizing: border-box;
+            align-items: center; color: white; padding: 10px; box-sizing: border-box;
         }
-
         .container {
             background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(15px);
             padding: 20px; border-radius: 20px; text-align: center;
             width: 100%; max-width: 450px; border: 1px solid rgba(255,255,255,0.1);
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
         }
-
         .owner { color: var(--green); font-weight: bold; margin-bottom: 12px; font-size: 1.1rem; }
-
-        /* مغير الخلفيات - متجاوب */
-        .bg-selector { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
-        .bg-opt { width: 28px; height: 28px; border-radius: 50%; border: 2px solid white; cursor: pointer; }
-
-        /* أزرار الأوضاع */
         .mode-container { display: flex; gap: 8px; margin-bottom: 15px; }
-        .mode-btn { flex: 1; padding: 10px; border-radius: 12px; border: none; cursor: pointer; background: #333; color: white; font-weight: bold; font-size: 0.9rem; transition: 0.2s; }
-        .active-mode { background: var(--accent); color: black; }
-
+        .mode-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; cursor: pointer; background: #333; color: white; font-weight: bold; font-size: 0.85rem; }
+        .active-mode { background: var(--accent); color: black; box-shadow: 0 0 10px var(--accent); }
         input[type="text"], select {
-            width: 100%; padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2);
+            width: 100%; padding: 14px; border-radius: 12px; border: none;
             margin-bottom: 10px; font-weight: bold; outline: none; box-sizing: border-box;
             background: white; color: #333; font-size: 1rem;
         }
-
-        /* شريط التقدم اللمسي */
         .progress-box { margin: 15px 0; display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
-        input[type="range"] { flex: 1; cursor: pointer; accent-color: var(--green); height: 8px; }
-
+        input[type="range"] { flex: 1; cursor: pointer; accent-color: var(--green); }
         .controls { display: flex; justify-content: center; align-items: center; gap: 25px; margin-top: 10px; }
-        .play-btn { background: var(--green); border: none; width: 65px; height: 65px; border-radius: 50%; font-size: 1.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(66, 230, 149, 0.3); }
-        .fav-add { background: none; border: 2px solid var(--red); color: var(--red); width: 48px; height: 48px; border-radius: 50%; cursor: pointer; font-size: 1.3rem; }
-
-        /* قائمة المفضلة المحسنة للجوال */
-        .fav-section { margin-top: 20px; text-align: right; background: rgba(255,255,255,0.08); border-radius: 15px; padding: 12px; max-height: 140px; overflow-y: auto; }
-        .fav-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; }
-        .del-item { color: var(--red); cursor: pointer; font-size: 1.2rem; padding: 0 10px; }
-
+        .play-btn { background: var(--green); border: none; width: 65px; height: 65px; border-radius: 50%; font-size: 1.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .fav-section { margin-top: 20px; text-align: right; background: rgba(255,255,255,0.08); border-radius: 15px; padding: 12px; max-height: 120px; overflow-y: auto; }
         .footer { margin-top: 18px; font-size: 0.75rem; opacity: 0.6; }
-        
-        /* تحسينات للشاشات الصغيرة جداً */
-        @media (max-width: 360px) {
-            .container { padding: 15px; }
-            .play-btn { width: 55px; height: 55px; }
-            .mode-btn { font-size: 0.8rem; }
-        }
     </style>
 </head>
 <body id="mainBody">
@@ -70,16 +42,9 @@
 <div class="container">
     <div class="owner">إذاعة القرآن الكريم الجامعة</div>
 
-    <div class="bg-selector">
-        <div class="bg-opt" onclick="changeBg('linear-gradient(135deg, #1e3c72, #2a5298)')" style="background: #1e3c72;"></div>
-        <div class="bg-opt" onclick="changeBg('linear-gradient(135deg, #134e5e, #71b280)')" style="background: #134e5e;"></div>
-        <div class="bg-opt" onclick="changeBg('linear-gradient(135deg, #2c3e50, #000000)')" style="background: #2c3e50;"></div>
-        <div class="bg-opt" onclick="changeBg('linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d)')" style="background: linear-gradient(135deg, #1a2a6c, #fdbb2d);"></div>
-    </div>
-
     <div class="mode-container">
-        <button class="mode-btn active-mode" id="allMode">المصحف كامل</button>
-        <button class="mode-btn" id="ammaMode">جزء عم للأطفال</button>
+        <button class="mode-btn active-mode" id="allMode">المصحف كامل 📖</button>
+        <button class="mode-btn" id="teacherMode">المصحف المعلم 👶</button>
     </div>
 
     <input type="text" id="searchReciter" placeholder="🔍 ابحث عن القارئ...">
@@ -93,136 +58,49 @@
     </div>
 
     <div class="controls">
-        <button id="addFav" class="fav-add">❤️</button>
+        <button id="addFav" style="background:none; border:2px solid var(--red); color:var(--red); width:48px; height:48px; border-radius:50%; cursor:pointer; font-size:1.3rem;">❤️</button>
         <button id="playBtn" class="play-btn">▶</button>
     </div>
 
-    <div class="fav-section">
-        <div style="text-align: center; color: var(--accent); font-size: 0.85rem; margin-bottom: 8px; font-weight: bold;">⭐ القائمة المفضلة</div>
-        <div id="favItems"></div>
+    <div class="fav-section" id="favItems">
+        <div style="text-align:center; font-size:0.75rem; opacity:0.5;">القائمة المفضلة</div>
     </div>
 
-    <div class="footer">صدقة جارية - إعداد أبو نواف © 2026</div>
+    <div class="footer">صدقة جارية - تطوير أبو نواف © 2026</div>
 </div>
 
 <audio id="audioPlayer"></audio>
 
 <script>
-    const body = document.getElementById('mainBody');
     const reciterSelect = document.getElementById('reciterSelect');
     const surahSelect = document.getElementById('surahSelect');
     const playBtn = document.getElementById('playBtn');
     const audio = document.getElementById('audioPlayer');
     const seekSlider = document.getElementById('seekSlider');
-    const favItems = document.getElementById('favItems');
-
+    
     let allReciters = [];
-    let favorites = JSON.parse(localStorage.getItem('myFavs')) || [];
     const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
-    function changeBg(bg) { body.style.background = bg; body.style.backgroundSize = "cover"; localStorage.setItem('userBg', bg); }
-    if(localStorage.getItem('userBg')) changeBg(localStorage.getItem('userBg'));
-
     async function init() {
-        try {
-            const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
-            const data = await res.json();
-            allReciters = data.reciters;
-            populateReciters(allReciters);
-            loadSurahs(false);
-            renderFavs();
-        } catch(e) { console.error("Error"); }
+        const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
+        const data = await res.json();
+        allReciters = data.reciters;
+        filterReciters(false); // البداية بالمصحف الكامل
+        loadSurahs();
     }
 
-    function populateReciters(list) {
+    function filterReciters(isTeacher) {
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
-        list.forEach(r => {
-            if(r.moshaf && r.moshaf.length > 0) {
-                const opt = document.createElement('option');
-                opt.value = r.moshaf[0].server;
-                opt.text = r.name;
-                reciterSelect.appendChild(opt);
-            }
+        const filtered = allReciters.filter(r => {
+            const hasMoshaf = r.moshaf && r.moshaf.length > 0;
+            if (!hasMoshaf) return false;
+            // البحث عن كلمة "معلم" في اسم المصحف
+            return isTeacher ? r.moshaf.some(m => m.name.includes("معلم")) : true;
         });
-    }
 
-    function loadSurahs(isAmma) {
-        surahSelect.innerHTML = '';
-        const start = isAmma ? 77 : 0;
-        surahNames.forEach((n, i) => {
-            if(i >= start || i === 0) {
-                const opt = document.createElement('option');
-                opt.value = (i+1).toString().padStart(3, '0');
-                opt.text = n;
-                surahSelect.appendChild(opt);
-            }
-        });
-    }
-
-    // التشغيل التلقائي
-    audio.onended = () => {
-        if (surahSelect.selectedIndex < surahSelect.options.length - 1) {
-            surahSelect.selectedIndex += 1;
-            playBtn.click();
-        }
-    };
-
-    audio.ontimeupdate = () => {
-        if(!isNaN(audio.duration)) {
-            seekSlider.value = (audio.currentTime / audio.duration) * 100;
-            document.getElementById('currentTime').innerText = formatTime(audio.currentTime);
-            document.getElementById('duration').innerText = formatTime(audio.duration);
-        }
-    };
-
-    seekSlider.oninput = () => audio.currentTime = audio.duration * (seekSlider.value / 100);
-    function formatTime(s) { let m = Math.floor(s/60), sc = Math.floor(s%60); return `${m}:${sc<10?'0'+sc:sc}`; }
-
-    playBtn.onclick = () => {
-        if(!reciterSelect.value || !surahSelect.value) return;
-        const url = `${reciterSelect.value}${surahSelect.value}.mp3`;
-        if(audio.src !== url) { audio.src = url; audio.play(); playBtn.innerText = "⏸"; }
-        else { audio.paused ? (audio.play(), playBtn.innerText = "⏸") : (audio.pause(), playBtn.innerText = "▶"); }
-    };
-
-    document.getElementById('addFav').onclick = () => {
-        if(!reciterSelect.value) return;
-        const item = {
-            title: `${reciterSelect.options[reciterSelect.selectedIndex].text} - ${surahSelect.options[surahSelect.selectedIndex].text}`,
-            srv: reciterSelect.value,
-            sur: surahSelect.value
-        };
-        if(!favorites.find(f => f.title === item.title)) {
-            favorites.push(item);
-            localStorage.setItem('myFavs', JSON.stringify(favorites));
-            renderFavs();
-        }
-    };
-
-    function renderFavs() {
-        favItems.innerHTML = favorites.length ? '' : '<div style="text-align:center;font-size:0.75rem;opacity:0.5;">لا توجد مفضلات</div>';
-        favorites.forEach((f, i) => {
-            const d = document.createElement('div');
-            d.className = 'fav-item';
-            d.innerHTML = `<span style="cursor:pointer; flex:1" onclick="playFav(${i})">${f.title}</span><span class="del-item" onclick="delFav(${i})">×</span>`;
-            favItems.appendChild(d);
-        });
-    }
-
-    window.playFav = (i) => {
-        const f = favorites[i];
-        reciterSelect.value = f.srv;
-        surahSelect.value = f.sur;
-        playBtn.click();
-    };
-
-    window.delFav = (i) => { favorites.splice(i, 1); localStorage.setItem('myFavs', JSON.stringify(favorites)); renderFavs(); };
-
-    document.getElementById('searchReciter').oninput = (e) => populateReciters(allReciters.filter(r => r.name.includes(e.target.value)));
-    document.getElementById('allMode').onclick = function() { loadSurahs(false); this.classList.add('active-mode'); document.getElementById('ammaMode').classList.remove('active-mode'); };
-    document.getElementById('ammaMode').onclick = function() { loadSurahs(true); this.classList.add('active-mode'); document.getElementById('allMode').classList.remove('active-mode'); };
-
-    init();
-</script>
-</body>
-</html>
+        filtered.forEach(r => {
+            const m = isTeacher ? r.moshaf.find(m => m.name.includes("معلم")) : r.moshaf[0];
+            const opt = document.createElement('option');
+            opt.value = m.server;
+            opt.text = isTeacher ? `${r.name} (معلم)` :
+    
