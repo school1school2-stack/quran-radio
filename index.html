@@ -127,5 +127,125 @@
             if(r.moshaf && r.moshaf.length > 0) {
                 const teacherMoshaf = r.moshaf.find(m => m.name.toLowerCase().includes("معلم"));
                 if(isChildMode && teacherMoshaf) {
-                    const opt = document.createElement
-    
+                    const opt = document.createElement('option');
+                    opt.value = teacherMoshaf.server;
+                    opt.text = r.name + " (المعلم)";
+                    reciterSelect.appendChild(opt);
+                } else if(!isChildMode) {
+                    const opt = document.createElement('option');
+                    opt.value = r.moshaf[0].server;
+                    opt.text = r.name;
+                    reciterSelect.appendChild(opt);
+                }
+            }
+        });
+    }
+
+    function loadSurahs(isAmma) {
+        surahSelect.innerHTML = '';
+        const start = isAmma ? 77 : 0;
+        surahNames.forEach((n, i) => {
+            if(i >= start || i === 0) {
+                const opt = document.createElement('option');
+                opt.value = (i+1).toString().padStart(3, '0');
+                opt.text = n;
+                surahSelect.appendChild(opt);
+            }
+        });
+    }
+
+    playBtn.onclick = () => {
+        if(!reciterSelect.value || !surahSelect.value) return;
+        const targetUrl = `${reciterSelect.value}${surahSelect.value}.mp3`;
+        
+        if(audio.src !== targetUrl) {
+            audio.src = targetUrl;
+            currentRepeat = 1; // إعادة تعيين عداد التكرار عند تغيير السورة
+            updateRepeatStatus();
+            audio.load();
+            audio.play().catch(e => {});
+        } else {
+            audio.paused ? audio.play() : audio.pause();
+        }
+    };
+
+    function updateRepeatStatus() {
+        let max = parseInt(repeatSelect.value);
+        if(max > 1) {
+            repeatStatus.style.display = "block";
+            repeatStatus.innerText = `التكرار الحالي: ${currentRepeat} من ${max}`;
+        } else {
+            repeatStatus.style.display = "none";
+        }
+    }
+
+    audio.onplay = () => playBtn.innerText = "⏸";
+    audio.onpause = () => playBtn.innerText = "▶";
+
+    audio.onended = () => {
+        let maxRepeat = parseInt(repeatSelect.value);
+        if (currentRepeat < maxRepeat) {
+            currentRepeat++;
+            updateRepeatStatus();
+            audio.currentTime = 0;
+            audio.play();
+        } else {
+            // إذا انتهى التكرار، ننتقل للسورة التالية
+            currentRepeat = 1;
+            if(surahSelect.selectedIndex < surahSelect.options.length - 1) {
+                surahSelect.selectedIndex++;
+                updateRepeatStatus();
+                playBtn.click();
+            } else {
+                playBtn.innerText = "▶";
+                repeatStatus.style.display = "none";
+            }
+        }
+    };
+
+    audio.ontimeupdate = () => {
+        if(!isNaN(audio.duration)) {
+            seekSlider.value = (audio.currentTime/audio.duration)*100;
+            document.getElementById('currentTime').innerText = formatTime(audio.currentTime);
+            document.getElementById('duration').innerText = formatTime(audio.duration);
+        }
+    };
+
+    seekSlider.oninput = () => audio.currentTime = audio.duration * (seekSlider.value/100);
+    function formatTime(s) { let m=Math.floor(s/60), sc=Math.floor(s%60); return `${m}:${sc<10?'0'+sc:sc}`; }
+
+    document.getElementById('allMode').onclick = function() {
+        filterReciters(false); loadSurahs(false); updateActiveBtn(this);
+    };
+    document.getElementById('childMode').onclick = function() {
+        filterReciters(true); loadSurahs(true); updateActiveBtn(this);
+    };
+
+    function updateActiveBtn(btn) {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode'));
+        btn.classList.add('active-mode');
+        audio.pause();
+        currentRepeat = 1;
+        updateRepeatStatus();
+        playBtn.innerText = "▶";
+    }
+
+    document.getElementById('searchReciter').oninput = (e) => {
+        const term = e.target.value.toLowerCase();
+        const isChildMode = document.getElementById('childMode').classList.contains('active-mode');
+        reciterSelect.innerHTML = '<option value="">-- نتائج البحث --</option>';
+        allReciters.filter(r => r.name.toLowerCase().includes(term)).forEach(r => {
+            const m = isChildMode ? r.moshaf.find(m => m.name.toLowerCase().includes("معلم")) : r.moshaf[0];
+            if(m) {
+                const opt = document.createElement('option');
+                opt.value = m.server;
+                opt.text = r.name + (isChildMode ? " (المعلم)" : "");
+                reciterSelect.appendChild(opt);
+            }
+        });
+    };
+
+    init();
+</script>
+</body>
+</html>
