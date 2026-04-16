@@ -118,6 +118,21 @@
         } catch(e) { reciterSelect.innerHTML = '<option>فشل التحميل</option>'; }
     }
 
+    // وظيفة التشغيل الفوري
+    function autoPlayTrack() {
+        if(!reciterSelect.value || !surahSelect.value) return;
+        const targetUrl = `${reciterSelect.value}${surahSelect.value}.mp3`;
+        audio.src = targetUrl;
+        currentRepeat = 1;
+        updateStatus();
+        audio.load();
+        audio.play().catch(e => console.log("Auto-play ready"));
+    }
+
+    // ربط التغيير في القوائم بالتشغيل الفوري
+    reciterSelect.onchange = autoPlayTrack;
+    surahSelect.onchange = autoPlayTrack;
+
     function filterReciters(mode) {
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
         allReciters.forEach(r => {
@@ -151,17 +166,9 @@
     }
 
     playBtn.onclick = () => {
-        if(!reciterSelect.value || !surahSelect.value) return;
-        const targetUrl = `${reciterSelect.value}${surahSelect.value}.mp3`;
-        if(audio.src !== targetUrl) {
-            audio.src = targetUrl;
-            currentRepeat = 1;
-            updateStatus();
-            audio.load();
-            audio.play().catch(e => {});
-        } else {
-            audio.paused ? audio.play() : audio.pause();
-        }
+        if(!reciterSelect.value) return;
+        if(!audio.src) { autoPlayTrack(); }
+        else { audio.paused ? audio.play() : audio.pause(); }
     };
 
     function updateStatus() {
@@ -189,7 +196,7 @@
             if(surahSelect.selectedIndex < surahSelect.options.length - 1) {
                 surahSelect.selectedIndex++;
                 updateStatus();
-                playBtn.click();
+                autoPlayTrack(); // تشغيل السورة التالية تلقائياً
             } else {
                 playBtn.innerText = "▶";
                 repeatStatus.style.display = "none";
