@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>مصحف أبو نواف المعلم</title>
+    <title>إذاعة القرآن الكريم الجامعة</title>
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2663/2663339.png" type="image/png">
     <style>
         :root { --accent: #f1c40f; --green: #42e695; --red: #ff4757; }
@@ -20,10 +20,15 @@
             width: 100%; max-width: 450px; border: 1px solid rgba(255,255,255,0.1);
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
         }
-        .owner { color: var(--green); font-weight: bold; margin-bottom: 12px; font-size: 1.1rem; }
-        .mode-container { display: flex; gap: 8px; margin-bottom: 15px; }
-        .mode-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; cursor: pointer; background: #333; color: white; font-weight: bold; font-size: 0.85rem; }
+        .main-title { color: var(--accent); font-weight: bold; margin-bottom: 5px; font-size: 1.4rem; }
+        .sub-title { color: var(--green); font-size: 0.9rem; margin-bottom: 15px; opacity: 0.9; }
+        
+        /* الأقسام */
+        .sections-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .mode-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; background: #333; color: white; font-weight: bold; font-size: 0.8rem; transition: 0.3s; }
         .active-mode { background: var(--accent); color: black; box-shadow: 0 0 10px var(--accent); }
+        .full-width { grid-column: span 2; }
+
         input[type="text"], select {
             width: 100%; padding: 14px; border-radius: 12px; border: none;
             margin-bottom: 10px; font-weight: bold; outline: none; box-sizing: border-box;
@@ -32,28 +37,29 @@
         .progress-box { margin: 15px 0; display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
         input[type="range"] { flex: 1; cursor: pointer; accent-color: var(--green); }
         .controls { display: flex; justify-content: center; align-items: center; gap: 25px; margin-top: 10px; }
-        .play-btn { background: var(--green); border: none; width: 65px; height: 65px; border-radius: 50%; font-size: 1.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .fav-section { margin-top: 20px; text-align: right; background: rgba(255,255,255,0.08); border-radius: 15px; padding: 12px; max-height: 120px; overflow-y: auto; }
-        .footer { margin-top: 18px; font-size: 0.75rem; opacity: 0.6; }
+        .play-btn { background: var(--green); border: none; width: 65px; height: 65px; border-radius: 50%; font-size: 1.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: black; }
+        .footer { margin-top: 20px; font-size: 0.8rem; line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
     </style>
 </head>
 <body id="mainBody">
 
 <div class="container">
-    <div class="owner">إذاعة القرآن الكريم الجامعة</div>
+    <div class="main-title">إذاعة القرآن الكريم الجامعة</div>
+    <div class="sub-title">إشراف وتطوير أبو نواف</div>
 
-    <div class="mode-container">
+    <div class="sections-container">
         <button class="mode-btn active-mode" id="allMode">المصحف كامل 📖</button>
         <button class="mode-btn" id="teacherMode">المصحف المعلم 👶</button>
+        <button class="mode-btn full-width" id="ammaMode">قسم الأشبال (جزء عم) ✨</button>
     </div>
 
-    <input type="text" id="searchReciter" placeholder="🔍 ابحث عن القارئ...">
-    <select id="reciterSelect"><option>جاري التحميل...</option></select>
+    <input type="text" id="searchReciter" placeholder="🔍 ابحث عن اسم القارئ...">
+    <select id="reciterSelect"><option value="">جاري تحميل القراء...</option></select>
     <select id="surahSelect"></select>
 
     <div class="progress-box">
         <span id="currentTime">0:00</span>
-        <input type="range" id="seekSlider" value="0">
+        <input type="range" id="seekSlider" value="0" min="0" step="1">
         <span id="duration">0:00</span>
     </div>
 
@@ -62,11 +68,11 @@
         <button id="playBtn" class="play-btn">▶</button>
     </div>
 
-    <div class="fav-section" id="favItems">
-        <div style="text-align:center; font-size:0.75rem; opacity:0.5;">القائمة المفضلة</div>
+    <div class="footer">
+        الحقوق محفوظة <br>
+        صدقة جارية لوجه الله تعالى <br>
+        <b>أبو نواف</b>
     </div>
-
-    <div class="footer">صدقة جارية - تطوير أبو نواف © 2026</div>
 </div>
 
 <audio id="audioPlayer"></audio>
@@ -82,25 +88,92 @@
     const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
     async function init() {
-        const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
-        const data = await res.json();
-        allReciters = data.reciters;
-        filterReciters(false); // البداية بالمصحف الكامل
-        loadSurahs();
+        try {
+            const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
+            const data = await res.json();
+            allReciters = data.reciters;
+            filterReciters(false); 
+            loadSurahs(false);
+        } catch(e) { reciterSelect.innerHTML = '<option>فشل في التحميل</option>'; }
     }
 
     function filterReciters(isTeacher) {
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
-        const filtered = allReciters.filter(r => {
-            const hasMoshaf = r.moshaf && r.moshaf.length > 0;
-            if (!hasMoshaf) return false;
-            // البحث عن كلمة "معلم" في اسم المصحف
-            return isTeacher ? r.moshaf.some(m => m.name.includes("معلم")) : true;
+        allReciters.forEach(r => {
+            if(r.moshaf && r.moshaf.length > 0) {
+                const teacherMoshaf = r.moshaf.find(m => m.name.includes("معلم"));
+                if(isTeacher && teacherMoshaf) {
+                    const opt = document.createElement('option');
+                    opt.value = teacherMoshaf.server;
+                    opt.text = r.name + " (المعلم)";
+                    reciterSelect.appendChild(opt);
+                } else if(!isTeacher) {
+                    const opt = document.createElement('option');
+                    opt.value = r.moshaf[0].server;
+                    opt.text = r.name;
+                    reciterSelect.appendChild(opt);
+                }
+            }
         });
+    }
 
+    function loadSurahs(isAmma) {
+        surahSelect.innerHTML = '';
+        const start = isAmma ? 77 : 0;
+        surahNames.forEach((n, i) => {
+            if(i >= start || i === 0) {
+                const opt = document.createElement('option');
+                opt.value = (i+1).toString().padStart(3, '0');
+                opt.text = n;
+                surahSelect.appendChild(opt);
+            }
+        });
+    }
+
+    playBtn.onclick = () => {
+        if(!reciterSelect.value) return;
+        const url = `${reciterSelect.value}${surahSelect.value}.mp3`;
+        if(audio.src !== url) { audio.src = url; audio.play(); playBtn.innerText = "⏸"; }
+        else { audio.paused ? (audio.play(), playBtn.innerText = "⏸") : (audio.pause(), playBtn.innerText = "▶"); }
+    };
+
+    audio.onended = () => { if(surahSelect.selectedIndex < surahSelect.options.length - 1) { surahSelect.selectedIndex++; playBtn.click(); } };
+    audio.ontimeupdate = () => { if(!isNaN(audio.duration)) { seekSlider.value = (audio.currentTime/audio.duration)*100; document.getElementById('currentTime').innerText = formatTime(audio.currentTime); document.getElementById('duration').innerText = formatTime(audio.duration); } };
+    seekSlider.oninput = () => audio.currentTime = audio.duration * (seekSlider.value/100);
+    function formatTime(s) { let m=Math.floor(s/60), sc=Math.floor(s%60); return `${m}:${sc<10?'0'+sc:sc}`; }
+
+    // التحكم بالأقسام
+    document.getElementById('teacherMode').onclick = function() {
+        filterReciters(true); loadSurahs(false);
+        updateActiveBtn(this);
+    };
+    document.getElementById('allMode').onclick = function() {
+        filterReciters(false); loadSurahs(false);
+        updateActiveBtn(this);
+    };
+    document.getElementById('ammaMode').onclick = function() {
+        filterReciters(false); loadSurahs(true);
+        updateActiveBtn(this);
+    };
+
+    function updateActiveBtn(btn) {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode'));
+        btn.classList.add('active-mode');
+    }
+
+    document.getElementById('searchReciter').oninput = (e) => {
+        const term = e.target.value;
+        const filtered = allReciters.filter(r => r.name.includes(term));
+        reciterSelect.innerHTML = '<option value="">-- نتائج البحث --</option>';
         filtered.forEach(r => {
-            const m = isTeacher ? r.moshaf.find(m => m.name.includes("معلم")) : r.moshaf[0];
             const opt = document.createElement('option');
-            opt.value = m.server;
-            opt.text = isTeacher ? `${r.name} (معلم)` :
-    
+            opt.value = r.moshaf[0].server;
+            opt.text = r.name;
+            reciterSelect.appendChild(opt);
+        });
+    };
+
+    init();
+</script>
+</body>
+</html>
