@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>إذاعة القرآن الكريم الجامعة - النسخة المقاومة للانقطاع</title>
+    <title>إذاعة القرآن الكريم - الاستكمال التلقائي</title>
     <style>
         :root { --accent: #f1c40f; --green: #42e695; --red: #ff4757; }
         body {
@@ -95,7 +95,7 @@
     let currentRepeat = 1;
     let favorites = JSON.parse(localStorage.getItem('quranFavs')) || [];
     let currentMode = 'مرتل';
-    let isWaitingForNet = false;
+    let hasRestored = false;
 
     const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
@@ -111,19 +111,54 @@
             const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
             const data = await res.json();
             allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
-            filterReciters(); 
-            loadSurahs(false);
-        } catch(e) { repeatStatus.innerText = "فشل تحميل البيانات، تأكد من الإنترنت"; }
+            
+            // 1. استرجاع الوضع الأخير تلقائياً
+            const lastSave = JSON.parse(localStorage.getItem('lastQuranSession'));
+            if (lastSave) {
+                currentMode = lastSave.mode || 'مرتل';
+                updateActiveBtn(document.getElementById(getModeBtnId(currentMode)));
+                filterReciters();
+                loadSurahs(currentMode === 'معلم');
+                reciterSelect.value = lastSave.server;
+                surahSelect.value = lastSave.surahNum;
+                audio.src = `${lastSave.server}${lastSave.surahNum}.mp3`;
+                audio.load();
+                audio.currentTime = lastSave.time;
+                repeatStatus.innerText = "🔄 تم استعادة آخر موقع.. اضغط تشغيل للمواصلة";
+                hasRestored = true;
+            } else {
+                filterReciters(); 
+                loadSurahs(false);
+            }
+        } catch(e) { console.log("خطأ في التحميل"); }
+    }
+
+    // وظيفة حفظ الموقع في الذاكرة كل ثانيتين
+    function saveCurrentProgress() {
+        if (!audio.src || audio.paused) return;
+        const session = {
+            server: reciterSelect.value,
+            surahNum: surahSelect.value,
+            time: audio.currentTime,
+            mode: currentMode
+        };
+        localStorage.setItem('lastQuranSession', JSON.stringify(session));
+    }
+    setInterval(saveCurrentProgress, 2000);
+
+    function getModeBtnId(mode) {
+        if (mode === 'مجود') return 'mojawadMode';
+        if (mode === 'معلم') return 'childMode';
+        return 'allMode';
     }
 
     function playAudioSafe() {
         const playPromise = audio.play();
         if (playPromise !== undefined) {
             playPromise.then(_ => {
-                isWaitingForNet = false;
                 updateMediaSession();
             }).catch(e => {
-                console.log("التشغيل بانتظار تفاعل أو إنترنت");
+                repeatStatus.innerText = "اضغط على زر (▶) للاستكمال";
             });
         }
     }
@@ -148,59 +183,22 @@
         playAudioSafe();
     }
 
-    // --- ميزة الحماية من انقطاع الإنترنت ---
-    audio.addEventListener('waiting', () => {
-        if (navigator.onLine === false) {
-            isWaitingForNet = true;
-            repeatStatus.innerText = "⏳ انقطع الاتصال.. بانتظار عودة الإنترنت";
-            repeatStatus.style.color = "var(--accent)";
-        }
-    });
-
-    window.addEventListener('online', () => {
-        if (isWaitingForNet) {
-            repeatStatus.innerText = "✅ عاد الإنترنت.. جاري الاستكمال";
-            audio.load(); 
-            playAudioSafe();
-        }
-    });
-
-    audio.onerror = () => {
-        if (!navigator.onLine) {
-            isWaitingForNet = true;
-            repeatStatus.innerText = "⚠️ فشل التشغيل.. سأحاول مجدداً عند توفر الشبكة";
-        } else {
-            repeatStatus.innerText = "⚠️ الملف غير متوفر، ننتقل للتالي...";
-            setTimeout(() => document.getElementById('nextBtn').click(), 2000);
-        }
-    };
-    // ---------------------------------------
-
     function filterReciters(term = "") {
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
         if (term === "") {
             let favGroup = document.createElement('optgroup');
             favGroup.label = "⭐ القراء المفضلون";
             let hasFavs = false;
-            favorites.filter(f => f.mode === currentMode).sort((a, b) => a.name.localeCompare(b.name, 'ar')).forEach(f => {
-                let opt = document.createElement('option');
-                opt.value = f.server;
-                opt.text = "❤️ " + f.name;
-                favGroup.appendChild(opt);
-                hasFavs = true;
+            favorites.filter(f => f.mode === currentMode).forEach(f => {
+                let opt = document.createElement('option'); opt.value = f.server; opt.text = "❤️ " + f.name; favGroup.appendChild(opt); hasFavs = true;
             });
             if(hasFavs) reciterSelect.appendChild(favGroup);
         }
         let allGroup = document.createElement('optgroup');
-        allGroup.label = term === "" ? "📋 القائمة الأبجدية" : "🔍 نتائج البحث";
+        allGroup.label = "📋 القائمة الأبجدية";
         allReciters.filter(r => term === "" || r.name.toLowerCase().includes(term.toLowerCase())).forEach(r => {
             let found = r.moshaf.find(m => currentMode === 'معلم' ? m.name.includes("معلم") : (currentMode === 'مجود' ? m.name.includes("مجود") : (m.name.includes("مرتل") || m.name === "حفص عن عاصم")));
-            if(found) {
-                const opt = document.createElement('option');
-                opt.value = found.server;
-                opt.text = r.name;
-                allGroup.appendChild(opt);
-            }
+            if(found) { const opt = document.createElement('option'); opt.value = found.server; opt.text = r.name; allGroup.appendChild(opt); }
         });
         reciterSelect.appendChild(allGroup);
     }
@@ -220,51 +218,30 @@
         if(prev && !isAmma) surahSelect.value = prev;
     }
 
-    playBtn.onclick = () => {
-        if(!audio.src) autoPlayTrack();
-        else audio.paused ? playAudioSafe() : audio.pause();
-    };
+    playBtn.onclick = () => { if(!audio.src) autoPlayTrack(); else audio.paused ? playAudioSafe() : audio.pause(); };
 
     document.getElementById('nextBtn').onclick = () => {
         if(surahSelect.selectedIndex === surahSelect.options.length - 1) {
             if(reciterSelect.selectedIndex < reciterSelect.options.length - 1) {
-                reciterSelect.selectedIndex++;
-                surahSelect.selectedIndex = 0;
-                autoPlayTrack();
+                reciterSelect.selectedIndex++; surahSelect.selectedIndex = 0; autoPlayTrack();
             }
-        } else {
-            surahSelect.selectedIndex++;
-            autoPlayTrack();
-        }
+        } else { surahSelect.selectedIndex++; autoPlayTrack(); }
     };
 
-    document.getElementById('prevBtn').onclick = () => {
-        if(surahSelect.selectedIndex > 0) {
-            surahSelect.selectedIndex--;
-            autoPlayTrack();
-        }
-    };
+    document.getElementById('prevBtn').onclick = () => { if(surahSelect.selectedIndex > 0) { surahSelect.selectedIndex--; autoPlayTrack(); } };
 
     function updateStatus() {
         let max = parseInt(repeatSelect.value);
-        repeatStatus.innerText = max > 1 ? `التكرار الحالي: ${currentRepeat} من ${max}` : "جاري الاستماع الآن...";
+        repeatStatus.innerText = max > 1 ? `تكرار: ${currentRepeat} من ${max}` : "جاري الاستماع الآن...";
         repeatStatus.style.display = "block";
-        repeatStatus.style.color = "var(--accent)";
     }
 
     audio.onplay = () => playBtn.innerText = "⏸";
     audio.onpause = () => playBtn.innerText = "▶";
-
     audio.onended = () => {
         let max = parseInt(repeatSelect.value);
-        if (currentRepeat < max) {
-            currentRepeat++;
-            updateStatus();
-            audio.currentTime = 0;
-            playAudioSafe();
-        } else {
-            document.getElementById('nextBtn').click();
-        }
+        if (currentRepeat < max) { currentRepeat++; audio.currentTime = 0; playAudioSafe(); }
+        else { document.getElementById('nextBtn').click(); }
     };
 
     audio.ontimeupdate = () => { if(!isNaN(audio.duration)) { seekSlider.value = (audio.currentTime/audio.duration)*100; document.getElementById('currentTime').innerText = formatTime(audio.currentTime); document.getElementById('duration').innerText = formatTime(audio.duration); } };
@@ -272,37 +249,34 @@
     function formatTime(s) { let m=Math.floor(s/60), sc=Math.floor(s%60); return `${m}:${sc<10?'0'+sc:sc}`; }
 
     favBtn.onclick = () => {
-        const server = reciterSelect.value;
-        if(!server) return;
+        const server = reciterSelect.value; if(!server) return;
         let name = reciterSelect.options[reciterSelect.selectedIndex].text.replace("❤️ ", "");
         const idx = favorites.findIndex(f => f.server === server);
-        if(idx === -1) favorites.push({server, name, mode: currentMode});
-        else favorites.splice(idx, 1);
+        if(idx === -1) favorites.push({server, name, mode: currentMode}); else favorites.splice(idx, 1);
         localStorage.setItem('quranFavs', JSON.stringify(favorites));
         filterReciters(document.getElementById('searchReciter').value);
-        reciterSelect.value = server;
-        checkFavStatus();
+        reciterSelect.value = server; checkFavStatus();
     };
 
-    function checkFavStatus() {
-        const exists = favorites.some(f => f.server === reciterSelect.value);
-        favBtn.classList.toggle('active', exists);
-    }
+    function checkFavStatus() { const exists = favorites.some(f => f.server === reciterSelect.value); favBtn.classList.toggle('active', exists); }
 
     reciterSelect.onchange = autoPlayTrack;
     surahSelect.onchange = autoPlayTrack;
     document.getElementById('searchReciter').oninput = (e) => filterReciters(e.target.value);
 
+    function updateActiveBtn(btn) {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode'));
+        btn.classList.add('active-mode');
+    }
+
     const modes = { 'allMode': 'مرتل', 'mojawadMode': 'مجود', 'childMode': 'معلم' };
     Object.keys(modes).forEach(id => {
         document.getElementById(id).onclick = function() {
             currentMode = modes[id];
-            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode'));
-            this.classList.add('active-mode');
+            updateActiveBtn(this);
             loadSurahs(currentMode === 'معلم');
             filterReciters();
-            audio.pause();
-            playBtn.innerText = "▶";
+            audio.pause(); playBtn.innerText = "▶";
         };
     });
 
