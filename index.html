@@ -20,31 +20,21 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
         }
         .main-title { color: var(--accent); font-weight: bold; margin-bottom: 25px; font-size: 1.6rem; text-shadow: 0 2px 10px rgba(241, 196, 15, 0.3); }
-        
         .sections-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
         .mode-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; background: #333; color: white; font-weight: bold; font-size: 0.85rem; transition: 0.3s; }
         .active-mode { background: var(--accent); color: black; box-shadow: 0 0 10px var(--accent); }
         .full-width { grid-column: span 2; }
-
-        input[type="text"], select {
-            width: 100%; padding: 14px; border-radius: 12px; border: none;
-            margin-bottom: 12px; font-weight: bold; outline: none; box-sizing: border-box;
-            background: white; color: #333; font-size: 1rem;
-        }
-
+        input[type="text"], select { width: 100%; padding: 14px; border-radius: 12px; border: none; margin-bottom: 12px; font-weight: bold; outline: none; box-sizing: border-box; background: white; color: #333; font-size: 1rem; }
         .repeat-box { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
         .repeat-box label { font-size: 0.85rem; font-weight: bold; }
         .repeat-box select { width: auto; margin: 0; padding: 5px 10px; background: white; color: black; font-size: 0.9rem; }
-
         .progress-box { margin: 15px 0; display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
         input[type="range"] { flex: 1; cursor: pointer; accent-color: var(--green); }
-
         .controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px; }
         .play-btn { background: var(--green); border: none; width: 70px; height: 70px; border-radius: 50%; font-size: 1.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: black; transition: 0.2s; box-shadow: 0 5px 15px rgba(66, 230, 149, 0.3); }
-        .nav-btn { background: rgba(255,255,255,0.1); border: none; color: white; width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .fav-btn { background: none; border: 2px solid var(--red); color: var(--red); width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .nav-btn { background: rgba(255,255,255,0.1); border: none; color: white; width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .fav-btn { background: none; border: 2px solid var(--red); color: var(--red); width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
         .fav-btn.active { background: var(--red); color: white; box-shadow: 0 0 15px var(--red); }
-        
         .footer { margin-top: 30px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
         .footer-text { color: var(--accent); font-size: 0.75rem; text-decoration: underline; letter-spacing: 0.5px; }
         .repeat-status { font-size: 0.8rem; color: var(--accent); margin-top: 5px; font-weight: bold; min-height: 1.2em; }
@@ -129,19 +119,15 @@
         const playPromise = audio.play();
         if (playPromise !== undefined) {
             playPromise.then(_ => {
-                updateMediaSession();
+                if ('mediaSession' in navigator) {
+                    navigator.mediaSession.metadata = new MediaMetadata({
+                        title: surahSelect.options[surahSelect.selectedIndex].text,
+                        artist: reciterSelect.options[reciterSelect.selectedIndex].text,
+                        album: 'إذاعة القرآن الكريم'
+                    });
+                }
             }).catch(e => {
                 repeatStatus.innerText = "اضغط على زر التشغيل للبدء";
-            });
-        }
-    }
-
-    function updateMediaSession() {
-        if ('mediaSession' in navigator) {
-            navigator.mediaSession.metadata = new MediaMetadata({
-                title: surahSelect.options[surahSelect.selectedIndex].text,
-                artist: reciterSelect.options[reciterSelect.selectedIndex].text,
-                album: 'إذاعة القرآن الكريم'
             });
         }
     }
@@ -171,7 +157,6 @@
             });
             if(hasFavs) reciterSelect.appendChild(favGroup);
         }
-
         let allGroup = document.createElement('optgroup');
         allGroup.label = term === "" ? "📋 القائمة الأبجدية" : "🔍 نتائج البحث";
         allReciters.filter(r => term === "" || r.name.toLowerCase().includes(term.toLowerCase())).forEach(r => {
@@ -207,7 +192,15 @@
     };
 
     document.getElementById('nextBtn').onclick = () => {
-        if(surahSelect.selectedIndex < surahSelect.options.length - 1) {
+        // إذا كنا في السورة الأخيرة (الناس)
+        if(surahSelect.selectedIndex === surahSelect.options.length - 1) {
+            // ننتقل للقارئ التالي في القائمة
+            if(reciterSelect.selectedIndex < reciterSelect.options.length - 1) {
+                reciterSelect.selectedIndex++;
+                surahSelect.selectedIndex = 0; // العودة للفاتحة
+                autoPlayTrack();
+            }
+        } else {
             surahSelect.selectedIndex++;
             autoPlayTrack();
         }
@@ -224,13 +217,15 @@
         let max = parseInt(repeatSelect.value);
         repeatStatus.innerText = max > 1 ? `التكرار الحالي: ${currentRepeat} من ${max}` : "جاري الاستماع الآن...";
         repeatStatus.style.display = "block";
+        repeatStatus.style.color = "var(--accent)";
     }
 
     audio.onplay = () => playBtn.innerText = "⏸";
     audio.onpause = () => playBtn.innerText = "▶";
     audio.onerror = () => {
-        repeatStatus.innerText = "⚠️ عذراً، الملف غير متوفر لهذا القارئ";
+        repeatStatus.innerText = "⚠️ الملف غير متوفر، ننتقل للتالي...";
         repeatStatus.style.color = "var(--red)";
+        setTimeout(() => document.getElementById('nextBtn').click(), 2000);
     };
 
     audio.onended = () => {
@@ -241,7 +236,7 @@
             audio.currentTime = 0;
             playAudioSafe();
         } else {
-            document.getElementById('nextBtn').click();
+            document.getElementById('nextBtn').click(); // الضغط التلقائي على التالي
         }
     };
 
