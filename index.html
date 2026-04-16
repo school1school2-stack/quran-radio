@@ -39,14 +39,15 @@
         .progress-box { margin: 15px 0; display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
         input[type="range"] { flex: 1; cursor: pointer; accent-color: var(--green); }
 
-        .controls { display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 10px; }
+        .controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px; }
         .play-btn { background: var(--green); border: none; width: 70px; height: 70px; border-radius: 50%; font-size: 1.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: black; transition: 0.2s; box-shadow: 0 5px 15px rgba(66, 230, 149, 0.3); }
-        .fav-btn { background: none; border: 2px solid var(--red); color: var(--red); width: 50px; height: 50px; border-radius: 50%; cursor: pointer; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .nav-btn { background: rgba(255,255,255,0.1); border: none; color: white; width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .fav-btn { background: none; border: 2px solid var(--red); color: var(--red); width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
         .fav-btn.active { background: var(--red); color: white; box-shadow: 0 0 15px var(--red); }
         
         .footer { margin-top: 30px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
         .footer-text { color: var(--accent); font-size: 0.75rem; text-decoration: underline; letter-spacing: 0.5px; }
-        .repeat-status { font-size: 0.8rem; color: var(--accent); margin-top: 5px; font-weight: bold; }
+        .repeat-status { font-size: 0.8rem; color: var(--accent); margin-top: 5px; font-weight: bold; min-height: 1.2em; }
     </style>
 </head>
 <body>
@@ -68,7 +69,7 @@
         <label>🔁 تكرار السورة آلياً:</label>
         <select id="repeatSelect"></select>
     </div>
-    <div id="repeatStatus" class="repeat-status" style="display:none;"></div>
+    <div id="repeatStatus" class="repeat-status"></div>
 
     <div class="progress-box">
         <span id="currentTime">0:00</span>
@@ -77,8 +78,10 @@
     </div>
 
     <div class="controls">
+        <button id="prevBtn" class="nav-btn" title="السورة السابقة">⏭</button>
         <button id="addFav" class="fav-btn" title="إضافة للمفضلة">❤</button>
         <button id="playBtn" class="play-btn">▶</button>
+        <button id="nextBtn" class="nav-btn" title="السورة التالية">⏮</button>
     </div>
 
     <div class="footer">
@@ -103,7 +106,7 @@
     let favorites = JSON.parse(localStorage.getItem('quranFavs')) || [];
     let currentMode = 'مرتل';
 
-    const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الالذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
+    const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
     for(let i=1; i<=20; i++) {
         let opt = document.createElement('option');
@@ -122,22 +125,30 @@
         } catch(e) { reciterSelect.innerHTML = '<option>فشل التحميل</option>'; }
     }
 
-    // وظيفة التشغيل المحسنة للأندرويد
     function playAudioSafe() {
         const playPromise = audio.play();
         if (playPromise !== undefined) {
             playPromise.then(_ => {
-                // بدأ التشغيل بنجاح
-            }).catch(error => {
-                console.log("التحميل التلقائي مقيد، يحتاج تفاعل يدوي أول مرة.");
+                updateMediaSession();
+            }).catch(e => {
+                repeatStatus.innerText = "اضغط على زر التشغيل للبدء";
+            });
+        }
+    }
+
+    function updateMediaSession() {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: surahSelect.options[surahSelect.selectedIndex].text,
+                artist: reciterSelect.options[reciterSelect.selectedIndex].text,
+                album: 'إذاعة القرآن الكريم'
             });
         }
     }
 
     function autoPlayTrack() {
         if(!reciterSelect.value || !surahSelect.value) return;
-        const targetUrl = `${reciterSelect.value}${surahSelect.value}.mp3`;
-        audio.src = targetUrl;
+        audio.src = `${reciterSelect.value}${surahSelect.value}.mp3`;
         currentRepeat = 1;
         updateStatus();
         checkFavStatus();
@@ -145,107 +156,83 @@
         playAudioSafe();
     }
 
-    reciterSelect.onchange = autoPlayTrack;
-    surahSelect.onchange = autoPlayTrack;
-
-    function filterReciters() {
+    function filterReciters(term = "") {
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
-        let favGroup = document.createElement('optgroup');
-        favGroup.label = "⭐ القراء المفضلون";
-        let hasFavs = false;
-        
-        favorites.filter(f => f.mode === currentMode)
-                 .sort((a, b) => a.name.localeCompare(b.name, 'ar'))
-                 .forEach(f => {
-                    let opt = document.createElement('option');
-                    opt.value = f.server;
-                    opt.text = "❤️ " + f.name;
-                    favGroup.appendChild(opt);
-                    hasFavs = true;
-                 });
-        if(hasFavs) reciterSelect.appendChild(favGroup);
+        if (term === "") {
+            let favGroup = document.createElement('optgroup');
+            favGroup.label = "⭐ القراء المفضلون";
+            let hasFavs = false;
+            favorites.filter(f => f.mode === currentMode).sort((a, b) => a.name.localeCompare(b.name, 'ar')).forEach(f => {
+                let opt = document.createElement('option');
+                opt.value = f.server;
+                opt.text = "❤️ " + f.name;
+                favGroup.appendChild(opt);
+                hasFavs = true;
+            });
+            if(hasFavs) reciterSelect.appendChild(favGroup);
+        }
 
         let allGroup = document.createElement('optgroup');
-        allGroup.label = "📋 القائمة الأبجدية الكاملة";
-        allReciters.forEach(r => {
-            if(r.moshaf && r.moshaf.length > 0) {
-                let found;
-                if(currentMode === 'معلم') found = r.moshaf.find(m => m.name.includes("معلم"));
-                else if(currentMode === 'مجود') found = r.moshaf.find(m => m.name.includes("مجود"));
-                else found = r.moshaf.find(m => m.name.includes("مرتل") || m.name === "حفص عن عاصم");
-
-                if(found) {
-                    const opt = document.createElement('option');
-                    opt.value = found.server;
-                    opt.text = r.name;
-                    allGroup.appendChild(opt);
-                }
+        allGroup.label = term === "" ? "📋 القائمة الأبجدية" : "🔍 نتائج البحث";
+        allReciters.filter(r => term === "" || r.name.toLowerCase().includes(term.toLowerCase())).forEach(r => {
+            let found = r.moshaf.find(m => currentMode === 'معلم' ? m.name.includes("معلم") : (currentMode === 'مجود' ? m.name.includes("مجود") : (m.name.includes("مرتل") || m.name === "حفص عن عاصم")));
+            if(found) {
+                const opt = document.createElement('option');
+                opt.value = found.server;
+                opt.text = r.name;
+                allGroup.appendChild(opt);
             }
         });
         reciterSelect.appendChild(allGroup);
     }
 
-    favBtn.onclick = () => {
-        const server = reciterSelect.value;
-        if(!server) return;
-        let name = reciterSelect.options[reciterSelect.selectedIndex].text.replace("❤️ ", "");
-        const index = favorites.findIndex(f => f.server === server);
-        if(index === -1) {
-            favorites.push({server, name, mode: currentMode});
-            favBtn.classList.add('active');
-        } else {
-            favorites.splice(index, 1);
-            favBtn.classList.remove('active');
-        }
-        localStorage.setItem('quranFavs', JSON.stringify(favorites));
-        filterReciters();
-        reciterSelect.value = server;
-    };
-
-    function checkFavStatus() {
-        const server = reciterSelect.value;
-        const index = favorites.findIndex(f => f.server === server);
-        index !== -1 ? favBtn.classList.add('active') : favBtn.classList.remove('active');
-    }
-
     function loadSurahs(isAmma) {
-        const currentSelection = surahSelect.value;
+        const prev = surahSelect.value;
         surahSelect.innerHTML = '';
         const start = isAmma ? 77 : 0;
         surahNames.forEach((n, i) => {
             if(i >= start || i === 0) {
                 const opt = document.createElement('option');
                 opt.value = (i+1).toString().padStart(3, '0');
-                opt.text = n;
+                opt.text = `${i+1}. ${n}`;
                 surahSelect.appendChild(opt);
             }
         });
-        if (currentSelection) surahSelect.value = currentSelection;
+        if(prev && !isAmma) surahSelect.value = prev;
     }
 
     playBtn.onclick = () => {
-        if(!reciterSelect.value) return;
         if(!audio.src) autoPlayTrack();
-        else {
-            if (audio.paused) playAudioSafe();
-            else audio.pause();
+        else audio.paused ? playAudioSafe() : audio.pause();
+    };
+
+    document.getElementById('nextBtn').onclick = () => {
+        if(surahSelect.selectedIndex < surahSelect.options.length - 1) {
+            surahSelect.selectedIndex++;
+            autoPlayTrack();
+        }
+    };
+
+    document.getElementById('prevBtn').onclick = () => {
+        if(surahSelect.selectedIndex > 0) {
+            surahSelect.selectedIndex--;
+            autoPlayTrack();
         }
     };
 
     function updateStatus() {
         let max = parseInt(repeatSelect.value);
-        if(max > 1) {
-            repeatStatus.style.display = "block";
-            repeatStatus.innerText = `التكرار الحالي: ${currentRepeat} من ${max}`;
-        } else {
-            repeatStatus.style.display = "none";
-        }
+        repeatStatus.innerText = max > 1 ? `التكرار الحالي: ${currentRepeat} من ${max}` : "جاري الاستماع الآن...";
+        repeatStatus.style.display = "block";
     }
 
     audio.onplay = () => playBtn.innerText = "⏸";
     audio.onpause = () => playBtn.innerText = "▶";
+    audio.onerror = () => {
+        repeatStatus.innerText = "⚠️ عذراً، الملف غير متوفر لهذا القارئ";
+        repeatStatus.style.color = "var(--red)";
+    };
 
-    // حدث انتهاء السورة - معدل ليناسب أندرويد
     audio.onended = () => {
         let max = parseInt(repeatSelect.value);
         if (currentRepeat < max) {
@@ -254,19 +241,7 @@
             audio.currentTime = 0;
             playAudioSafe();
         } else {
-            currentRepeat = 1;
-            if(surahSelect.selectedIndex < surahSelect.options.length - 1) {
-                surahSelect.selectedIndex++;
-                updateStatus();
-                // بدلاً من استدعاء autoPlayTrack مباشرة، نقوم بتحميل المصدر ثم التشغيل
-                const targetUrl = `${reciterSelect.value}${surahSelect.value}.mp3`;
-                audio.src = targetUrl;
-                audio.load();
-                playAudioSafe();
-            } else {
-                playBtn.innerText = "▶";
-                repeatStatus.style.display = "none";
-            }
+            document.getElementById('nextBtn').click();
         }
     };
 
@@ -274,34 +249,40 @@
     seekSlider.oninput = () => audio.currentTime = audio.duration * (seekSlider.value/100);
     function formatTime(s) { let m=Math.floor(s/60), sc=Math.floor(s%60); return `${m}:${sc<10?'0'+sc:sc}`; }
 
-    document.getElementById('allMode').onclick = function() { currentMode = 'مرتل'; filterReciters(); loadSurahs(false); updateActiveBtn(this); };
-    document.getElementById('mojawadMode').onclick = function() { currentMode = 'مجود'; filterReciters(); loadSurahs(false); updateActiveBtn(this); };
-    document.getElementById('childMode').onclick = function() { currentMode = 'معلم'; filterReciters(); loadSurahs(true); updateActiveBtn(this); };
+    favBtn.onclick = () => {
+        const server = reciterSelect.value;
+        if(!server) return;
+        let name = reciterSelect.options[reciterSelect.selectedIndex].text.replace("❤️ ", "");
+        const idx = favorites.findIndex(f => f.server === server);
+        if(idx === -1) favorites.push({server, name, mode: currentMode});
+        else favorites.splice(idx, 1);
+        localStorage.setItem('quranFavs', JSON.stringify(favorites));
+        filterReciters(document.getElementById('searchReciter').value);
+        reciterSelect.value = server;
+        checkFavStatus();
+    };
 
-    function updateActiveBtn(btn) {
-        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode'));
-        btn.classList.add('active-mode');
-        audio.pause();
-        currentRepeat = 1;
-        updateStatus();
-        playBtn.innerText = "▶";
-        document.getElementById('searchReciter').value = '';
+    function checkFavStatus() {
+        const exists = favorites.some(f => f.server === reciterSelect.value);
+        favBtn.classList.toggle('active', exists);
     }
 
-    document.getElementById('searchReciter').oninput = (e) => {
-        const term = e.target.value.toLowerCase();
-        if (term === "") { filterReciters(); return; }
-        reciterSelect.innerHTML = '<option value="">-- نتائج البحث --</option>';
-        allReciters.filter(r => r.name.toLowerCase().includes(term)).forEach(r => {
-            let found = r.moshaf.find(m => currentMode === 'معلم' ? m.name.includes("معلم") : (currentMode === 'مجود' ? m.name.includes("مجود") : (m.name.includes("مرتل") || m.name === "حفص عن عاصم")));
-            if(found) {
-                const opt = document.createElement('option');
-                opt.value = found.server;
-                opt.text = r.name;
-                reciterSelect.appendChild(opt);
-            }
-        });
-    };
+    reciterSelect.onchange = autoPlayTrack;
+    surahSelect.onchange = autoPlayTrack;
+    document.getElementById('searchReciter').oninput = (e) => filterReciters(e.target.value);
+
+    const modes = { 'allMode': 'مرتل', 'mojawadMode': 'مجود', 'childMode': 'معلم' };
+    Object.keys(modes).forEach(id => {
+        document.getElementById(id).onclick = function() {
+            currentMode = modes[id];
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode'));
+            this.classList.add('active-mode');
+            loadSurahs(currentMode === 'معلم');
+            filterReciters();
+            audio.pause();
+            playBtn.innerText = "▶";
+        };
+    });
 
     init();
 </script>
