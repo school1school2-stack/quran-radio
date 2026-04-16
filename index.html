@@ -3,70 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مصحف أبو نواف - ركن أطفال داوود</title>
+    <title>مصحف أبو نواف الجامع</title>
     <style>
-        :root { --accent: #f1c40f; --green: #42e695; }
+        :root { --accent: #f1c40f; --green: #42e695; --red: #ff4757; }
+        
         body {
             margin: 0; font-family: 'Segoe UI', sans-serif;
-            background: #1a1a2e; min-height: 100vh;
-            display: flex; justify-content: center; align-items: center; color: white; padding: 20px;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            background-size: cover; background-attachment: fixed;
+            min-height: 100vh; display: flex; justify-content: center; 
+            align-items: center; color: white; padding: 20px;
+            transition: background 0.5s ease;
         }
+
         .container {
-            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px);
-            padding: 20px; border-radius: 20px; text-align: center;
-            width: 100%; max-width: 500px; border: 2px solid var(--accent);
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(15px);
+            padding: 25px; border-radius: 25px; text-align: center;
+            width: 100%; max-width: 450px; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
-        .video-box {
-            position: relative; width: 100%; padding-bottom: 56.25%;
-            height: 0; border-radius: 15px; overflow: hidden; margin-bottom: 20px;
-            background: #000; border: 1px solid #333;
-        }
-        .video-box iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-        
-        select {
+
+        .owner { color: var(--green); font-weight: bold; margin-bottom: 15px; font-size: 1.2rem; }
+
+        /* مغير الخلفيات */
+        .bg-selector { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; }
+        .bg-opt { width: 25px; height: 25px; border-radius: 50%; border: 2px solid white; cursor: pointer; }
+
+        /* اختيار النطاق (أطفال/كل) */
+        .mode-container { margin-bottom: 15px; }
+        .mode-btn { padding: 8px 15px; border-radius: 10px; border: none; cursor: pointer; background: #444; color: white; font-weight: bold; margin: 0 5px; }
+        .active-mode { background: var(--accent); color: black; }
+
+        input[type="text"], select {
             width: 100%; padding: 12px; border-radius: 10px; border: none;
-            margin-bottom: 15px; font-weight: bold; background: #fff; color: #333;
+            margin-bottom: 10px; font-weight: bold; outline: none; box-sizing: border-box;
         }
-        .mode-title { color: var(--accent); margin-bottom: 10px; font-weight: bold; }
-        .footer { margin-top: 15px; font-size: 0.8rem; opacity: 0.7; }
+
+        /* شريط التقدم */
+        .progress-box { margin: 15px 0; display: flex; align-items: center; gap: 10px; font-size: 0.8rem; }
+        input[type="range"] { flex: 1; cursor: pointer; accent-color: var(--green); }
+
+        .controls { display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 10px; }
+        .play-btn { background: var(--green); border: none; width: 60px; height: 60px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; transition: 0.3s; }
+        .play-btn:hover { transform: scale(1.1); }
+        .fav-add { background: none; border: 2px solid var(--red); color: var(--red); width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; }
+
+        /* قائمة المفضلة */
+        .fav-section { margin-top: 25px; text-align: right; background: rgba(255,255,255,0.05); border-radius: 15px; padding: 12px; max-height: 150px; overflow-y: auto; }
+        .fav-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; }
+        .del-item { color: var(--red); cursor: pointer; font-weight: bold; padding: 0 5px; }
+
+        .footer { margin-top: 20px; font-size: 0.7rem; opacity: 0.5; }
     </style>
 </head>
-<body>
+<body id="mainBody">
 
 <div class="container">
-    <div style="color:var(--green); font-weight:bold; margin-bottom:10px;">إشراف أبو نواف</div>
-    <div class="mode-title">📺 قناة داوود للأطفال - اختر السورة</div>
+    <div class="owner">مصحف أبو نواف الجامع</div>
 
-    <div class="video-box">
-        <iframe id="dawoodFrame" src="https://www.youtube.com/embed/Uf0S7FcfXOI" allowfullscreen></iframe>
+    <div class="bg-selector">
+        <div class="bg-opt" onclick="changeBg('linear-gradient(135deg, #1e3c72, #2a5298)')" style="background: #1e3c72;"></div>
+        <div class="bg-opt" onclick="changeBg('linear-gradient(135deg, #134e5e, #71b280)')" style="background: #134e5e;"></div>
+        <div class="bg-opt" onclick="changeBg('linear-gradient(135deg, #2c3e50, #000000)')" style="background: #2c3e50;"></div>
+        <div class="bg-opt" onclick="changeBg('linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d)')" style="background: linear-gradient(135deg, #1a2a6c, #fdbb2d);"></div>
     </div>
 
-    <label for="dawoodSurah">اختر السورة لتعلمها مع داوود:</label>
-    <select id="dawoodSurah" onchange="changeDawoodVideo()">
-        <option value="Uf0S7FcfXOI">سورة النبأ</option>
-        <option value="W_X_7m6Y0vE">سورة النازعات</option>
-        <option value="6M5y1_v_L8A">سورة عبس</option>
-        <option value="p7NfP8XGZ-g">سورة التكوير</option>
-        <option value="mKInYFzG32U">سورة الانفطار</option>
-        <option value="exfH6-Cj_68">سورة المطففين</option>
-        <option value="R08S5vG80p8">سورة الشمس</option>
-        <option value="YfV7-h7fV_M">سورة الناس</option>
-        <option value="lzEuix0DYhY">مشاهدة القناة كاملة</option>
-    </select>
+    <div class="mode-container">
+        <button class="mode-btn active-mode" id="allMode">المصحف كامل</button>
+        <button class="mode-btn" id="ammaMode">جزء عم للأطفال</button>
+    </div>
 
-    <div class="footer">تعليم القرآن للأطفال بأسلوب ممتع - 2026</div>
+    <input type="text" id="searchReciter" placeholder="ابحث عن اسم القارئ...">
+    <select id="reciterSelect"><option>جاري تحميل القراء...</option></select>
+    <select id="surahSelect"></select>
+
+    <div class="progress-box">
+        <span id="currentTime">0:00</span>
+        <input type="range" id="seekSlider" value="0">
+        <span id="duration">0:00</span>
+    </div>
+
+    <div class="controls">
+        <button id="addFav" class="fav-add" title="إضافة للمفضلة">❤️</button>
+        <button id="playBtn" class="play-btn">▶</button>
+    </div>
+
+    <div class="fav-section">
+        <div style="text-align: center; color: var(--accent); font-size: 0.8rem; margin-bottom: 5px;">قائمة المفضلات</div>
+        <div id="favItems"></div>
+    </div>
+
+    <div class="footer">إعداد وإشراف أبو نواف © 2026</div>
 </div>
 
-<script>
-    function changeDawoodVideo() {
-        const select = document.getElementById('dawoodSurah');
-        const iframe = document.getElementById('dawoodFrame');
-        const videoId = select.value;
-        
-        // تحديث الرابط ليعمل الفيديو الجديد فوراً داخل الموقع
-        iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-    }
-</script>
+<audio id="audioPlayer"></audio>
 
+<script>
+    const body = document.getElementById('mainBody');
+    const reciterSelect = document.getElementById('reciterSelect');
+    const surahSelect = document.getElementById('surahSelect');
+    const playBtn = document.getElementById('playBtn');
+    const audio = document.getElementById('audioPlayer');
+    const seekSlider = document.getElementById('seekSlider');
+    const favItems = document.getElementById('favItems');
+
+    let allReciters = [];
+    let favorites = JSON.parse(localStorage.getItem('myFavs')) || [];
+    const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
+
+    function changeBg(bg) { body.style.background = bg; body.style.backgroundSize = "cover"; localStorage.setItem('userBg', bg); }
+    if(localStorage.getItem('userBg')) changeBg(localStorage.getItem('userBg'));
+
+    async function init() {
+        try {
+            const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
+            const data = await res.json();
+            allReciters = data.reciters;
+            populateReciters(allReciters);
+            loadSurahs(false);
+            renderFavs();
+        } catch(e) { console.error("Error init"); }
+    }
+
+    function populateReciters(list) {
+        reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
+        list.forEach(r => {
+            if(r.moshaf && r.moshaf.length > 0) {
+                const opt = document.createElement('option');
+                opt.value = r.moshaf[0].server;
+                opt.text = r.name;
+                reciterSelect.appendChild(opt);
+            }
+        });
+    }
+
+    function loadSurahs(isAmma) {
+        surahSelect.innerHTML = '';
+        const start = isAmma ? 77 : 0;
+        surahNames.forEach((n, i) => {
+            if(i >= start || i === 0) {
+                const opt = document.createElement('option');
+                opt.value = (i+1).toString().padStart(3, '0');
+                opt.text = `${i+1}. ${n}`;
+                surahSelect.appendChild(opt);
+            }
+        });
+    }
+
+    audio.ontimeupdate = () => {
+        if(!isNaN(audio.duration)) {
+            seekSlider.value = (audio.currentTime / audio.duration) * 100;
+            document.getElementById('currentTime').innerText = formatTime(audio.currentTime);
+            document.getElementById('duration').innerText = formatTime(audio.duration);
+        }
+    };
+
+    seekSlider.oninput = () => audio.currentTime = audio.duration * (seekSlider.value / 100);
+
+    function formatTime(s) { let m = Math.floor(s/60), sc = Math.floor(s%60); return `${m}:${sc<10?'0'+sc:sc}`; }
+
+    playBtn.onclick = () => {
+        if(!reciterSelect.value || !surahSelect.value) return alert("اختر القارئ والسورة");
+        const url = `${reciterSelect.value}${surahSelect.value}.mp3`;
+        if(audio.src !== url) { audio.src = url; audio.play(); playBtn.innerText = "⏸"; }
+        else { audio.paused ? (audio.play(), playBtn.innerText = "⏸") : (audio.pause(), playBtn.innerText = "▶"); }
+    };
+
+    document.getElementById('addFav').onclick = () => {
+        if(!reciterSelect.value) return;
+        const item = {
+            title: `${reciterSelect.options[reciterSelect.selectedIndex].text} - ${surahSelect.options[surahSelect.selectedIndex].text}`,
+            srv: reciterSelect.value,
+            sur: surahSelect.value
+        };
+        if(!favorites.find(f => f.title === item.title)) {
+            favorites.push(item);
+            localStorage.setItem('myFavs', JSON.stringify(favorites));
+            renderFavs();
+        }
+    };
+
+    function renderFavs() {
+        favItems.innerHTML = favorites.length ? '' : '<div style="text-align:center;font-size:0.7rem;opacity:0.5;">لا توجد مفضلات</div>';
+        favorites.forEach((f, i) => {
+            const d = document.createElement('div');
+            d.className = 'fav-item';
+            d.innerHTML = `<span style="cursor:pointer" onclick="playFav(${i})">${f.title}</span><span class="del-item" onclick="delFav(${i})">×</span>`;
+            favItems.appendChild(d);
+        });
+    }
+
+    window.playFav = (i) => {
+        const f = favorites[i];
+        reciterSelect.value = f.srv;
+        surahSelect.value = f.sur;
+        playBtn.click();
+    };
+
+    window.delFav = (i) => { favorites.splice(i, 1); localStorage.setItem('myFavs', JSON.stringify(favorites)); renderFavs(); };
+
+    document.getElementById('searchReciter').oninput = (e) => populateReciters(allReciters.filter(r => r.name.includes(e.target.value)));
+    document.getElementById('allMode').onclick = function() { loadSurahs(false); this.classList.add('active-mode'); document.getElementById('ammaMode').classList.remove('active-mode'); };
+    document.getElementById('ammaMode').onclick = function() { loadSurahs(true); this.classList.add('active-mode'); document.getElementById('allMode').classList.remove('active-mode'); };
+
+    init();
+</script>
 </body>
 </html>
