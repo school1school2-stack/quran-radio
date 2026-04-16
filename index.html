@@ -21,25 +21,23 @@
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
         }
         .main-title { color: var(--accent); font-weight: bold; margin-bottom: 5px; font-size: 1.4rem; }
-        .sub-title { color: var(--green); font-size: 0.9rem; margin-bottom: 15px; opacity: 0.9; }
+        .sub-title { color: var(--green); font-size: 0.9rem; margin-bottom: 20px; opacity: 0.9; }
         
-        .sections-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .mode-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; background: #333; color: white; font-weight: bold; font-size: 0.8rem; transition: 0.3s; }
-        .active-mode { background: var(--accent); color: black; box-shadow: 0 0 10px var(--accent); }
-        .full-width { grid-column: span 2; }
+        .sections-container { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .mode-btn { padding: 14px; border-radius: 12px; border: none; cursor: pointer; background: #333; color: white; font-weight: bold; font-size: 1rem; transition: 0.3s; width: 100%; }
+        .active-mode { background: var(--accent); color: black; box-shadow: 0 0 15px var(--accent); }
 
         input[type="text"], select {
             width: 100%; padding: 14px; border-radius: 12px; border: none;
-            margin-bottom: 10px; font-weight: bold; outline: none; box-sizing: border-box;
+            margin-bottom: 12px; font-weight: bold; outline: none; box-sizing: border-box;
             background: white; color: #333; font-size: 1rem;
         }
         .progress-box { margin: 15px 0; display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
         input[type="range"] { flex: 1; cursor: pointer; accent-color: var(--green); }
         .controls { display: flex; justify-content: center; align-items: center; gap: 25px; margin-top: 10px; }
         .play-btn { background: var(--green); border: none; width: 65px; height: 65px; border-radius: 50%; font-size: 1.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: black; transition: 0.2s; }
-        .play-btn:active { transform: scale(0.9); }
         
-        .footer { margin-top: 20px; font-size: 0.8rem; line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
+        .footer { margin-top: 25px; font-size: 0.85rem; line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
     </style>
 </head>
 <body>
@@ -49,13 +47,12 @@
     <div class="sub-title">إشراف وتطوير أبو نواف</div>
 
     <div class="sections-container">
-        <button class="mode-btn active-mode" id="allMode">المصحف كامل 📖</button>
-        <button class="mode-btn" id="teacherMode">المصحف المعلم 📖</button>
-        <button class="mode-btn full-width" id="ammaTeacherMode">جزء عم (المعلم للأطفال) 👶</button>
+        <button class="mode-btn active-mode" id="allMode">📖 القرآن الكريم كامل</button>
+        <button class="mode-btn" id="childMode">👶 قسم الأطفال (المصحف المعلم)</button>
     </div>
 
     <input type="text" id="searchReciter" placeholder="🔍 ابحث عن اسم القارئ...">
-    <select id="reciterSelect"><option value="">جاري التحميل...</option></select>
+    <select id="reciterSelect"><option value="">جاري تحميل قائمة القراء...</option></select>
     <select id="surahSelect"></select>
 
     <div class="progress-box">
@@ -65,7 +62,6 @@
     </div>
 
     <div class="controls">
-        <button id="addFav" style="background:none; border:2px solid var(--red); color:var(--red); width:48px; height:48px; border-radius:50%; cursor:pointer; font-size:1.3rem;">❤️</button>
         <button id="playBtn" class="play-btn">▶</button>
     </div>
 
@@ -95,20 +91,20 @@
             allReciters = data.reciters;
             filterReciters(false); 
             loadSurahs(false);
-        } catch(e) { reciterSelect.innerHTML = '<option>فشل في التحميل</option>'; }
+        } catch(e) { reciterSelect.innerHTML = '<option>فشل في تحميل البيانات</option>'; }
     }
 
-    function filterReciters(isTeacher) {
+    function filterReciters(isChildMode) {
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
         allReciters.forEach(r => {
             if(r.moshaf && r.moshaf.length > 0) {
                 const teacherMoshaf = r.moshaf.find(m => m.name.toLowerCase().includes("معلم"));
-                if(isTeacher && teacherMoshaf) {
+                if(isChildMode && teacherMoshaf) {
                     const opt = document.createElement('option');
                     opt.value = teacherMoshaf.server;
                     opt.text = r.name + " (المعلم)";
                     reciterSelect.appendChild(opt);
-                } else if(!isTeacher) {
+                } else if(!isChildMode) {
                     const opt = document.createElement('option');
                     opt.value = r.moshaf[0].server;
                     opt.text = r.name;
@@ -122,4 +118,74 @@
         surahSelect.innerHTML = '';
         const start = isAmma ? 77 : 0;
         surahNames.forEach((n, i) => {
-    
+            if(i >= start || i === 0) {
+                const opt = document.createElement('option');
+                opt.value = (i+1).toString().padStart(3, '0');
+                opt.text = n;
+                surahSelect.appendChild(opt);
+            }
+        });
+    }
+
+    playBtn.onclick = () => {
+        if(!reciterSelect.value || !surahSelect.value) return;
+        const targetUrl = `${reciterSelect.value}${surahSelect.value}.mp3`;
+        
+        if(audio.src !== targetUrl) {
+            audio.src = targetUrl;
+            audio.load();
+            audio.play().catch(e => {});
+            playBtn.innerText = "⏸";
+        } else {
+            if(audio.paused) {
+                audio.play();
+                playBtn.innerText = "⏸";
+            } else {
+                audio.pause();
+                playBtn.innerText = "▶";
+            }
+        }
+    };
+
+    audio.onplay = () => playBtn.innerText = "⏸";
+    audio.onpause = () => playBtn.innerText = "▶";
+    audio.onended = () => { if(surahSelect.selectedIndex < surahSelect.options.length - 1) { surahSelect.selectedIndex++; playBtn.click(); } };
+    audio.ontimeupdate = () => { if(!isNaN(audio.duration)) { seekSlider.value = (audio.currentTime/audio.duration)*100; document.getElementById('currentTime').innerText = formatTime(audio.currentTime); document.getElementById('duration').innerText = formatTime(audio.duration); } };
+    seekSlider.oninput = () => audio.currentTime = audio.duration * (seekSlider.value/100);
+    function formatTime(s) { let m=Math.floor(s/60), sc=Math.floor(s%60); return `${m}:${sc<10?'0'+sc:sc}`; }
+
+    document.getElementById('allMode').onclick = function() {
+        filterReciters(false); loadSurahs(false); updateActiveBtn(this);
+    };
+    document.getElementById('childMode').onclick = function() {
+        filterReciters(true); loadSurahs(true); updateActiveBtn(this);
+    };
+
+    function updateActiveBtn(btn) {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode'));
+        btn.classList.add('active-mode');
+        audio.pause();
+        playBtn.innerText = "▶";
+        document.getElementById('searchReciter').value = '';
+    }
+
+    document.getElementById('searchReciter').oninput = (e) => {
+        const term = e.target.value.toLowerCase();
+        const isChildMode = document.getElementById('childMode').classList.contains('active-mode');
+        reciterSelect.innerHTML = '<option value="">-- نتائج البحث --</option>';
+        
+        allReciters.filter(r => r.name.toLowerCase().includes(term)).forEach(r => {
+            const m = isChildMode ? r.moshaf.find(m => m.name.includes("معلم")) : r.moshaf[0];
+            if(m) {
+                const opt = document.createElement('option');
+                opt.value = m.server;
+                opt.text = r.name + (isChildMode ? " (المعلم)" : "");
+                reciterSelect.appendChild(opt);
+            }
+        });
+    };
+
+    init();
+</script>
+</body>
+</html>
