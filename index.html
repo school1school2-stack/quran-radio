@@ -23,7 +23,6 @@
         .main-title { color: var(--accent); font-weight: bold; margin-bottom: 5px; font-size: 1.4rem; }
         .sub-title { color: var(--green); font-size: 0.9rem; margin-bottom: 15px; opacity: 0.9; }
         
-        /* الأقسام */
         .sections-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
         .mode-btn { padding: 12px; border-radius: 12px; border: none; cursor: pointer; background: #333; color: white; font-weight: bold; font-size: 0.8rem; transition: 0.3s; }
         .active-mode { background: var(--accent); color: black; box-shadow: 0 0 10px var(--accent); }
@@ -37,11 +36,13 @@
         .progress-box { margin: 15px 0; display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
         input[type="range"] { flex: 1; cursor: pointer; accent-color: var(--green); }
         .controls { display: flex; justify-content: center; align-items: center; gap: 25px; margin-top: 10px; }
-        .play-btn { background: var(--green); border: none; width: 65px; height: 65px; border-radius: 50%; font-size: 1.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: black; }
+        .play-btn { background: var(--green); border: none; width: 65px; height: 65px; border-radius: 50%; font-size: 1.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: black; transition: 0.2s; }
+        .play-btn:active { transform: scale(0.9); }
+        
         .footer { margin-top: 20px; font-size: 0.8rem; line-height: 1.6; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
     </style>
 </head>
-<body id="mainBody">
+<body>
 
 <div class="container">
     <div class="main-title">إذاعة القرآن الكريم الجامعة</div>
@@ -49,12 +50,12 @@
 
     <div class="sections-container">
         <button class="mode-btn active-mode" id="allMode">المصحف كامل 📖</button>
-        <button class="mode-btn" id="teacherMode">المصحف المعلم 👶</button>
-        <button class="mode-btn full-width" id="ammaMode">قسم الأشبال (جزء عم) ✨</button>
+        <button class="mode-btn" id="teacherMode">المصحف المعلم 📖</button>
+        <button class="mode-btn full-width" id="ammaTeacherMode">جزء عم (المعلم للأطفال) 👶</button>
     </div>
 
     <input type="text" id="searchReciter" placeholder="🔍 ابحث عن اسم القارئ...">
-    <select id="reciterSelect"><option value="">جاري تحميل القراء...</option></select>
+    <select id="reciterSelect"><option value="">جاري التحميل...</option></select>
     <select id="surahSelect"></select>
 
     <div class="progress-box">
@@ -101,7 +102,7 @@
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
         allReciters.forEach(r => {
             if(r.moshaf && r.moshaf.length > 0) {
-                const teacherMoshaf = r.moshaf.find(m => m.name.includes("معلم"));
+                const teacherMoshaf = r.moshaf.find(m => m.name.toLowerCase().includes("معلم"));
                 if(isTeacher && teacherMoshaf) {
                     const opt = document.createElement('option');
                     opt.value = teacherMoshaf.server;
@@ -121,59 +122,4 @@
         surahSelect.innerHTML = '';
         const start = isAmma ? 77 : 0;
         surahNames.forEach((n, i) => {
-            if(i >= start || i === 0) {
-                const opt = document.createElement('option');
-                opt.value = (i+1).toString().padStart(3, '0');
-                opt.text = n;
-                surahSelect.appendChild(opt);
-            }
-        });
-    }
-
-    playBtn.onclick = () => {
-        if(!reciterSelect.value) return;
-        const url = `${reciterSelect.value}${surahSelect.value}.mp3`;
-        if(audio.src !== url) { audio.src = url; audio.play(); playBtn.innerText = "⏸"; }
-        else { audio.paused ? (audio.play(), playBtn.innerText = "⏸") : (audio.pause(), playBtn.innerText = "▶"); }
-    };
-
-    audio.onended = () => { if(surahSelect.selectedIndex < surahSelect.options.length - 1) { surahSelect.selectedIndex++; playBtn.click(); } };
-    audio.ontimeupdate = () => { if(!isNaN(audio.duration)) { seekSlider.value = (audio.currentTime/audio.duration)*100; document.getElementById('currentTime').innerText = formatTime(audio.currentTime); document.getElementById('duration').innerText = formatTime(audio.duration); } };
-    seekSlider.oninput = () => audio.currentTime = audio.duration * (seekSlider.value/100);
-    function formatTime(s) { let m=Math.floor(s/60), sc=Math.floor(s%60); return `${m}:${sc<10?'0'+sc:sc}`; }
-
-    // التحكم بالأقسام
-    document.getElementById('teacherMode').onclick = function() {
-        filterReciters(true); loadSurahs(false);
-        updateActiveBtn(this);
-    };
-    document.getElementById('allMode').onclick = function() {
-        filterReciters(false); loadSurahs(false);
-        updateActiveBtn(this);
-    };
-    document.getElementById('ammaMode').onclick = function() {
-        filterReciters(false); loadSurahs(true);
-        updateActiveBtn(this);
-    };
-
-    function updateActiveBtn(btn) {
-        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode'));
-        btn.classList.add('active-mode');
-    }
-
-    document.getElementById('searchReciter').oninput = (e) => {
-        const term = e.target.value;
-        const filtered = allReciters.filter(r => r.name.includes(term));
-        reciterSelect.innerHTML = '<option value="">-- نتائج البحث --</option>';
-        filtered.forEach(r => {
-            const opt = document.createElement('option');
-            opt.value = r.moshaf[0].server;
-            opt.text = r.name;
-            reciterSelect.appendChild(opt);
-        });
-    };
-
-    init();
-</script>
-</body>
-</html>
+    
