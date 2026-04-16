@@ -3,33 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إذاعة القرآن الكريم الشاملة</title>
+    <title>إذاعة القرآن الكريم - أبو نواف</title>
     <style>
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             color: white;
-            overflow: hidden;
         }
 
         .radio-card {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(15px);
-            padding: 40px;
-            border-radius: 30px;
+            padding: 30px;
+            border-radius: 25px;
             text-align: center;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            width: 350px;
+            width: 380px;
             border: 1px solid rgba(255,255,255,0.2);
         }
 
-        h2 { color: #42e695; margin-bottom: 10px; font-size: 1.8rem; }
-        p { color: #ccc; font-size: 0.9rem; margin-bottom: 30px; }
+        .header-title { color: #f1c40f; margin-bottom: 5px; font-size: 1.6rem; }
+        .sub-title { color: #42e695; margin-bottom: 25px; font-weight: bold; }
+
+        /* خانة البحث */
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            margin-bottom: 15px;
+            outline: none;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.9);
+        }
 
         select {
             width: 100%;
@@ -42,16 +54,17 @@
             margin-bottom: 25px;
             cursor: pointer;
             outline: none;
+            height: 45px;
         }
 
         .play-btn {
             background: #42e695;
             color: #000;
             border: none;
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
@@ -61,43 +74,39 @@
             box-shadow: 0 0 20px rgba(66, 230, 149, 0.4);
         }
 
-        .play-btn:hover { transform: scale(1.1); background: #34d082; }
+        .play-btn:hover { transform: scale(1.1); }
 
-        /* الأشرطة المتحركة عند التشغيل */
+        .footer-name { margin-top: 25px; font-size: 0.8rem; color: #bdc3c7; }
+
         .waves {
             display: flex;
             justify-content: center;
             align-items: flex-end;
             height: 30px;
             gap: 4px;
-            margin-top: 25px;
+            margin-top: 20px;
             opacity: 0;
         }
-
         .waves.active { opacity: 1; }
-
         .wave-bar {
             width: 4px;
-            height: 10px;
             background: #42e695;
             border-radius: 2px;
             animation: pulse 1s ease-in-out infinite;
         }
-
-        @keyframes pulse {
-            0%, 100% { height: 10px; }
-            50% { height: 30px; }
-        }
+        @keyframes pulse { 0%, 100% { height: 10px; } 50% { height: 30px; } }
     </style>
 </head>
 <body>
 
 <div class="radio-card">
-    <h2>إذاعة القرآن الكريم</h2>
-    <p id="stationName">اختر القارئ واستمع للذكر الحكيم</p>
+    <div class="header-title">إذاعة القرآن الكريم</div>
+    <div class="sub-title">إهداء من أبو نواف</div>
+
+    <input type="text" id="searchInput" class="search-box" placeholder="ابحث عن قارئ أو إذاعة...">
 
     <select id="radioStations">
-        <option value="">-- اختر من القائمة --</option>
+        <option value="">-- جاري تحميل الإذاعات --</option>
     </select>
 
     <button class="play-btn" id="mainBtn">▶</button>
@@ -109,6 +118,8 @@
         <div class="wave-bar" style="animation-delay: 0.2s"></div>
         <div class="wave-bar" style="animation-delay: 0.4s"></div>
     </div>
+
+    <div class="footer-name">بواسطة أبو نواف © 2026</div>
 </div>
 
 <audio id="player"></audio>
@@ -118,48 +129,57 @@
     const select = document.getElementById('radioStations');
     const btn = document.getElementById('mainBtn');
     const waves = document.getElementById('waveContainer');
-    const stationNameText = document.getElementById('stationName');
+    const searchInput = document.getElementById('searchInput');
+    
+    let allStations = []; // لتخزين جميع الإذاعات للبحث فيها
 
-    // هذه البيانات مدمجة وتعمل تلقائياً دون أي تدخل منك
-    const apiURL = "https://mp3quran.net/api/v3/radios?language=ar";
-
+    // جلب البيانات من الـ API
     async function loadRadios() {
         try {
-            const response = await fetch(apiURL);
+            const response = await fetch("https://mp3quran.net/api/v3/radios?language=ar");
             const data = await response.json();
-            
-            data.radios.forEach(radio => {
-                let option = document.createElement('option');
-                option.value = radio.url;
-                option.text = radio.name;
-                select.appendChild(option);
-            });
+            allStations = data.radios;
+            displayStations(allStations);
         } catch (error) {
-            stationNameText.innerText = "تعذر الاتصال، تأكد من الإنترنت";
+            select.innerHTML = '<option>تعذر تحميل البيانات</option>';
         }
     }
 
+    // وظيفة لعرض الإذاعات في القائمة
+    function displayStations(stations) {
+        select.innerHTML = '<option value="">-- اختر الإذاعة --</option>';
+        stations.forEach(radio => {
+            let option = document.createElement('option');
+            option.value = radio.url;
+            option.text = radio.name;
+            select.appendChild(option);
+        });
+    }
+
+    // وظيفة البحث
+    searchInput.oninput = () => {
+        const searchTerm = searchInput.value.toLowerCase();
+        const filtered = allStations.filter(radio => 
+            radio.name.toLowerCase().includes(searchTerm)
+        );
+        displayStations(filtered);
+    };
+
     btn.onclick = () => {
-        if (!select.value) {
-            alert("يرجى اختيار إذاعة أولاً");
-            return;
-        }
+        if (!select.value) return alert("اختر إذاعة أولاً");
 
         if (player.paused) {
             player.src = select.value;
             player.play();
             btn.innerText = "⏸";
             waves.classList.add('active');
-            stationNameText.innerText = "جاري الاستماع لـ: " + select.options[select.selectedIndex].text;
         } else {
             player.pause();
             btn.innerText = "▶";
             waves.classList.remove('active');
-            stationNameText.innerText = "تم الإيقاف";
         }
     };
 
-    // تحميل الإذاعات تلقائياً عند فتح الصفحة
     loadRadios();
 </script>
 
