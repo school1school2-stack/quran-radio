@@ -3,184 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إذاعة القرآن الكريم - أبو نواف</title>
+    <title>مصحف أبو نواف الجامع</title>
     <style>
         body {
             margin: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             color: white;
+            padding: 20px;
         }
 
-        .radio-card {
-            background: rgba(255, 255, 255, 0.1);
+        .container {
+            background: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(15px);
             padding: 30px;
-            border-radius: 25px;
+            border-radius: 20px;
             text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            width: 380px;
-            border: 1px solid rgba(255,255,255,0.2);
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .header-title { color: #f1c40f; margin-bottom: 5px; font-size: 1.6rem; }
-        .sub-title { color: #42e695; margin-bottom: 25px; font-weight: bold; }
+        h2 { color: #f1c40f; margin-bottom: 5px; }
+        .owner { color: #42e695; margin-bottom: 20px; font-weight: bold; }
 
-        /* خانة البحث */
         .search-box {
             width: 100%;
             padding: 12px;
-            border-radius: 12px;
+            border-radius: 10px;
             border: none;
             margin-bottom: 15px;
-            outline: none;
             font-size: 1rem;
-            box-sizing: border-box;
-            background: rgba(255, 255, 255, 0.9);
+            outline: none;
         }
 
         select {
             width: 100%;
             padding: 12px;
-            border-radius: 12px;
-            background: #fff;
-            color: #333;
+            border-radius: 10px;
+            margin-bottom: 15px;
             font-weight: bold;
-            border: none;
-            margin-bottom: 25px;
             cursor: pointer;
             outline: none;
-            height: 45px;
         }
 
+        .controls { margin-top: 20px; }
         .play-btn {
             background: #42e695;
-            color: #000;
             border: none;
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto;
-            box-shadow: 0 0 20px rgba(66, 230, 149, 0.4);
+            box-shadow: 0 0 15px rgba(66, 230, 149, 0.4);
         }
 
-        .play-btn:hover { transform: scale(1.1); }
-
-        .footer-name { margin-top: 25px; font-size: 0.8rem; color: #bdc3c7; }
-
-        .waves {
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            height: 30px;
-            gap: 4px;
-            margin-top: 20px;
-            opacity: 0;
-        }
-        .waves.active { opacity: 1; }
-        .wave-bar {
-            width: 4px;
-            background: #42e695;
-            border-radius: 2px;
-            animation: pulse 1s ease-in-out infinite;
-        }
-        @keyframes pulse { 0%, 100% { height: 10px; } 50% { height: 30px; } }
+        .footer { margin-top: 25px; font-size: 0.8rem; opacity: 0.7; }
     </style>
 </head>
 <body>
 
-<div class="radio-card">
-    <div class="header-title">إذاعة القرآن الكريم</div>
-    <div class="sub-title">إهداء من أبو نواف</div>
+<div class="container">
+    <h2>القرآن الكريم</h2>
+    <div class="owner">بإشراف أبو نواف</div>
 
-    <input type="text" id="searchInput" class="search-box" placeholder="ابحث عن قارئ أو إذاعة...">
-
-    <select id="radioStations">
-        <option value="">-- جاري تحميل الإذاعات --</option>
+    <input type="text" id="searchReciter" class="search-box" placeholder="ابحث عن اسم القارئ...">
+    
+    <select id="reciterSelect">
+        <option value="">-- اختر القارئ --</option>
     </select>
 
-    <button class="play-btn" id="mainBtn">▶</button>
+    <select id="surahSelect">
+        <option value="">-- اختر السورة --</option>
+    </select>
 
-    <div class="waves" id="waveContainer">
-        <div class="wave-bar" style="animation-delay: 0.1s"></div>
-        <div class="wave-bar" style="animation-delay: 0.3s"></div>
-        <div class="wave-bar" style="animation-delay: 0.5s"></div>
-        <div class="wave-bar" style="animation-delay: 0.2s"></div>
-        <div class="wave-bar" style="animation-delay: 0.4s"></div>
+    <div class="controls">
+        <button id="playBtn" class="play-btn">▶</button>
     </div>
 
-    <div class="footer-name">بواسطة أبو نواف © 2026</div>
+    <div class="footer">جميع الحقوق محفوظة - أبو نواف © 2026</div>
 </div>
 
-<audio id="player"></audio>
+<audio id="audioPlayer"></audio>
 
 <script>
-    const player = document.getElementById('player');
-    const select = document.getElementById('radioStations');
-    const btn = document.getElementById('mainBtn');
-    const waves = document.getElementById('waveContainer');
-    const searchInput = document.getElementById('searchInput');
-    
-    let allStations = []; // لتخزين جميع الإذاعات للبحث فيها
+    const reciterSelect = document.getElementById('reciterSelect');
+    const surahSelect = document.getElementById('surahSelect');
+    const searchInput = document.getElementById('searchReciter');
+    const playBtn = document.getElementById('playBtn');
+    const audio = document.getElementById('audioPlayer');
 
-    // جلب البيانات من الـ API
-    async function loadRadios() {
-        try {
-            const response = await fetch("https://mp3quran.net/api/v3/radios?language=ar");
-            const data = await response.json();
-            allStations = data.radios;
-            displayStations(allStations);
-        } catch (error) {
-            select.innerHTML = '<option>تعذر تحميل البيانات</option>';
-        }
+    let allReciters = [];
+
+    // 1. جلب قائمة القراء
+    async function init() {
+        const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
+        const data = await res.json();
+        allReciters = data.reciters;
+        populateReciters(allReciters);
+        loadSurahs();
     }
 
-    // وظيفة لعرض الإذاعات في القائمة
-    function displayStations(stations) {
-        select.innerHTML = '<option value="">-- اختر الإذاعة --</option>';
-        stations.forEach(radio => {
-            let option = document.createElement('option');
-            option.value = radio.url;
-            option.text = radio.name;
-            select.appendChild(option);
+    function populateReciters(list) {
+        reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
+        list.forEach(r => {
+            const option = document.createElement('option');
+            option.value = r.moshaf[0].server; // نأخذ السيرفر الأول للقارئ
+            option.dataset.surahList = r.moshaf[0].surah_list;
+            option.text = r.name;
+            reciterSelect.appendChild(option);
         });
     }
 
-    // وظيفة البحث
+    // 2. قائمة السور (أسماء السور ثابتة)
+    function loadSurahs() {
+        const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
+        
+        surahNames.forEach((name, index) => {
+            const option = document.createElement('option');
+            // السور في السيرفرات تكون بتنسيق 001, 002, 003...
+            option.value = (index + 1).toString().padStart(3, '0');
+            option.text = `${index + 1}. ${name}`;
+            surahSelect.appendChild(option);
+        });
+    }
+
+    // البحث
     searchInput.oninput = () => {
-        const searchTerm = searchInput.value.toLowerCase();
-        const filtered = allStations.filter(radio => 
-            radio.name.toLowerCase().includes(searchTerm)
-        );
-        displayStations(filtered);
+        const filtered = allReciters.filter(r => r.name.includes(searchInput.value));
+        populateReciters(filtered);
     };
 
-    btn.onclick = () => {
-        if (!select.value) return alert("اختر إذاعة أولاً");
+    // التشغيل
+    playBtn.onclick = () => {
+        const server = reciterSelect.value;
+        const surah = surahSelect.value;
 
-        if (player.paused) {
-            player.src = select.value;
-            player.play();
-            btn.innerText = "⏸";
-            waves.classList.add('active');
+        if (!server || !surah) return alert("اختر القارئ والسورة أولاً");
+
+        const finalUrl = `${server}${surah}.mp3`;
+        
+        if (audio.src !== finalUrl) {
+            audio.src = finalUrl;
+            audio.play();
+            playBtn.innerText = "⏸";
         } else {
-            player.pause();
-            btn.innerText = "▶";
-            waves.classList.remove('active');
+            if (audio.paused) {
+                audio.play();
+                playBtn.innerText = "⏸";
+            } else {
+                audio.pause();
+                playBtn.innerText = "▶";
+            }
         }
     };
 
-    loadRadios();
+    init();
 </script>
 
 </body>
