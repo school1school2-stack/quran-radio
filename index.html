@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>إذاعة القرآن الكريم الجامعة</title>
+    <title>إذاعة القرآن الكريم الجامعة - النسخة المقاومة للانقطاع</title>
     <style>
         :root { --accent: #f1c40f; --green: #42e695; --red: #ff4757; }
         body {
@@ -68,10 +68,10 @@
     </div>
 
     <div class="controls">
-        <button id="prevBtn" class="nav-btn" title="السورة السابقة">⏭</button>
-        <button id="addFav" class="fav-btn" title="إضافة للمفضلة">❤</button>
+        <button id="prevBtn" class="nav-btn">⏭</button>
+        <button id="addFav" class="fav-btn">❤</button>
         <button id="playBtn" class="play-btn">▶</button>
-        <button id="nextBtn" class="nav-btn" title="السورة التالية">⏮</button>
+        <button id="nextBtn" class="nav-btn">⏮</button>
     </div>
 
     <div class="footer">
@@ -95,6 +95,7 @@
     let currentRepeat = 1;
     let favorites = JSON.parse(localStorage.getItem('quranFavs')) || [];
     let currentMode = 'مرتل';
+    let isWaitingForNet = false;
 
     const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
@@ -112,22 +113,27 @@
             allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
             filterReciters(); 
             loadSurahs(false);
-        } catch(e) { reciterSelect.innerHTML = '<option>فشل التحميل</option>'; }
+        } catch(e) { repeatStatus.innerText = "فشل تحميل البيانات، تأكد من الإنترنت"; }
     }
 
     function playAudioSafe() {
         const playPromise = audio.play();
         if (playPromise !== undefined) {
             playPromise.then(_ => {
-                if ('mediaSession' in navigator) {
-                    navigator.mediaSession.metadata = new MediaMetadata({
-                        title: surahSelect.options[surahSelect.selectedIndex].text,
-                        artist: reciterSelect.options[reciterSelect.selectedIndex].text,
-                        album: 'إذاعة القرآن الكريم'
-                    });
-                }
+                isWaitingForNet = false;
+                updateMediaSession();
             }).catch(e => {
-                repeatStatus.innerText = "اضغط على زر التشغيل للبدء";
+                console.log("التشغيل بانتظار تفاعل أو إنترنت");
+            });
+        }
+    }
+
+    function updateMediaSession() {
+        if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: surahSelect.options[surahSelect.selectedIndex].text,
+                artist: reciterSelect.options[reciterSelect.selectedIndex].text,
+                album: 'إذاعة القرآن الكريم'
             });
         }
     }
@@ -141,6 +147,34 @@
         audio.load();
         playAudioSafe();
     }
+
+    // --- ميزة الحماية من انقطاع الإنترنت ---
+    audio.addEventListener('waiting', () => {
+        if (navigator.onLine === false) {
+            isWaitingForNet = true;
+            repeatStatus.innerText = "⏳ انقطع الاتصال.. بانتظار عودة الإنترنت";
+            repeatStatus.style.color = "var(--accent)";
+        }
+    });
+
+    window.addEventListener('online', () => {
+        if (isWaitingForNet) {
+            repeatStatus.innerText = "✅ عاد الإنترنت.. جاري الاستكمال";
+            audio.load(); 
+            playAudioSafe();
+        }
+    });
+
+    audio.onerror = () => {
+        if (!navigator.onLine) {
+            isWaitingForNet = true;
+            repeatStatus.innerText = "⚠️ فشل التشغيل.. سأحاول مجدداً عند توفر الشبكة";
+        } else {
+            repeatStatus.innerText = "⚠️ الملف غير متوفر، ننتقل للتالي...";
+            setTimeout(() => document.getElementById('nextBtn').click(), 2000);
+        }
+    };
+    // ---------------------------------------
 
     function filterReciters(term = "") {
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
@@ -192,12 +226,10 @@
     };
 
     document.getElementById('nextBtn').onclick = () => {
-        // إذا كنا في السورة الأخيرة (الناس)
         if(surahSelect.selectedIndex === surahSelect.options.length - 1) {
-            // ننتقل للقارئ التالي في القائمة
             if(reciterSelect.selectedIndex < reciterSelect.options.length - 1) {
                 reciterSelect.selectedIndex++;
-                surahSelect.selectedIndex = 0; // العودة للفاتحة
+                surahSelect.selectedIndex = 0;
                 autoPlayTrack();
             }
         } else {
@@ -222,11 +254,6 @@
 
     audio.onplay = () => playBtn.innerText = "⏸";
     audio.onpause = () => playBtn.innerText = "▶";
-    audio.onerror = () => {
-        repeatStatus.innerText = "⚠️ الملف غير متوفر، ننتقل للتالي...";
-        repeatStatus.style.color = "var(--red)";
-        setTimeout(() => document.getElementById('nextBtn').click(), 2000);
-    };
 
     audio.onended = () => {
         let max = parseInt(repeatSelect.value);
@@ -236,7 +263,7 @@
             audio.currentTime = 0;
             playAudioSafe();
         } else {
-            document.getElementById('nextBtn').click(); // الضغط التلقائي على التالي
+            document.getElementById('nextBtn').click();
         }
     };
 
