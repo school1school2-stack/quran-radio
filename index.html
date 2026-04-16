@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>إذاعة القرآن الكريم الجامعة</title>
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2663/2663339.png" type="image/png">
     <style>
         :root { --accent: #f1c40f; --green: #42e695; --red: #ff4757; }
         body {
@@ -43,7 +42,7 @@
         .controls { display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 10px; }
         .play-btn { background: var(--green); border: none; width: 70px; height: 70px; border-radius: 50%; font-size: 1.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: black; transition: 0.2s; box-shadow: 0 5px 15px rgba(66, 230, 149, 0.3); }
         .fav-btn { background: none; border: 2px solid var(--red); color: var(--red); width: 50px; height: 50px; border-radius: 50%; cursor: pointer; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
-        .fav-btn.active { background: var(--red); color: white; }
+        .fav-btn.active { background: var(--red); color: white; box-shadow: 0 0 15px var(--red); }
         
         .footer { margin-top: 30px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
         .footer-text { color: var(--accent); font-size: 0.75rem; text-decoration: underline; letter-spacing: 0.5px; }
@@ -61,8 +60,8 @@
         <button class="mode-btn full-width" id="childMode">👶 قسم الأطفال (المصحف المعلم)</button>
     </div>
 
-    <input type="text" id="searchReciter" placeholder="🔍 ابحث عن قارئ أو المفضلين...">
-    <select id="reciterSelect"><option value="">جاري تحميل القراء...</option></select>
+    <input type="text" id="searchReciter" placeholder="🔍 ابحث عن قارئ...">
+    <select id="reciterSelect"></select>
     <select id="surahSelect"></select>
 
     <div class="repeat-box">
@@ -102,6 +101,7 @@
     let allReciters = [];
     let currentRepeat = 1;
     let favorites = JSON.parse(localStorage.getItem('quranFavs')) || [];
+    let currentMode = 'مرتل';
 
     const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
@@ -117,7 +117,7 @@
             const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
             const data = await res.json();
             allReciters = data.reciters;
-            filterReciters('مرتل'); 
+            filterReciters(); 
             loadSurahs(false);
         } catch(e) { reciterSelect.innerHTML = '<option>فشل التحميل</option>'; }
     }
@@ -136,57 +136,65 @@
     reciterSelect.onchange = autoPlayTrack;
     surahSelect.onchange = autoPlayTrack;
 
-    function filterReciters(mode) {
+    function filterReciters() {
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
         
-        // عرض المفضلين أولاً
-        if(favorites.length > 0) {
-            let group = document.createElement('optgroup');
-            group.label = "❤️ القراء المفضلون";
-            favorites.forEach(f => {
-                if(f.mode === mode) {
-                    let opt = document.createElement('option');
-                    opt.value = f.server;
-                    opt.text = f.name;
-                    group.appendChild(opt);
-                }
-            });
-            if(group.children.length > 0) reciterSelect.appendChild(group);
-        }
+        // 1. إضافة المفضلين لهذا القسم (تظهر دائماً في الأعلى)
+        let favGroup = document.createElement('optgroup');
+        favGroup.label = "⭐ القراء المفضلون (محلياً)";
+        let hasFavs = false;
+        
+        favorites.forEach(f => {
+            if(f.mode === currentMode) {
+                let opt = document.createElement('option');
+                opt.value = f.server;
+                opt.text = "❤️ " + f.name;
+                favGroup.appendChild(opt);
+                hasFavs = true;
+            }
+        });
+        if(hasFavs) reciterSelect.appendChild(favGroup);
 
+        // 2. إضافة باقي القراء
+        let allGroup = document.createElement('optgroup');
+        allGroup.label = "📋 كل القراء";
         allReciters.forEach(r => {
             if(r.moshaf && r.moshaf.length > 0) {
-                let foundMoshaf;
-                if(mode === 'معلم') foundMoshaf = r.moshaf.find(m => m.name.includes("معلم"));
-                else if(mode === 'مجود') foundMoshaf = r.moshaf.find(m => m.name.includes("مجود"));
-                else foundMoshaf = r.moshaf.find(m => m.name.includes("مرتل") || m.name === "حفص عن عاصم");
+                let found;
+                if(currentMode === 'معلم') found = r.moshaf.find(m => m.name.includes("معلم"));
+                else if(currentMode === 'مجود') found = r.moshaf.find(m => m.name.includes("مجود"));
+                else found = r.moshaf.find(m => m.name.includes("مرتل") || m.name === "حفص عن عاصم");
 
-                if(foundMoshaf) {
+                if(found) {
                     const opt = document.createElement('option');
-                    opt.value = foundMoshaf.server;
-                    opt.text = r.name + ` (${mode})`;
-                    reciterSelect.appendChild(opt);
+                    opt.value = found.server;
+                    opt.text = r.name;
+                    allGroup.appendChild(opt);
                 }
             }
         });
+        reciterSelect.appendChild(allGroup);
     }
 
-    // نظام المفضلة
     favBtn.onclick = () => {
         const server = reciterSelect.value;
         if(!server) return;
-        const name = reciterSelect.options[reciterSelect.selectedIndex].text;
-        const mode = document.querySelector('.active-mode').innerText.includes('مجود') ? 'مجود' : (document.querySelector('.active-mode').innerText.includes('معلم') ? 'معلم' : 'مرتل');
-
+        
+        // الحصول على الاسم بدون إيموجي القلب إذا كان مختاراً من المفضلة أصلاً
+        let name = reciterSelect.options[reciterSelect.selectedIndex].text.replace("❤️ ", "");
         const index = favorites.findIndex(f => f.server === server);
+
         if(index === -1) {
-            favorites.push({server, name, mode});
+            favorites.push({server, name, mode: currentMode});
             favBtn.classList.add('active');
         } else {
             favorites.splice(index, 1);
             favBtn.classList.remove('active');
         }
+        
         localStorage.setItem('quranFavs', JSON.stringify(favorites));
+        filterReciters(); // تحديث القائمة فوراً
+        reciterSelect.value = server; // الحفاظ على الاختيار الحالي
     };
 
     function checkFavStatus() {
@@ -250,9 +258,9 @@
     seekSlider.oninput = () => audio.currentTime = audio.duration * (seekSlider.value/100);
     function formatTime(s) { let m=Math.floor(s/60), sc=Math.floor(s%60); return `${m}:${sc<10?'0'+sc:sc}`; }
 
-    document.getElementById('allMode').onclick = function() { filterReciters('مرتل'); loadSurahs(false); updateActiveBtn(this); };
-    document.getElementById('mojawadMode').onclick = function() { filterReciters('مجود'); loadSurahs(false); updateActiveBtn(this); };
-    document.getElementById('childMode').onclick = function() { filterReciters('معلم'); loadSurahs(true); updateActiveBtn(this); };
+    document.getElementById('allMode').onclick = function() { currentMode = 'مرتل'; filterReciters(); loadSurahs(false); updateActiveBtn(this); };
+    document.getElementById('mojawadMode').onclick = function() { currentMode = 'مجود'; filterReciters(); loadSurahs(false); updateActiveBtn(this); };
+    document.getElementById('childMode').onclick = function() { currentMode = 'معلم'; filterReciters(); loadSurahs(true); updateActiveBtn(this); };
 
     function updateActiveBtn(btn) {
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode'));
@@ -261,18 +269,18 @@
         currentRepeat = 1;
         updateStatus();
         playBtn.innerText = "▶";
+        document.getElementById('searchReciter').value = '';
     }
 
     document.getElementById('searchReciter').oninput = (e) => {
         const term = e.target.value.toLowerCase();
-        let mode = document.querySelector('.active-mode').id === 'mojawadMode' ? 'مجود' : (document.querySelector('.active-mode').id === 'childMode' ? 'معلم' : 'مرتل');
         reciterSelect.innerHTML = '<option value="">-- نتائج البحث --</option>';
         allReciters.filter(r => r.name.toLowerCase().includes(term)).forEach(r => {
-            let found = r.moshaf.find(m => mode === 'معلم' ? m.name.includes("معلم") : (mode === 'مجود' ? m.name.includes("مجود") : (m.name.includes("مرتل") || m.name === "حفص عن عاصم")));
+            let found = r.moshaf.find(m => currentMode === 'معلم' ? m.name.includes("معلم") : (currentMode === 'مجود' ? m.name.includes("مجود") : (m.name.includes("مرتل") || m.name === "حفص عن عاصم")));
             if(found) {
                 const opt = document.createElement('option');
                 opt.value = found.server;
-                opt.text = r.name + ` (${mode})`;
+                opt.text = r.name;
                 reciterSelect.appendChild(opt);
             }
         });
