@@ -116,7 +116,8 @@
         try {
             const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
             const data = await res.json();
-            allReciters = data.reciters;
+            // ترتيب القراء أبجدياً فور جلبهم من الـ API
+            allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
             filterReciters(); 
             loadSurahs(false);
         } catch(e) { reciterSelect.innerHTML = '<option>فشل التحميل</option>'; }
@@ -139,25 +140,25 @@
     function filterReciters() {
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
         
-        // 1. إضافة المفضلين لهذا القسم (تظهر دائماً في الأعلى)
+        // 1. المفضلة (مرتبة أبجدياً أيضاً)
         let favGroup = document.createElement('optgroup');
-        favGroup.label = "⭐ القراء المفضلون (محلياً)";
+        favGroup.label = "⭐ القراء المفضلون";
         let hasFavs = false;
         
-        favorites.forEach(f => {
-            if(f.mode === currentMode) {
-                let opt = document.createElement('option');
-                opt.value = f.server;
-                opt.text = "❤️ " + f.name;
-                favGroup.appendChild(opt);
-                hasFavs = true;
-            }
-        });
+        favorites.filter(f => f.mode === currentMode)
+                 .sort((a, b) => a.name.localeCompare(b.name, 'ar'))
+                 .forEach(f => {
+                    let opt = document.createElement('option');
+                    opt.value = f.server;
+                    opt.text = "❤️ " + f.name;
+                    favGroup.appendChild(opt);
+                    hasFavs = true;
+                 });
         if(hasFavs) reciterSelect.appendChild(favGroup);
 
-        // 2. إضافة باقي القراء
+        // 2. باقي القراء (مرتبين أبجدياً)
         let allGroup = document.createElement('optgroup');
-        allGroup.label = "📋 كل القراء";
+        allGroup.label = "📋 القائمة الأبجدية الكاملة";
         allReciters.forEach(r => {
             if(r.moshaf && r.moshaf.length > 0) {
                 let found;
@@ -179,11 +180,8 @@
     favBtn.onclick = () => {
         const server = reciterSelect.value;
         if(!server) return;
-        
-        // الحصول على الاسم بدون إيموجي القلب إذا كان مختاراً من المفضلة أصلاً
         let name = reciterSelect.options[reciterSelect.selectedIndex].text.replace("❤️ ", "");
         const index = favorites.findIndex(f => f.server === server);
-
         if(index === -1) {
             favorites.push({server, name, mode: currentMode});
             favBtn.classList.add('active');
@@ -191,10 +189,9 @@
             favorites.splice(index, 1);
             favBtn.classList.remove('active');
         }
-        
         localStorage.setItem('quranFavs', JSON.stringify(favorites));
-        filterReciters(); // تحديث القائمة فوراً
-        reciterSelect.value = server; // الحفاظ على الاختيار الحالي
+        filterReciters();
+        reciterSelect.value = server;
     };
 
     function checkFavStatus() {
