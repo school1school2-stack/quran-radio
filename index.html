@@ -45,6 +45,7 @@
         .fav-btn.active { background: var(--red); color: white; box-shadow: 0 0 15px var(--red); }
         
         .footer { margin-top: 30px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
+        /* سطر كامل، لون ذهبي، خط صغير، تحته خط */
         .footer-text { color: var(--accent); font-size: 0.75rem; text-decoration: underline; letter-spacing: 0.5px; }
         .repeat-status { font-size: 0.8rem; color: var(--accent); margin-top: 5px; font-weight: bold; }
     </style>
@@ -82,7 +83,7 @@
     </div>
 
     <div class="footer">
-        <div class="footer-text">الحقوق محفوظة - صدقة جارية لوجه الله تعالى - أبو نواف</div>
+        <div class="footer-text">صدقة جارية لجميع موتى المسلمين - أبو نواف</div>
     </div>
 </div>
 
@@ -116,7 +117,6 @@
         try {
             const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
             const data = await res.json();
-            // ترتيب القراء أبجدياً فور جلبهم من الـ API
             allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
             filterReciters(); 
             loadSurahs(false);
@@ -139,8 +139,6 @@
 
     function filterReciters() {
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
-        
-        // 1. المفضلة (مرتبة أبجدياً أيضاً)
         let favGroup = document.createElement('optgroup');
         favGroup.label = "⭐ القراء المفضلون";
         let hasFavs = false;
@@ -156,7 +154,6 @@
                  });
         if(hasFavs) reciterSelect.appendChild(favGroup);
 
-        // 2. باقي القراء (مرتبين أبجدياً)
         let allGroup = document.createElement('optgroup');
         allGroup.label = "📋 القائمة الأبجدية الكاملة";
         allReciters.forEach(r => {
