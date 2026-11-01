@@ -32,12 +32,12 @@
         }
         .feat-link:hover { background: var(--accent); color: black; }
 
-        /* الأقسام الأربعة (شبكة 2x2) */
+        /* الأقسام الأربعة المستقلة (شبكة 2x2) */
         .sections-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
         
         .mode-btn { 
             padding: 12px 8px; border-radius: 12px; border: none; cursor: pointer; 
-            background: #333; color: white; font-weight: bold; font-size: 0.8rem; 
+            background: #333; color: white; font-weight: bold; font-size: 0.85rem; 
             transition: 0.3s; text-align: center;
         }
         .active-mode { background: var(--accent); color: black; box-shadow: 0 0 15px var(--accent); }
@@ -90,7 +90,7 @@
     
     <button class="feat-link" onclick="toggleModal(true)">📋 أهم المميزات</button>
 
-    <!-- الأقسام الأربعة المستقلة -->
+    <!-- الأقسام الأربعة مثل تطبيق وحي -->
     <div class="sections-container">
         <button class="mode-btn active-mode" id="allMode">📖 المصحف المرتل</button>
         <button class="mode-btn" id="mojawadMode">🎤 المصحف المجود</button>
@@ -98,7 +98,7 @@
         <button class="mode-btn" id="asmariMode">🎧 المختصر الصوتي</button>
     </div>
 
-    <input type="text" id="searchReciter" placeholder="🔍 ابحث بأي جزء من اسم القارئ...">
+    <input type="text" id="searchReciter" placeholder="🔍 ابحث بأي جزء من الاسم...">
     <select id="reciterSelect"></select>
     <select id="surahSelect"></select>
 
@@ -130,11 +130,11 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
-            <li>⭐ أيقونة مستقلة للمختصر الصوتي (عبدالله الأسمري).</li>
-            <li>⭐ بحث ذكي وشامل بأي جزء من اسم القارئ.</li>
+            <li>⭐ قسم مستقل ومخصص للمختصر الصوتي (عبدالله الأسمري).</li>
+            <li>⭐ بحث ذكي وسريع بأي جزء من اسم القارئ.</li>
             <li>⭐ تكرار السورة (حتى 20 مرة) للحفظ والاستذكار.</li>
             <li>⭐ استكمال التلاوة تلقائياً من حيث توقفت.</li>
-            <li>⭐ قائمة المفضلة السريعة للقراء.</li>
+            <li>⭐ قائمة مفضلة سريعة للقراء.</li>
         </ul>
     </div>
 </div>
@@ -166,6 +166,7 @@
         repeatSelect.appendChild(opt);
     }
 
+    // تنظيف وحذف الهمزات والتشكيل لضمان نجاح البحث بأي جزء من الاسم
     function normalizeArabic(text) {
         if (!text) return "";
         return text
@@ -198,7 +199,7 @@
                 filterReciters(); loadSurahs(false);
             }
         } catch(e) { 
-            repeatStatus.innerText = "خطأ في جلب البيانات، تأكد من الاتصال بالإنترنت"; 
+            repeatStatus.innerText = "خطأ في الاتصال بالسيرفر، تأكد من وجود إنترنت"; 
         }
     }
 
@@ -222,17 +223,17 @@
     
     function playAudioSafe() { 
         audio.play().catch(e => { 
-            repeatStatus.innerText = "تم التجهيز.. اضغط (▶) للمواصلة"; 
+            repeatStatus.innerText = "جاهز للبدء.. اضغط (▶) للتداول"; 
         }); 
     }
 
-    // دالة بناء الرابط الصوتي المباشر بدقة
+    // تكوين روابط البث الصوتية المباشرة والموثوقة
     function getAudioUrl(server, surahNum) {
         if (currentMode === 'المختصر') {
             let sNum = parseInt(surahNum, 10);
             let formattedSurah = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
-            // الرابط المباشر الصحيح للمختصر الصوتي للأسمري على سيرفر الأرشيف
-            return `https://archive.org/download/002_2x0210503cccccccccc/${formattedSurah}_2x0210503cccccccccc.mp3`;
+            // سيرفر تدفق مباشر وسريع لسور المختصر الصوتي
+            return `https://ia800204.us.archive.org/28/items/002_2x0210503cccccccccc/${formattedSurah}_2x0210503cccccccccc.mp3`;
         }
         return `${server}${surahNum}.mp3`;
     }
@@ -253,7 +254,7 @@
 
         if (currentMode === 'المختصر') {
             const opt = document.createElement('option');
-            opt.value = "asmari_special";
+            opt.value = "asmari_mode";
             opt.text = "عبدالله الأسمري (المختصر الصوتي)";
             if (cleanTerm === "" || normalizeArabic(opt.text).includes(cleanTerm)) {
                 reciterSelect.appendChild(opt);
@@ -323,12 +324,12 @@
 
     function updateStatus() {
         let max = parseInt(repeatSelect.value);
-        repeatStatus.innerText = max > 1 ? `تكرار: ${currentRepeat} من ${max}` : "جاري الاستماع الآن...";
+        repeatStatus.innerText = max > 1 ? `تكرار: ${currentRepeat} من ${max}` : "جاري التشغيل الآن...";
     }
 
     audio.onplay = () => playBtn.innerText = "⏸";
     audio.onpause = () => playBtn.innerText = "▶";
-    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر تشغيل الملف الصوتي، تأكد من الاتصال بالإنترنت"; };
+    audio.onerror = () => { repeatStatus.innerText = "⚠️ جاري الاتصال بالسيرفر.. اضغط (▶)"; };
     
     audio.onended = () => {
         let max = parseInt(repeatSelect.value);
