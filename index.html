@@ -32,15 +32,15 @@
         }
         .feat-link:hover { background: var(--accent); color: black; }
 
+        /* شبكة الأيقونات الأربع (2x2) */
         .sections-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
         
         .mode-btn { 
-            padding: 12px; border-radius: 12px; border: none; cursor: pointer; 
-            background: #333; color: white; font-weight: bold; font-size: 0.85rem; 
-            transition: 0.3s; 
+            padding: 12px 8px; border-radius: 12px; border: none; cursor: pointer; 
+            background: #333; color: white; font-weight: bold; font-size: 0.8rem; 
+            transition: 0.3s; text-align: center;
         }
         .active-mode { background: var(--accent); color: black; box-shadow: 0 0 15px var(--accent); }
-        .full-width { grid-column: span 2; }
 
         input[type="text"], select { 
             width: 100%; padding: 14px; border-radius: 12px; border: none; 
@@ -90,10 +90,12 @@
     
     <button class="feat-link" onclick="toggleModal(true)">📋 أهم المميزات</button>
 
+    <!-- الأقسام الأربعة الجديدة -->
     <div class="sections-container">
         <button class="mode-btn active-mode" id="allMode">📖 المصحف المرتل</button>
         <button class="mode-btn" id="mojawadMode">🎤 المصحف المجود</button>
-        <button class="mode-btn full-width" id="childMode">👶 قسم الأطفال (المعلم)</button>
+        <button class="mode-btn" id="childMode">👶 قسم الأطفال</button>
+        <button class="mode-btn" id="asmariMode">🎧 المختصر الصوتي</button>
     </div>
 
     <input type="text" id="searchReciter" placeholder="🔍 ابحث بأي جزء من اسم القارئ...">
@@ -128,7 +130,7 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
-            <li>⭐ دعم عبدالله الأسمري (المختصر الصوتي).</li>
+            <li>⭐ قسم خاص مستقل للمختصر الصوتي (عبدالله الأسمري).</li>
             <li>⭐ بحث متطور وشامل بأي جزء من الاسم.</li>
             <li>⭐ تكرار السورة (حتى 20 مرة) للحفظ.</li>
             <li>⭐ استكمال تلقائي ذكي من حيث توقفت.</li>
@@ -164,7 +166,6 @@
         repeatSelect.appendChild(opt);
     }
 
-    // دالة لتنحيف النص العربي وتوحيده للبحث الفعال (بدون حساسيات للهمزات)
     function normalizeArabic(text) {
         if (!text) return "";
         return text
@@ -176,28 +177,9 @@
 
     async function init() {
         try {
-            const res = "https://mp3quran.net/api/v3/reciters?language=ar";
-            const response = await fetch(res);
-            const data = await response.json();
+            const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
+            const data = await res.json();
             allReciters = data.reciters;
-
-            // إضافة الشيخ عبدالله الأسمري (المختصر الصوتي) مع رابط السيرفر المباشر الموثوق
-            const asmariReciter = {
-                id: 9999,
-                name: "عبدالله الأسمري (المختصر الصوتي)",
-                moshaf: [
-                    {
-                        name: "المختصر الصوتي",
-                        server: "https://server11.mp3quran.net/asmri/",
-                        surah_total: 114
-                    }
-                ]
-            };
-            
-            if (!allReciters.some(r => r.name.includes("عبدالله الأسمري"))) {
-                allReciters.unshift(asmariReciter);
-            }
-
             allReciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
             
             const lastSave = JSON.parse(localStorage.getItem('lastQuranSession'));
@@ -208,7 +190,7 @@
                 loadSurahs(currentMode === 'معلم');
                 reciterSelect.value = lastSave.server;
                 surahSelect.value = lastSave.surahNum;
-                audio.src = `${lastSave.server}${lastSave.surahNum}.mp3`;
+                audio.src = getAudioUrl(lastSave.server, lastSave.surahNum);
                 audio.load();
                 audio.currentTime = lastSave.time;
                 repeatStatus.innerText = "🔄 تم استعادة آخر موقع تلقائياً";
@@ -231,7 +213,12 @@
     }
     setInterval(saveCurrentProgress, 2000);
 
-    function getModeBtnId(m) { return m === 'مجود' ? 'mojawadMode' : (m === 'معلم' ? 'childMode' : 'allMode'); }
+    function getModeBtnId(m) { 
+        if (m === 'مجود') return 'mojawadMode';
+        if (m === 'معلم') return 'childMode';
+        if (m === 'المختصر') return 'asmariMode';
+        return 'allMode'; 
+    }
     
     function playAudioSafe() { 
         audio.play().catch(e => { 
@@ -239,9 +226,18 @@
         }); 
     }
 
+    // دالة لتوليد رابط السورة (مع دعم رابط الأرشيف الخاص بالمختصر الصوتي)
+    function getAudioUrl(server, surahNum) {
+        if (currentMode === 'المختصر') {
+            let sNum = parseInt(surahNum, 10);
+            return `${server}${sNum}.mp3`;
+        }
+        return `${server}${surahNum}.mp3`;
+    }
+
     function autoPlayTrack() {
         if(!reciterSelect.value || !surahSelect.value) return;
-        audio.src = `${reciterSelect.value}${surahSelect.value}.mp3`;
+        audio.src = getAudioUrl(reciterSelect.value, surahSelect.value);
         currentRepeat = 1;
         updateStatus();
         checkFavStatus();
@@ -249,10 +245,21 @@
         playAudioSafe();
     }
 
-    // تفعيل البحث الشامل بأي جزء من الاسم
     function filterReciters(term = "") {
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
         const cleanTerm = normalizeArabic(term.trim());
+
+        // إذا كنا في قسم المختصر الصوتي، نخصص الخيار للشيخ عبدالله الأسمري فقط
+        if (currentMode === 'المختصر') {
+            const asmariServer = "https://archive.org/download/002_2x0210503cccccccccc/";
+            const opt = document.createElement('option');
+            opt.value = asmariServer;
+            opt.text = "عبدالله الأسمري (المختصر الصوتي)";
+            if (cleanTerm === "" || normalizeArabic(opt.text).includes(cleanTerm)) {
+                reciterSelect.appendChild(opt);
+            }
+            return;
+        }
 
         if (term === "") {
             let favGroup = document.createElement('optgroup'); 
@@ -275,8 +282,7 @@
                 let found = r.moshaf.find(m => {
                     if (currentMode === 'معلم') return m.name.includes("معلم");
                     if (currentMode === 'مجود') return m.name.includes("مجود");
-                    if (r.name.includes("عبدالله الأسمري")) return true;
-                    return m.name.includes("مرتل") || m.name.includes("حفص") || m.name.includes("المختصر");
+                    return m.name.includes("مرتل") || m.name.includes("حفص");
                 });
                 if(found) { 
                     const opt = document.createElement('option'); 
@@ -359,11 +365,22 @@
 
     function updateActiveBtn(btn) { document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode')); btn.classList.add('active-mode'); }
     
-    const modes = { 'allMode': 'مرتل', 'mojawadMode': 'مجود', 'childMode': 'معلم' };
+    const modes = { 'allMode': 'مرتل', 'mojawadMode': 'مجود', 'childMode': 'معلم', 'asmariMode': 'المختصر' };
     Object.keys(modes).forEach(id => {
         document.getElementById(id).onclick = function() {
-            currentMode = modes[id]; updateActiveBtn(this); loadSurahs(currentMode === 'معلم'); filterReciters();
-            audio.pause(); playBtn.innerText = "▶";
+            currentMode = modes[id]; 
+            updateActiveBtn(this); 
+            loadSurahs(currentMode === 'معلم'); 
+            filterReciters();
+            
+            // إذا تم اختيار المختصر الصوتي، اختر الشيخ عبدالله الأسمري تلقائياً وبدء تشغيله
+            if (currentMode === 'المختصر' && reciterSelect.options.length > 1) {
+                reciterSelect.selectedIndex = 1;
+                autoPlayTrack();
+            } else {
+                audio.pause(); 
+                playBtn.innerText = "▶";
+            }
         };
     });
 
