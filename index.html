@@ -48,7 +48,7 @@
             width: 100%; padding: 14px; border-radius: 12px; border: none; 
             margin-bottom: 12px; background: white; color: #333; 
             font-size: 1rem; font-weight: bold; outline: none;
-            box-sizing: border-box; /* لضمان عدم الخروج عن الإطار */
+            box-sizing: border-box; 
             text-align: right;
         }
 
@@ -99,7 +99,7 @@
         <button class="mode-btn full-width" id="childMode">👶 قسم الأطفال (المعلم)</button>
     </div>
 
-    <input type="text" id="searchReciter" placeholder="🔍  ابحث عن قارئ...">
+    <input type="text" id="searchReciter" placeholder="🔍 ابحث عن أي قارئ (مثل: الأسمري)...">
     <select id="reciterSelect"></select>
     <select id="surahSelect"></select>
 
@@ -131,14 +131,12 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
-            <li>⭐ استكمال تلقائي ذكي من حيث توقفت.</li>
+            <li>⭐ دعم عبدالله الأسمري (المختصر الصوتي).</li>
             <li>⭐ تكرار السورة (حتى 20 مرة) للحفظ.</li>
-            <li>⭐ بث متواصل (ينتقل للقارئ التالي تلقائياً).</li>
+            <li>⭐ بحث متطور وشامل بأي جزء من الاسم.</li>
             <li>⭐ قائمة مفضلة لحفظ قراءك المختارين.</li>
             <li>⭐ أنماط متعددة (مرتل، مجود، معلم).</li>
-            <li>⭐ نظام إعادة تشغيل عند عودة الإنترنت.</li>
-            <li>⭐ بحث سريع وفوري بمجرد كتابة الاسم.</li>
-            <li>⭐ التحكم في الصوت من شاشة القفل.</li>
+            <li>⭐ استكمال تلقائي ذكي من حيث توقفت.</li>
         </ul>
     </div>
 </div>
@@ -170,11 +168,40 @@
         repeatSelect.appendChild(opt);
     }
 
+    // دالة لتنحيف النص العربي وتوحيده للبحث الفعال (بدون حساسيات للهمزات والتنوين)
+    function normalizeArabic(text) {
+        if (!text) return "";
+        return text
+            .replace(/[أإآء]/g, 'ا')
+            .replace(/ة/g, 'ه')
+            .replace(/ى/g, 'ي')
+            .replace(/[\u064b-\u065f]/g, '');
+    }
+
     async function init() {
         try {
             const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
             const data = await res.json();
-            allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+            allReciters = data.reciters;
+
+            // إضافة الشيخ عبدالله الأسمري (المختصر الصوتي) يدوياً لضمان توفره
+            const asmariReciter = {
+                id: 9999,
+                name: "عبدالله الأسمري (المختصر الصوتي)",
+                moshaf: [
+                    {
+                        name: "المختصر الصوتي",
+                        server: "https://server11.mp3quran.net/asmri/",
+                        surah_total: 114
+                    }
+                ]
+            };
+            
+            if (!allReciters.some(r => r.name.includes("عبدالله الأسمري"))) {
+                allReciters.unshift(asmariReciter);
+            }
+
+            allReciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
             
             const lastSave = JSON.parse(localStorage.getItem('lastQuranSession'));
             if (lastSave) {
@@ -191,7 +218,7 @@
             } else {
                 filterReciters(); loadSurahs(false);
             }
-        } catch(e) { repeatStatus.innerText = "خطأ في جلب البيانات من السيرفر"; }
+        } catch(e) { repeatStatus.innerText = "خطأ في جلب البيانات، تأكد من الاتصال بالإنترنت"; }
     }
 
     function saveCurrentProgress() {
@@ -223,19 +250,42 @@
         playAudioSafe();
     }
 
+    // تفعيل البحث الفعال في أي جزء من الاسم
     function filterReciters(term = "") {
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
+        const cleanTerm = normalizeArabic(term.trim());
+
         if (term === "") {
-            let favGroup = document.createElement('optgroup'); favGroup.label = "⭐ القراء المفضلون";
+            let favGroup = document.createElement('optgroup'); 
+            favGroup.label = "⭐ القراء المفضلون";
             favorites.filter(f => f.mode === currentMode).forEach(f => {
-                let opt = document.createElement('option'); opt.value = f.server; opt.text = "❤️ " + f.name; favGroup.appendChild(opt);
+                let opt = document.createElement('option'); 
+                opt.value = f.server; 
+                opt.text = "❤️ " + f.name; 
+                favGroup.appendChild(opt);
             });
             if(favGroup.children.length > 0) reciterSelect.appendChild(favGroup);
         }
-        let allGroup = document.createElement('optgroup'); allGroup.label = term === "" ? "📋 القائمة الأبجدية" : "🔍 نتائج البحث";
-        allReciters.filter(r => term === "" || r.name.includes(term)).forEach(r => {
-            let found = r.moshaf.find(m => currentMode === 'معلم' ? m.name.includes("معلم") : (currentMode === 'مجود' ? m.name.includes("مجود") : (m.name.includes("مرتل") || m.name === "حفص عن عاصم")));
-            if(found) { const opt = document.createElement('option'); opt.value = found.server; opt.text = r.name; allGroup.appendChild(opt); }
+
+        let allGroup = document.createElement('optgroup'); 
+        allGroup.label = term === "" ? "📋 القائمة الأبجدية" : "🔍 نتائج البحث";
+        
+        allReciters.forEach(r => {
+            const cleanName = normalizeArabic(r.name);
+            if (cleanTerm === "" || cleanName.includes(cleanTerm)) {
+                let found = r.moshaf.find(m => {
+                    if (currentMode === 'معلم') return m.name.includes("معلم");
+                    if (currentMode === 'مجود') return m.name.includes("مجود");
+                    if (r.name.includes("عبدالله الأسمري")) return true;
+                    return m.name.includes("مرتل") || m.name.includes("حفص") || m.name.includes("المختصر");
+                });
+                if(found) { 
+                    const opt = document.createElement('option'); 
+                    opt.value = found.server; 
+                    opt.text = r.name; 
+                    allGroup.appendChild(opt); 
+                }
+            }
         });
         reciterSelect.appendChild(allGroup);
     }
@@ -245,8 +295,10 @@
         surahSelect.innerHTML = '';
         surahNames.forEach((n, i) => {
             if(!isAmma || i >= 77 || i === 0) {
-                const opt = document.createElement('option'); opt.value = (i+1).toString().padStart(3, '0');
-                opt.text = `${i+1}. ${n}`; surahSelect.appendChild(opt);
+                const opt = document.createElement('option'); 
+                opt.value = (i+1).toString().padStart(3, '0');
+                opt.text = `${i+1}. ${n}`; 
+                surahSelect.appendChild(opt);
             }
         });
         if(prev && !isAmma) surahSelect.value = prev;
@@ -271,13 +323,22 @@
 
     audio.onplay = () => playBtn.innerText = "⏸";
     audio.onpause = () => playBtn.innerText = "▶";
+    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر تشغيل الملف الصوتي، جرب قارئاً آخر"; };
+    
     audio.onended = () => {
         let max = parseInt(repeatSelect.value);
         if (currentRepeat < max) { currentRepeat++; updateStatus(); audio.currentTime = 0; playAudioSafe(); }
         else { document.getElementById('nextBtn').click(); }
     };
 
-    audio.ontimeupdate = () => { if(!isNaN(audio.duration)) { seekSlider.value = (audio.currentTime/audio.duration)*100; document.getElementById('currentTime').innerText = formatTime(audio.currentTime); document.getElementById('duration').innerText = formatTime(audio.duration); } };
+    audio.ontimeupdate = () => { 
+        if(!isNaN(audio.duration)) { 
+            seekSlider.value = (audio.currentTime/audio.duration)*100; 
+            document.getElementById('currentTime').innerText = formatTime(audio.currentTime); 
+            document.getElementById('duration').innerText = formatTime(audio.duration); 
+        } 
+    };
+    
     seekSlider.oninput = () => audio.currentTime = audio.duration * (seekSlider.value/100);
     function formatTime(s) { let m=Math.floor(s/60), sc=Math.floor(s%60); return `${m}:${sc<10?'0'+sc:sc}`; }
 
