@@ -226,13 +226,13 @@
         }); 
     }
 
-    // توليد رابط الصوت المباشر (مع دعم الرابط المباشر للمختصر الصوتي للأسمري)
+    // دالة بناء الرابط الصوتي المباشر بدقة
     function getAudioUrl(server, surahNum) {
         if (currentMode === 'المختصر') {
             let sNum = parseInt(surahNum, 10);
             let formattedSurah = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
-            // استخدام رابط الأرشيف المباشر بصيغة الملف الصحيحة للمختصر الصوتي
-            return `${server}${formattedSurah}_2x0210503cccccccccc.mp3`;
+            // الرابط المباشر الصحيح للمختصر الصوتي للأسمري على سيرفر الأرشيف
+            return `https://archive.org/download/002_2x0210503cccccccccc/${formattedSurah}_2x0210503cccccccccc.mp3`;
         }
         return `${server}${surahNum}.mp3`;
     }
@@ -252,10 +252,8 @@
         const cleanTerm = normalizeArabic(term.trim());
 
         if (currentMode === 'المختصر') {
-            // السيرفر المباشر لأرشيف ملفات المختصر الصوتي
-            const asmariServer = "https://archive.org/download/002_2x0210503cccccccccc/";
             const opt = document.createElement('option');
-            opt.value = asmariServer;
+            opt.value = "asmari_special";
             opt.text = "عبدالله الأسمري (المختصر الصوتي)";
             if (cleanTerm === "" || normalizeArabic(opt.text).includes(cleanTerm)) {
                 reciterSelect.appendChild(opt);
