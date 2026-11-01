@@ -24,7 +24,6 @@
 
         .main-title { color: var(--accent); font-weight: bold; margin-bottom: 20px; font-size: 1.6rem; text-shadow: 0 2px 10px rgba(241, 196, 15, 0.3); }
 
-        /* زر المميزات */
         .feat-link { 
             background: none; border: 1px solid var(--accent); color: var(--accent); 
             padding: 6px 18px; border-radius: 20px; cursor: pointer; 
@@ -43,7 +42,6 @@
         .active-mode { background: var(--accent); color: black; box-shadow: 0 0 15px var(--accent); }
         .full-width { grid-column: span 2; }
 
-        /* تعديل مربع البحث والقوائم لمنع البروز */
         input[type="text"], select { 
             width: 100%; padding: 14px; border-radius: 12px; border: none; 
             margin-bottom: 12px; background: white; color: #333; 
@@ -76,7 +74,6 @@
         .fav-btn { border: 2px solid var(--red); color: var(--red); background: none; }
         .fav-btn.active { background: var(--red); color: white; box-shadow: 0 0 15px var(--red); }
 
-        /* النافذة المنبثقة */
         .modal { display: none; position: fixed; z-index: 2000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
         .modal-content { background: var(--dark-bg); padding: 25px; border-radius: 20px; width: 100%; max-width: 380px; border: 2px solid var(--accent); position: relative; }
         .close-modal { position: absolute; top: 10px; left: 15px; font-size: 1.8rem; cursor: pointer; color: var(--red); }
@@ -89,7 +86,7 @@
 <body>
 
 <div class="container">
-    <div class="main-title">إذاعة القرآن الكريم </div>
+    <div class="main-title">إذاعة القرآن الكريم</div>
     
     <button class="feat-link" onclick="toggleModal(true)">📋 أهم المميزات</button>
 
@@ -99,7 +96,7 @@
         <button class="mode-btn full-width" id="childMode">👶 قسم الأطفال (المعلم)</button>
     </div>
 
-    <input type="text" id="searchReciter" placeholder="🔍 ابحث عن أي قارئ (مثل: الأسمري)...">
+    <input type="text" id="searchReciter" placeholder="🔍 ابحث بأي جزء من اسم القارئ...">
     <select id="reciterSelect"></select>
     <select id="surahSelect"></select>
 
@@ -132,11 +129,10 @@
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
             <li>⭐ دعم عبدالله الأسمري (المختصر الصوتي).</li>
-            <li>⭐ تكرار السورة (حتى 20 مرة) للحفظ.</li>
             <li>⭐ بحث متطور وشامل بأي جزء من الاسم.</li>
-            <li>⭐ قائمة مفضلة لحفظ قراءك المختارين.</li>
-            <li>⭐ أنماط متعددة (مرتل، مجود، معلم).</li>
+            <li>⭐ تكرار السورة (حتى 20 مرة) للحفظ.</li>
             <li>⭐ استكمال تلقائي ذكي من حيث توقفت.</li>
+            <li>⭐ قائمة مفضلة لحفظ قراءك المختارين.</li>
         </ul>
     </div>
 </div>
@@ -168,7 +164,7 @@
         repeatSelect.appendChild(opt);
     }
 
-    // دالة لتنحيف النص العربي وتوحيده للبحث الفعال (بدون حساسيات للهمزات والتنوين)
+    // دالة لتنحيف النص العربي وتوحيده للبحث الفعال (بدون حساسيات للهمزات)
     function normalizeArabic(text) {
         if (!text) return "";
         return text
@@ -180,11 +176,12 @@
 
     async function init() {
         try {
-            const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
-            const data = await res.json();
+            const res = "https://mp3quran.net/api/v3/reciters?language=ar";
+            const response = await fetch(res);
+            const data = await response.json();
             allReciters = data.reciters;
 
-            // إضافة الشيخ عبدالله الأسمري (المختصر الصوتي) يدوياً لضمان توفره
+            // إضافة الشيخ عبدالله الأسمري (المختصر الصوتي) مع رابط السيرفر المباشر الموثوق
             const asmariReciter = {
                 id: 9999,
                 name: "عبدالله الأسمري (المختصر الصوتي)",
@@ -218,7 +215,9 @@
             } else {
                 filterReciters(); loadSurahs(false);
             }
-        } catch(e) { repeatStatus.innerText = "خطأ في جلب البيانات، تأكد من الاتصال بالإنترنت"; }
+        } catch(e) { 
+            repeatStatus.innerText = "خطأ في جلب البيانات، تأكد من الاتصال بالإنترنت"; 
+        }
     }
 
     function saveCurrentProgress() {
@@ -250,7 +249,7 @@
         playAudioSafe();
     }
 
-    // تفعيل البحث الفعال في أي جزء من الاسم
+    // تفعيل البحث الشامل بأي جزء من الاسم
     function filterReciters(term = "") {
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
         const cleanTerm = normalizeArabic(term.trim());
@@ -323,7 +322,7 @@
 
     audio.onplay = () => playBtn.innerText = "⏸";
     audio.onpause = () => playBtn.innerText = "▶";
-    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر تشغيل الملف الصوتي، جرب قارئاً آخر"; };
+    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر تشغيل الملف الصوتي، تأكد من الاتصال"; };
     
     audio.onended = () => {
         let max = parseInt(repeatSelect.value);
