@@ -137,8 +137,8 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
-            <li>⭐ دعم تلاوات وتفاسير أرشيف الإنترنت للشيخ عبدالله الأسمري.</li>
-            <li>⭐ تصفح وتحديد السور والمقاطع بكل سلاسة.</li>
+            <li>⭐ دعم تفاسير وتلاوات أرشيف الإنترنت[span_1](start_span)[span_1](end_span).</li>
+            <li>⭐ تنظيم السور والمقاطع بكل سلاسة.</li>
             <li>⭐ استكمال الاستماع تلقائياً من حيث توقفت.</li>
         </ul>
     </div>
@@ -504,12 +504,12 @@
 
     function getAudioUrl(server, fileCode, isArchive = false) {
         if (isArchive) {
-            // تنسيق الرابط تماماً كما ورد في الأرشيف (رقم السورة + اسم السورة بصيغة URL encoded + اسم الشيخ)
-            let sNumStr = fileCode.split('-')[0]; // يستخرج رقم الملف مثل 001 أو 002
+            let sNumStr = fileCode.split('-')[0]; // يستخرج الرقم مثل 001، 002
             let parsedNum = parseInt(sNumStr, 10);
             let surahIndex = isNaN(parsedNum) ? 0 : parsedNum - 1;
             let sName = surahNames[surahIndex] || "الفاتحة";
             
+            // استخدام رابط الأرشيف المباشر المطابق لملفات صابر عبد الحكم / عبدالله الأسمري
             return `${server}${sNumStr}+-+%D8%B3%D9%88%D8%B1%D8%A9+${encodeURIComponent(sName)}+-+%D8%B5%D8%A7%D8%A8%D8%B1+%D8%B9%D8%A8%D8%AF+%D8%A7%D9%84%D8%AD%D9%83%D9%85_2.mp3`;
         }
         let baseUrl = server.endsWith('/') ? server : server + '/';
@@ -750,7 +750,7 @@
         const isTafsir = (currentMode === 'تفسير');
         document.getElementById('normalReciterSection').style.display = isTafsir ? 'none' : 'block';
         document.getElementById('tafsirSection').style.display = isTafsir ? 'block' : 'none';
-        document.getElementById('pageTitle').innerText = isTisfrTitle = isTafsir ? "التفسير والدروس الصوتية" : "إذاعة القرآن الكريم";
+        document.getElementById('pageTitle').innerText = isTafsir ? "التفسير والدروس الصوتية" : "إذاعة القرآن الكريم";
         favBtn.style.display = isTafsir ? 'none' : 'flex';
     }
 
