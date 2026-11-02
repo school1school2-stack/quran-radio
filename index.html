@@ -90,7 +90,7 @@
     
     <button class="feat-link" onclick="toggleModal(true)">📋 أهم المميزات</button>
 
-    <!-- الأقسام الأربعة (المصحف المرتل، المجود، الأطفال، ومختصر التفسير) -->
+    <!-- الأقسام الأربعة -->
     <div class="sections-container">
         <button class="mode-btn active-mode" id="allMode">📖 المصحف المرتل</button>
         <button class="mode-btn" id="mojawadMode">🎤 المصحف المجود</button>
@@ -182,7 +182,7 @@
             const data = await res.json();
             allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
 
-            // جلب التفاسير ومختصر التفسير من واجهة الموقع الرسمية
+            // جلب قائمة التفاسير المعتمدة من API الموقع الرسمي
             const tafsirRes = await fetch("https://www.mp3quran.net/api/v3/tafsir?language=ar");
             const tafsirData = await tafsirRes.json();
             tafsirList = tafsirData.tafsirs || [];
@@ -231,7 +231,7 @@
         }); 
     }
 
-    // دالة بناء الرابط الآمن لكل قسم (تفسير أو قراء عاديين)
+    // دالة بناء الرابط المتوافقة مع بنية روابط الـ API وموقع TV Quran للتفاسير
     function getAudioUrl(server, surahNum) {
         let sNum = parseInt(surahNum, 10);
         let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
@@ -271,6 +271,7 @@
                     }
                 });
             } else {
+                // رابط احتياطي دقيق في حال تعذر جلب الـ API الخارجي
                 let opt = document.createElement('option');
                 opt.value = "https://download.quranicaudio.com/quran/muasasat_al_bayan/mokhtasar/";
                 opt.text = "مختصر تفسير القرآن الكريم";
