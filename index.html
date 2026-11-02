@@ -508,7 +508,7 @@
 
     function getAudioUrl(server, fileCode) {
         if (server === "ARCHIVE_ALASLAMI") {
-            return fileCode; // رابط سورة الشيخ عبد الله الأسلمي   
+            return fileCode; 
         }
         let baseUrl = server.endsWith('/') ? server : server + '/';
         return `${baseUrl}${fileCode}.mp3`;
@@ -517,10 +517,9 @@
     function buildTafsirTypeDropdown() {
         tafsirTypeSelect.innerHTML = '';
         
-        // إضافة خيار تفسير الشيخ عبد الله الأسلمي   
         let optAslami = document.createElement('option');
         optAslami.value = "ARCHIVE_ALASLAMI";
-        optAslami.text = "تفسير الشيخ: عبد الله الأسلمي  ";
+        optAslami.text = "قراءة التفسير عبدالله الأسمري تلاوة صابر عبد الحكم";
         tafsirTypeSelect.appendChild(optAslami);
 
         if (tafsirList.length > 0) {
@@ -553,14 +552,13 @@
     function updatePartDropdown(surahId) {
         tafsirPartSelect.innerHTML = '';
         
-        // إذا كان المختار هو الشيخ عبد الله الأسلمي، يتم ربطه برابط الخادم المباشر للأرشيف الذي أرسلته
         if (tafsirTypeSelect.value === "ARCHIVE_ALASLAMI") {
             let sNum = parseInt(surahId, 10);
             let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
             
             let opt = document.createElement('option');
             opt.value = `https://ia601001.us.archive.org/21/items/almokhtasar_fe_tafseer_quran_002/almokhtasar_fe_tafseer_quran_${sStr}.mp3`;
-            opt.text = `سورة ${surahNames[sNum-1]} - الشيخ عبد الله الأسلمي`;
+            opt.text = `سورة ${surahNames[sNum-1]} - صابر عبد الحكم`;
             tafsirPartSelect.appendChild(opt);
             return;
         }
