@@ -137,9 +137,9 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
-            <li>⭐ تصفح التفسير بنظام القائمتين بدقة متناهية وسلاسة[span_0](start_span)[span_0](end_span).</li>
-            <li>⭐ ضبط ترتيب وتصحيح سور القرآن (بما فيها سورة الرحمن وما بعدها)[span_1](start_span)[span_1](end_span).</li>
-            <li>⭐ استكمال الاستماع تلقائياً من حيث توقفت[span_2](start_span)[span_2](end_span).</li>
+            <li>⭐ تصفح التفسير بنظام القائمتين بدقة متناهية وسلاسة.</li>
+            <li>⭐ ضبط ترتيب وتصحيح سور القرآن (بما فيها سورة الرحمن وما بعدها).</li>
+            <li>⭐ استكمال الاستماع تلقائياً من حيث توقفت.</li>
         </ul>
     </div>
 </div>
@@ -519,7 +519,7 @@
         
         let optAslami = document.createElement('option');
         optAslami.value = "ARCHIVE_ALASLAMI";
-        optAslami.text = "قراءة التفسير عبدالله الأسمري تلاوة صابر عبد الحكم";
+        optAslami.text = "قراءة التفسير علي بشير أحمد تلاوة أنس العمادي";
         tafsirTypeSelect.appendChild(optAslami);
 
         if (tafsirList.length > 0) {
@@ -558,7 +558,7 @@
             
             let opt = document.createElement('option');
             opt.value = `https://ia601001.us.archive.org/21/items/almokhtasar_fe_tafseer_quran_002/almokhtasar_fe_tafseer_quran_${sStr}.mp3`;
-            opt.text = `سورة ${surahNames[sNum-1]} - صابر عبد الحكم`;
+            opt.text = `سورة ${surahNames[sNum-1]} - أنس العمادي`;
             tafsirPartSelect.appendChild(opt);
             return;
         }
