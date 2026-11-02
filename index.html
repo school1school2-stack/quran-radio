@@ -137,7 +137,7 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
-            <li>⭐ دعم تفاسير وتلاوات أرشيف الإنترنت (مثل دروس الشيخ عبدالله الأسمري).</li>
+            <li>⭐ دعم تلاوات وتفاسير أرشيف الإنترنت للشيخ عبدالله الأسمري.</li>
             <li>⭐ تصفح وتحديد السور والمقاطع بكل سلاسة.</li>
             <li>⭐ استكمال الاستماع تلقائياً من حيث توقفت.</li>
         </ul>
@@ -415,7 +415,7 @@
             { name: "الآيات من 1 إلى 15", file: "057-1-15" }, { name: "الآيات من 16 إلى 29", file: "057-16-29" }
         ],
         58: [
-            { name: "الآيات من 1 إلى صيغة الملف", file: "058-1-13" }, { name: "الآيات من 14 إلى 22", file: "058-14-22" }
+            { name: "الآيات من 1 إلى 13", file: "058-1-13" }, { name: "الآيات من 14 إلى 22", file: "058-14-22" }
         ],
         59: [
             { name: "الآيات من 1 إلى 10", file: "059-1-10" }, { name: "الآيات من 11 إلى 24", file: "059-11-24" }
@@ -444,7 +444,6 @@
             const data = await res.json();
             allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
 
-            // إعداد خيارات التفسير الصوتي ومن ضمنها أرشيف الشيخ عبدالله الأسمري
             buildTafsirTypeDropdown();
             buildMainSurahDropdown();
 
@@ -505,12 +504,13 @@
 
     function getAudioUrl(server, fileCode, isArchive = false) {
         if (isArchive) {
-            // دعم رابط الأرشيف للشيخ عبدالله الأسمري بالطريقة التي طلبتها
-            let surahIndex = parseInt(tafsirMainSurahSelect.value, 10) - 1;
+            // تنسيق الرابط تماماً كما ورد في الأرشيف (رقم السورة + اسم السورة بصيغة URL encoded + اسم الشيخ)
+            let sNumStr = fileCode.split('-')[0]; // يستخرج رقم الملف مثل 001 أو 002
+            let parsedNum = parseInt(sNumStr, 10);
+            let surahIndex = isNaN(parsedNum) ? 0 : parsedNum - 1;
             let sName = surahNames[surahIndex] || "الفاتحة";
             
-            // إذا كان الرابط يتبع نمط أرشيف الإنترنت الخاص بالملفات المباشرة
-            return `${server}${fileCode}+-+%D8%B3%D9%88%D8%B1%D8%A9+${encodeURIComponent(sName)}+-+%D8%B9%D8%A8%D8%AF%D8%A7%D9%84%D9%84%D9%87+%D8%A7%D9%84%D8%A3%D8%B3%D9%85%D8%B1%D9%8A_2.mp3`;
+            return `${server}${sNumStr}+-+%D8%B3%D9%88%D8%B1%D8%A9+${encodeURIComponent(sName)}+-+%D8%B5%D8%A7%D8%A8%D8%B1+%D8%B9%D8%A8%D8%AF+%D8%A7%D9%84%D8%AD%D9%83%D9%85_2.mp3`;
         }
         let baseUrl = server.endsWith('/') ? server : server + '/';
         return `${baseUrl}${fileCode}.mp3`;
@@ -519,13 +519,11 @@
     function buildTafsirTypeDropdown() {
         tafsirTypeSelect.innerHTML = '';
         
-        // إضافة أرشيف الشيخ عبدالله الأسمري بناءً على الرابط الذي أرسلته
         let archiveOpt = document.createElement('option');
         archiveOpt.value = "https://archive.org/download/002-2_cccccccccccccccccccccc202105/";
         archiveOpt.text = "تلاوة / تفسير: عبدالله الأسمري (أرشيف الإنترنت)";
         tafsirTypeSelect.appendChild(archiveOpt);
 
-        // خيار تفاسير mp3quran الإضافية إن وجدت
         let defaultOpt = document.createElement('option');
         defaultOpt.value = "https://server17.mp3quran.net/tafseer/tabri/";
         defaultOpt.text = "تفسير القرآن الكريم: الطبري";
@@ -752,7 +750,7 @@
         const isTafsir = (currentMode === 'تفسير');
         document.getElementById('normalReciterSection').style.display = isTafsir ? 'none' : 'block';
         document.getElementById('tafsirSection').style.display = isTafsir ? 'block' : 'none';
-        document.getElementById('pageTitle').innerText = isTafsir ? "التفسير والدروس الصوتية" : "إذاعة القرآن الكريم";
+        document.getElementById('pageTitle').innerText = isTisfrTitle = isTafsir ? "التفسير والدروس الصوتية" : "إذاعة القرآن الكريم";
         favBtn.style.display = isTafsir ? 'none' : 'flex';
     }
 
