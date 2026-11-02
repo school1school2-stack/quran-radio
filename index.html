@@ -129,10 +129,10 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
-            <li>⭐ قسم خاص بمختصر تفسير القرآن الصوتي.</li>
+            <li>⭐ قسم مباشر لمختصر تفسير القرآن الصوتي من موقع Mp3Quran.</li>
             <li>⭐ تكرار السورة (حتى 20 مرة) للحفظ والاستذكار.</li>
             <li>⭐ استكمال التلاوة تلقائياً من حيث توقفت.</li>
-            <li>⭐ بحث ذكي وشامل بأي جزء من اسم القارئ.</li>
+            <li>⭐ بحث ذكي وشامل بأي جزء من الاسم.</li>
         </ul>
     </div>
 </div>
@@ -150,6 +150,7 @@
     const favBtn = document.getElementById('addFav');
     
     let allReciters = [];
+    let tafsirList = [];
     let currentRepeat = 1;
     let favorites = JSON.parse(localStorage.getItem('quranFavs')) || [];
     let currentMode = 'مرتل';
@@ -175,9 +176,15 @@
 
     async function init() {
         try {
+            // جلب القراء العاديين
             const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
             const data = await res.json();
             allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+
+            // جلب بيانات قسم التفاسير مباشرة من واجهة موقع mp3quran الرسمية
+            const tafsirRes = await fetch("https://www.mp3quran.net/api/v3/tafsir?language=ar");
+            const tafsirData = await tafsirRes.json();
+            tafsirList = tafsirData.tafsirs || [];
             
             const lastSave = JSON.parse(localStorage.getItem('lastQuranSession'));
             if (lastSave) {
@@ -223,12 +230,13 @@
         }); 
     }
 
-    // توليد الروابط المباشرة الصحيحة من سيرفر mp3quran الرسمي لمختصر التفسير
+    // توليد الروابط الصوتية بدقة حسب نوع القسم المختار
     function getAudioUrl(server, surahNum) {
         if (currentMode === 'تفسير') {
             let sNum = parseInt(surahNum, 10);
             let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
-            return `https://download.quranicaudio.com/quran/muasasat_al_bayan/mokhtasar/${sStr}.mp3`;
+            // الروابط المباشرة تعتمد على السيرفر الخاص بالتفسير المختار من واجهة الموقع
+            return `${server}${sStr}.mp3`;
         }
         return `${server}${surahNum}.mp3`;
     }
@@ -249,11 +257,23 @@
 
         if (currentMode === 'تفسير') {
             let tafsirGroup = document.createElement('optgroup');
-            tafsirGroup.label = "📚 تفاسير القرآن الكريم";
-            let opt = document.createElement('option');
-            opt.value = "https://download.quranicaudio.com/quran/muasasat_al_bayan/mokhtasar/";
-            opt.text = "مختصر تفسير القرآن الكريم";
-            tafsirGroup.appendChild(opt);
+            tafsirGroup.label = "📚 مختصرات وتفاسير القرآن الكريم";
+            
+            if (tafsirList.length > 0) {
+                tafsirList.forEach(t => {
+                    if (cleanTerm === "" || normalizeArabic(t.name).includes(cleanTerm)) {
+                        let opt = document.createElement('option');
+                        opt.value = t.server;
+                        opt.text = t.name;
+                        tafsirGroup.appendChild(opt);
+                    }
+                });
+            } else {
+                let opt = document.createElement('option');
+                opt.value = "https://download.quranicaudio.com/quran/muasasat_al_bayan/mokhtasar/";
+                opt.text = "مختصر تفسير القرآن الكريم";
+                tafsirGroup.appendChild(opt);
+            }
             reciterSelect.appendChild(tafsirGroup);
             return;
         }
@@ -325,7 +345,7 @@
 
     audio.onplay = () => playBtn.innerText = "⏸";
     audio.onpause = () => playBtn.innerText = "▶";
-    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر جلب الملف من الموقع، جرب سورة أخرى"; };
+    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر جلب الملف الصوتي، جرب سورة أخرى"; };
     
     audio.onended = () => {
         let max = parseInt(repeatSelect.value);
