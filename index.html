@@ -1,775 +1,726 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>إذاعة القرآن الكريم والتفسير</title>
-    <style>
-        :root { --accent: #f1c40f; --green: #42e695; --red: #ff4757; --dark-bg: #0f172a; }
-        
-        body {
-            margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif;
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            min-height: 100vh; display: flex; justify-content: center; 
-            align-items: center; color: white; padding: 15px; box-sizing: border-box;
-        }
-
-        .container {
-            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(15px);
-            padding: 25px 20px; border-radius: 20px; text-align: center;
-            width: 100%; max-width: 440px; border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-            box-sizing: border-box;
-        }
-
-        .main-title { color: var(--accent); font-weight: bold; margin-bottom: 15px; font-size: 1.5rem; text-shadow: 0 2px 10px rgba(241, 196, 15, 0.3); }
-
-        .feat-link { 
-            background: none; border: 1px solid var(--accent); color: var(--accent); 
-            padding: 6px 18px; border-radius: 20px; cursor: pointer; 
-            font-size: 0.85rem; margin-bottom: 15px; transition: 0.3s; 
-            display: inline-flex; align-items: center; gap: 5px;
-        }
-        .feat-link:hover { background: var(--accent); color: black; }
-
-        .sections-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        
-        .mode-btn { 
-            padding: 10px 5px; border-radius: 12px; border: none; cursor: pointer; 
-            background: #333; color: white; font-weight: bold; font-size: 0.78rem; 
-            transition: 0.3s; text-align: center;
-        }
-        .active-mode { background: var(--accent); color: black; box-shadow: 0 0 15px var(--accent); }
-
-        input[type="text"], select { 
-            width: 100%; padding: 14px; border-radius: 12px; border: none; 
-            margin-bottom: 12px; background: white; color: #333; 
-            font-size: 1rem; font-weight: bold; outline: none;
-            box-sizing: border-box; text-align: right;
-        }
-
-        .repeat-box { 
-            background: rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; 
-            margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; 
-        }
-
-        .progress-box { margin: 15px 0; display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
-        input[type="range"] { flex: 1; cursor: pointer; accent-color: var(--green); }
-
-        .controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px; }
-        
-        .play-btn { 
-            background: var(--green); border: none; width: 75px; height: 75px; 
-            border-radius: 50%; font-size: 1.8rem; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center; 
-            color: black; transition: 0.2s; box-shadow: 0 5px 15px rgba(66, 230, 149, 0.3); 
-        }
-        .nav-btn, .fav-btn { 
-            background: rgba(255,255,255,0.1); border: none; color: white; 
-            width: 50px; height: 50px; border-radius: 50%; cursor: pointer; 
-            font-size: 1.2rem; display: flex; align-items: center; justify-content: center; 
-        }
-        .fav-btn { border: 2px solid var(--red); color: var(--red); background: none; }
-        .fav-btn.active { background: var(--red); color: white; box-shadow: 0 0 15px var(--red); }
-
-        .modal { display: none; position: fixed; z-index: 2000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-        .modal-content { background: var(--dark-bg); padding: 25px; border-radius: 20px; width: 100%; max-width: 380px; border: 2px solid var(--accent); position: relative; }
-        .close-modal { position: absolute; top: 10px; left: 15px; font-size: 1.8rem; cursor: pointer; color: var(--red); }
-        .feat-list { text-align: right; list-style: none; padding: 0; margin-top: 20px; }
-        .feat-list li { margin-bottom: 12px; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
-
-        .footer { margin-top: 25px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.8rem; color: var(--accent); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>إذاعة القرآن الكريم والتفسير</title>
+<style>
+:root { --accent: #f1c40f; --green: #42e695; --red: #ff4757; --dark-bg: #0f172a; }
+​body {
+margin: 0; font-family: 'Segoe UI', Tahoma, sans-serif;
+background: linear-gradient(135deg, #1e3c72, #2a5298);
+min-height: 100vh; display: flex; justify-content: center;
+align-items: center; color: white; padding: 15px; box-sizing: border-box;
+}
+​.container {
+background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(15px);
+padding: 25px 20px; border-radius: 20px; text-align: center;
+width: 100%; max-width: 440px; border: 1px solid rgba(255,255,255,0.1);
+box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+box-sizing: border-box;
+}
+​.main-title { color: var(--accent); font-weight: bold; margin-bottom: 15px; font-size: 1.5rem; text-shadow: 0 2px 10px rgba(241, 196, 15, 0.3); }
+​.feat-link {
+background: none; border: 1px solid var(--accent); color: var(--accent);
+padding: 6px 18px; border-radius: 20px; cursor: pointer;
+font-size: 0.85rem; margin-bottom: 15px; transition: 0.3s;
+display: inline-flex; align-items: center; gap: 5px;
+}
+.feat-link:hover { background: var(--accent); color: black; }
+​.sections-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+​.mode-btn {
+padding: 10px 5px; border-radius: 12px; border: none; cursor: pointer;
+background: #333; color: white; font-weight: bold; font-size: 0.78rem;
+transition: 0.3s; text-align: center;
+}
+.active-mode { background: var(--accent); color: black; box-shadow: 0 0 15px var(--accent); }
+​input[type="text"], select {
+width: 100%; padding: 14px; border-radius: 12px; border: none;
+margin-bottom: 12px; background: white; color: #333;
+font-size: 1rem; font-weight: bold; outline: none;
+box-sizing: border-box; text-align: right;
+}
+​.repeat-box {
+background: rgba(255,255,255,0.1); padding: 12px; border-radius: 12px;
+margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
+}
+​.progress-box { margin: 15px 0; display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
+input[type="range"] { flex: 1; cursor: pointer; accent-color: var(--green); }
+​.controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px; }
+​.play-btn {
+background: var(--green); border: none; width: 75px; height: 75px;
+border-radius: 50%; font-size: 1.8rem; cursor: pointer;
+display: flex; align-items: center; justify-content: center;
+color: black; transition: 0.2s; box-shadow: 0 5px 15px rgba(66, 230, 149, 0.3);
+}
+.nav-btn, .fav-btn {
+background: rgba(255,255,255,0.1); border: none; color: white;
+width: 50px; height: 50px; border-radius: 50%; cursor: pointer;
+font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
+}
+.fav-btn { border: 2px solid var(--red); color: var(--red); background: none; }
+.fav-btn.active { background: var(--red); color: white; box-shadow: 0 0 15px var(--red); }
+​.modal { display: none; position: fixed; z-index: 2000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+.modal-content { background: var(--dark-bg); padding: 25px; border-radius: 20px; width: 100%; max-width: 380px; border: 2px solid var(--accent); position: relative; }
+.close-modal { position: absolute; top: 10px; left: 15px; font-size: 1.8rem; cursor: pointer; color: var(--red); }
+.feat-list { text-align: right; list-style: none; padding: 0; margin-top: 20px; }
+.feat-list li { margin-bottom: 12px; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
+​.footer { margin-top: 25px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.8rem; color: var(--accent); }
+</style>
 </head>
 <body>
-
-<div class="container">
-    <div class="main-title" id="pageTitle">إذاعة القرآن الكريم</div>
-    
-    <button class="feat-link" onclick="toggleModal(true)">📋 أهم المميزات</button>
-
-    <div class="sections-container">
-        <button class="mode-btn active-mode" id="allMode">📖 المصحف المرتل</button>
-        <button class="mode-btn" id="mojawadMode">🎤 المصحف المجود</button>
-        <button class="mode-btn" id="childMode">👶 قسم الأطفال</button>
-        <button class="mode-btn" id="tafsirMode">📚 مختصر التفسير</button>
-    </div>
-
-    <!-- قسم القراء العاديين -->
-    <div id="normalReciterSection">
-        <input type="text" id="searchReciter" placeholder="🔍 ابحث بأي جزء من الاسم...">
-        <select id="reciterSelect"></select>
-        <select id="surahSelect"></select>
-    </div>
-
-    <!-- قسم التفسير بنظام القائمتين المنفصلتين -->
-    <div id="tafsirSection" style="display: none;">
-        <select id="tafsirTypeSelect"></select>
-        <select id="tafsirMainSurahSelect"></select>
-        <select id="tafsirPartSelect"></select>
-    </div>
-
-    <div class="repeat-box">
-        <label style="font-size: 0.9rem; font-weight: bold;">🔁 تكرار التلاوة آلياً:</label>
-        <select id="repeatSelect" style="width: auto; margin:0; padding:5px 10px;"></select>
-    </div>
-    
-    <div id="repeatStatus" style="font-size: 0.85rem; color: var(--accent); margin-bottom: 10px; min-height: 1.2em;"></div>
-
-    <div class="progress-box">
-        <span id="currentTime">0:00</span>
-        <input type="range" id="seekSlider" value="0" min="0" step="1">
-        <span id="duration">0:00</span>
-    </div>
-
-    <div class="controls">
-        <button id="prevBtn" class="nav-btn">⏭</button>
-        <button id="addFav" class="fav-btn">❤</button>
-        <button id="playBtn" class="play-btn">▶</button>
-        <button id="nextBtn" class="nav-btn">⏮</button>
-    </div>
-
-    <div class="footer">صدقة جارية لجميع موتى المسلمين</div>
+​<div class="container">
+<div class="main-title" id="pageTitle">إذاعة القرآن الكريم</div>
+​<button class="feat-link" onclick="toggleModal(true)">📋 أهم المميزات</button>
+​<div class="sections-container">
+<button class="mode-btn active-mode" id="allMode">📖 المصحف المرتل</button>
+<button class="mode-btn" id="mojawadMode">🎤 المصحف المجود</button>
+<button class="mode-btn" id="childMode">👶 قسم الأطفال</button>
+<button class="mode-btn" id="tafsirMode">📚 مختصر التفسير</button>
 </div>
-
-<div id="featModal" class="modal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="toggleModal(false)">&times;</span>
-        <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
-        <ul class="feat-list">
-            <li>⭐ تصفح التفسير بنظام القائمتين بدقة متناهية وسلاسة[span_1](start_span)[span_1](end_span).</li>
-            <li>⭐ ضبط ترتيب وتصحيح سور القرآن (بما فيها سورة الرحمن وما بعدها)[span_2](start_span)[span_2](end_span).</li>
-            <li>⭐ استكمال الاستماع تلقائياً من حيث توقفت[span_3](start_span)[span_3](end_span).</li>
-        </ul>
-    </div>
+​<!-- قسم القراء العاديين -->
+<div id="normalReciterSection">
+<input type="text" id="searchReciter" placeholder="🔍 ابحث بأي جزء من الاسم...">
+<select id="reciterSelect"></select>
+<select id="surahSelect"></select>
 </div>
-
-<audio id="audioPlayer" preload="auto"></audio>
-
-<script>
-    const reciterSelect = document.getElementById('reciterSelect');
-    const surahSelect = document.getElementById('surahSelect');
-    const tafsirTypeSelect = document.getElementById('tafsirTypeSelect');
-    const tafsirMainSurahSelect = document.getElementById('tafsirMainSurahSelect');
-    const tafsirPartSelect = document.getElementById('tafsirPartSelect');
-    const repeatSelect = document.getElementById('repeatSelect');
-    const repeatStatus = document.getElementById('repeatStatus');
-    const playBtn = document.getElementById('playBtn');
-    const audio = document.getElementById('audioPlayer');
-    const seekSlider = document.getElementById('seekSlider');
-    const favBtn = document.getElementById('addFav');
-    
-    let allReciters = [];
-    let tafsirList = [];
-    let currentRepeat = 1;
-    let favorites = JSON.parse(localStorage.getItem('quranFavs')) || [];
-    let currentMode = 'مرتل';
-
-    const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
-
-    const tafsirDatabase = {
-        1: [{ name: "سورة الفاتحة كاملة", file: "001" }],
-        2: [
-            { name: "الآيات من 1 إلى 25", file: "002-1-25" }, { name: "الآيات من 26 إلى 43", file: "002-26-43" },
-            { name: "الآيات من 44 إلى 59", file: "002-44-59" }, { name: "الآيات من 60 إلى 74", file: "002-60-74" },
-            { name: "الآيات من 75 إلى 91", file: "002-75-91" }, { name: "الآيات من 92 إلى 105", file: "002-92-105" },
-            { name: "الآيات من 106 إلى 123", file: "002-106-123" }, { name: "الآيات من 124 إلى 141", file: "002-124-141" },
-            { name: "الآيات من 142 إلى 157", file: "002-142-157" }, { name: "الآيات من 158 إلى 176", file: "002-158-176" },
-            { name: "الآيات من 177 إلى 188", file: "002-177-188" }, { name: "الآيات من 189 إلى 202", file: "002-189-202" },
-            { name: "الآيات من 203 إلى 218", file: "002-203-218" }, { name: "الآيات من 219 إلى 232", file: "002-219-232" },
-            { name: "الآيات من 233 إلى 242", file: "002-233-242" }, { name: "الآيات من 243 إلى 252", file: "002-243-252" },
-            { name: "الآيات من 253 إلى 262", file: "002-253-262" }, { name: "الآيات من 263 إلى 271", file: "002-263-271" },
-            { name: "الآيات من 272 إلى 282", file: "002-272-282" }, { name: "الآيات من 283 إلى 286", file: "002-283-286" }
-        ],
-        3: [
-            { name: "الآيات من 1 إلى 14", file: "003-1-14" }, { name: "الآيات من 15 إلى 32", file: "003-15-32" },
-            { name: "الآيات من 33 إلى 51", file: "003-33-51" }, { name: "الآيات من 52 إلى 74", file: "003-52-74" },
-            { name: "الآيات من 75 إلى 92", file: "003-75-92" }, { name: "الآيات من 93 إلى 112", file: "003-93-112" },
-            { name: "الآيات من 113 إلى 132", file: "003-113-132" }, { name: "الآيات من 133 إلى 152", file: "003-133-152" },
-            { name: "الآيات من 153 إلى 171", file: "003-153-171" }, { name: "الآيات من 172 إلى 185", file: "003-172-185" },
-            { name: "الآيات من 186 إلى 200", file: "003-186-200" }
-        ],
-        4: [
-            { name: "الآيات من 1 إلى 11", file: "004-1-11" }, { name: "الآيات من 12 إلى 23", file: "004-12-23" },
-            { name: "الآيات من 24 إلى 35", file: "004-24-35" }, { name: "الآيات من 36 إلى 57", file: "004-36-57" },
-            { name: "الآيات من 58 إلى 73", file: "004-58-73" }, { name: "الآيات من 74 إلى 87", file: "004-74-87" },
-            { name: "الآيات من 88 إلى 99", file: "004-88-99" }, { name: "الآيات من 100 إلى 113", file: "004-100-113" },
-            { name: "الآيات من 114 إلى 134", file: "004-114-134" }, { name: "الآيات من 135 إلى 147", file: "004-135-147" },
-            { name: "الآيات من 148 إلى 162", file: "004-148-162" }, { name: "الآيات من 163 إلى 176", file: "004-163-176" }
-        ],
-        5: [
-            { name: "الآيات من 1 إلى 11", file: "005-1-11" }, { name: "الآيات من 12 إلى 26", file: "005-12-26" },
-            { name: "الآيات من 27 إلى 40", file: "005-27-40" }, { name: "الآيات من 41 إلى 50", file: "005-41-50" },
-            { name: "الآيات من 51 إلى 66", file: "005-51-66" }, { name: "الآيات من 67 إلى 81", file: "005-67-81" },
-            { name: "الآيات من 82 إلى 96", file: "005-82-96" }, { name: "الآيات من 97 إلى 108", file: "005-97-108" },
-            { name: "الآيات من 109 إلى 120", file: "005-109-120" }
-        ],
-        6: [
-            { name: "الآيات من 1 إلى 12", file: "006-1-12" }, { name: "الآيات من 13 إلى 35", file: "006-13-35" },
-            { name: "الآيات من 36 إلى 58", file: "006-36-58" }, { name: "الآيات من 59 إلى 73", file: "006-59-73" },
-            { name: "الآيات من 74 إلى 94", file: "006-74-94" }, { name: "الآيات من 95 إلى 110", file: "006-95-110" },
-            { name: "الآيات من 111 إلى 126", file: "006-111-126" }, { name: "الآيات من 127 إلى 140", file: "006-127-140" },
-            { name: "الآيات من 141 إلى 150", file: "006-141-150" }, { name: "الآيات من 151 إلى 165", file: "006-151-165" }
-        ],
-        7: [
-            { name: "الآيات من 1 إلى 30", file: "007-1-30" }, { name: "الآيات من 31 إلى 46", file: "007-31-46" },
-            { name: "الآيات من 47 إلى 64", file: "007-47-64" }, { name: "الآيات من 65 إلى 87", file: "007-65-87" },
-            { name: "الآيات من 88 إلى 116", file: "007-88-116" }, { name: "الآيات من 117 إلى 141", file: "007-117-141" },
-            { name: "الآيات من 142 إلى 155", file: "007-142-155" }, { name: "الآيات من 156 إلى 170", file: "007-156-170" },
-            { name: "الآيات من 171 إلى 188", file: "007-171-188" }, { name: "الآيات من 189 إلى 206", file: "007-189-206" }
-        ],
-        8: [
-            { name: "الآيات من 1 إلى 21", file: "008-1-21" }, { name: "الآيات من 22 إلى 40", file: "008-22-40" },
-            { name: "الآيات من 41 إلى 60", file: "008-41-60" }, { name: "الآيات من 61 إلى 75", file: "008-61-75" }
-        ],
-        9: [
-            { name: "الآيات من 1 إلى 18", file: "009-1-18" }, { name: "الآيات من 19 إلى 33", file: "009-19-33" },
-            { name: "الآيات من 34 إلى 45", file: "009-34-45" }, { name: "الآيات من 46 إلى 59", file: "009-46-59" },
-            { name: "الآيات من 60 إلى 74", file: "009-60-74" }, { name: "الآيات من 75 إلى 92", file: "009-75-92" },
-            { name: "الآيات من 93 إلى 110", file: "009-93-110" }, { name: "الآيات من 111 إلى 121", file: "009-111-121" },
-            { name: "الآيات من 122 إلى 129", file: "009-122-129" }
-        ],
-        10: [
-            { name: "الآيات من 1 إلى 10", file: "010-1-10" }, { name: "الآيات من 11 إلى 25", file: "010-11-25" },
-            { name: "الآيات من 26 إلى 52", file: "010-26-52" }, { name: "الآيات من 53 إلى 70", file: "010-53-70" },
-            { name: "الآيات من 71 إلى 89", file: "010-71-89" }, { name: "الآيات من 90 إلى 109", file: "010-90-109" }
-        ],
-        11: [
-            { name: "الآيات من 1 إلى 5", file: "011-1-5" }, { name: "الآيات من 6 إلى 23", file: "011-6-23" },
-            { name: "الآيات من 24 إلى 40", file: "011-24-40" }, { name: "الآيات من 41 إلى 60", file: "011-41-60" },
-            { name: "الآيات من 61 إلى 83", file: "011-61-83" }, { name: "الآيات من 84 إلى 107", file: "011-84-107" },
-            { name: "الآيات من 108 إلى 123", file: "011-108-123" }
-        ],
-        12: [
-            { name: "الآيات من 1 إلى 6", file: "012-1-6" }, { name: "الآيات من 7 إلى 29", file: "012-7-29" },
-            { name: "الآيات من 30 إلى 52", file: "012-30-52" }, { name: "الآيات من 53 إلى 76", file: "012-53-76" },
-            { name: "الآيات من 77 إلى 100", file: "012-77-100" }, { name: "الآيات من 101 إلى 111", file: "012-101-111" }
-        ],
-        13: [
-            { name: "الآيات من 1 إلى 18", file: "013-1-18" }, { name: "الآيات من 19 إلى 34", file: "013-19-34" },
-            { name: "الآيات من 35 إلى 43", file: "013-35-43" }
-        ],
-        14: [
-            { name: "الآيات من 1 إلى 9", file: "014-1-9" }, { name: "الآيات من 10 إلى 27", file: "014-10-27" },
-            { name: "الآيات من 28 إلى 52", file: "014-28-52" }
-        ],
-        15: [
-            { name: "الآيات من 1 إلى 48", file: "015-1-48" }, { name: "الآيات من 49 إلى 99", file: "015-49-99" }
-        ],
-        16: [
-            { name: "الآيات من 1 إلى 29", file: "016-1-29" }, { name: "الآيات من 30 إلى 50", file: "016-30-50" },
-            { name: "الآيات من 51 إلى 74", file: "016-51-74" }, { name: "الآيات من 75 إلى 89", file: "016-75-89" },
-            { name: "الآيات من 90 إلى 110", file: "016-90-110" }, { name: "الآيات من 111 إلى 128", file: "016-111-128" }
-        ],
-        17: [
-            { name: "الآيات من 1 إلى 22", file: "017-1-22" }, { name: "الآيات من 23 إلى 49", file: "017-23-49" },
-            { name: "الآيات من 50 إلى 69", file: "017-50-69" }, { name: "الآيات من 70 إلى 98", file: "017-70-98" },
-            { name: "الآيات من 99 إلى 111", file: "017-99-111" }
-        ],
-        18: [
-            { name: "الآيات من 1 إلى 16", file: "018-1-16" }, { name: "الآيات من 17 إلى 31", file: "018-17-31" },
-            { name: "الآيات من 32 إلى 50", file: "018-32-50" }, { name: "الآيات من 51 إلى 74", file: "018-51-74" },
-            { name: "الآيات من 75 إلى 98", file: "018-75-98" }, { name: "الآيات من 99 إلى 110", file: "018-99-110" }
-        ],
-        19: [
-            { name: "الآيات من 1 إلى 21", file: "019-1-21" }, { name: "الآيات من 22 إلى 58", file: "019-22-58" },
-            { name: "الآيات من 59 إلى 98", file: "019-59-98" }
-        ],
-        20: [
-            { name: "الآيات من 1 إلى 54", file: "020-1-54" }, { name: "الآيات من 55 إلى 82", file: "020-55-82" },
-            { name: "الآيات من 83 إلى 110", file: "020-83-110" }, { name: "الآيات من 111 إلى 135", file: "020-111-135" }
-        ],
-        21: [
-            { name: "الآيات من 1 إلى 28", file: "021-1-28" }, { name: "الآيات من 29 إلى 50", file: "021-29-50" },
-            { name: "الآيات من 51 إلى 82", file: "021-51-82" }, { name: "الآيات من 83 إلى 112", file: "021-83-112" }
-        ],
-        22: [
-            { name: "الآيات من 1 إلى 18", file: "022-1-18" }, { name: "الآيات من 19 إلى 37", file: "022-19-37" },
-            { name: "الآيات من 38 إلى 59", file: "022-38-59" }, { name: "الآيات من 60 إلى 78", file: "022-60-78" }
-        ],
-        23: [
-            { name: "الآيات من 1 إلى 35", file: "023-1-35" }, { name: "الآيات من 36 إلى 74", file: "023-36-74" },
-            { name: "الآيات من 75 إلى 118", file: "023-75-118" }
-        ],
-        24: [
-            { name: "الآيات من 1 إلى 20", file: "024-1-20" }, { name: "الآيات من 21 إلى 34", file: "024-21-34" },
-            { name: "الآيات من 35 إلى 52", file: "024-35-52" }, { name: "الآيات من 53 إلى 64", file: "024-53-64" }
-        ],
-        25: [
-            { name: "الآيات من 1 إلى 20", file: "025-1-20" }, { name: "الآيات من 21 إلى 52", file: "025-21-52" },
-            { name: "الآيات من 53 إلى 77", file: "025-53-77" }
-        ],
-        26: [
-            { name: "الآيات من 1 إلى 51", file: "026-1-51" }, { name: "الآيات من 52 إلى 110", file: "026-52-110" },
-            { name: "الآيات من 111 إلى 180", file: "026-111-180" }, { name: "الآيات من 181 إلى 227", file: "026-181-227" }
-        ],
-        27: [
-            { name: "الآيات من 1 إلى 26", file: "027-1-26" }, { name: "الآيات من 27 إلى 55", file: "027-27-55" },
-            { name: "الآيات من 56 إلى 81", file: "027-56-81" }, { name: "الآيات من 82 إلى 93", file: "027-82-93" }
-        ],
-        28: [
-            { name: "الآيات من 1 إلى 11", file: "028-1-11" }, { name: "الآيات من 12 إلى 28", file: "028-12-28" },
-            { name: "الآيات من 29 إلى 50", file: "028-29-50" }, { name: "الآيات من 51 إلى 75", file: "028-51-75" },
-            { name: "الآيات من 76 إلى 88", file: "028-76-88" }
-        ],
-        29: [
-            { name: "الآيات من 1 إلى 25", file: "029-1-25" }, { name: "الآيات من 26 إلى 45", file: "029-26-45" },
-            { name: "الآيات من 46 إلى 69", file: "029-46-69" }
-        ],
-        30: [
-            { name: "الآيات من 1 إلى 30", file: "030-1-30" }, { name: "الآيات من 31 إلى 53", file: "030-31-53" },
-            { name: "الآيات من 54 إلى 60", file: "030-54-60" }
-        ],
-        31: [
-            { name: "الآيات من 1 إلى 21", file: "031-1-21" }, { name: "الآيات من 22 إلى 34", file: "031-22-34" }
-        ],
-        32: [
-            { name: "الآيات من 1 إلى 10", file: "032-1-10" }, { name: "الآيات من 11 إلى 30", file: "032-11-30" }
-        ],
-        33: [
-            { name: "الآيات من 1 إلى 17", file: "033-1-17" }, { name: "الآيات من 18 إلى 30", file: "033-18-30" },
-            { name: "الآيات من 31 إلى 50", file: "033-31-50" }, { name: "الآيات من 51 إلى 59", file: "033-51-59" },
-            { name: "الآيات من 60 إلى 73", file: "033-60-73" }
-        ],
-        34: [
-            { name: "الآيات من 1 إلى 9", file: "034-1-9" }, { name: "الآيات من 10 إلى 23", file: "034-10-23" },
-            { name: "الآيات من 24 إلى 45", file: "034-24-45" }, { name: "الآيات من 46 إلى 54", file: "034-46-54" }
-        ],
-        35: [
-            { name: "الآيات من 1 إلى 14", file: "035-1-14" }, { name: "الآيات من 15 إلى 40", file: "035-15-40" },
-            { name: "الآيات من 41 إلى 45", file: "035-41-45" }
-        ],
-        36: [
-            { name: "الآيات من 1 إلى 27", file: "036-1-27" }, { name: "الآيات من 28 إلى 59", file: "036-28-59" },
-            { name: "الآيات من 60 إلى 83", file: "036-60-83" }
-        ],
-        37: [
-            { name: "الآيات من 1 إلى 21", file: "037-1-21" }, { name: "الآيات من 22 إلى 82", file: "037-22-82" },
-            { name: "الآيات من 83 إلى 144", file: "037-83-144" }, { name: "الآيات من 145 إلى 182", file: "037-145-182" }
-        ],
-        38: [
-            { name: "الآيات من 1 إلى 20", file: "038-1-20" }, { name: "الآيات من 21 إلى 51", file: "038-21-51" },
-            { name: "الآيات من 52 إلى 88", file: "038-52-88" }
-        ],
-        39: [
-            { name: "الآيات من 1 إلى 7", file: "039-1-7" }, { name: "الآيات من 8 إلى 31", file: "039-8-31" },
-            { name: "الآيات من 32 إلى 52", file: "039-32-52" }, { name: "الآيات من 53 إلى 75", file: "039-53-75" }
-        ],
-        40: [
-            { name: "الآيات من 1 إلى 20", file: "040-1-20" }, { name: "الآيات من 21 إلى 40", file: "040-21-40" },
-            { name: "الآيات من 41 إلى 65", file: "040-41-65" }, { name: "الآيات من 66 إلى 85", file: "040-66-85" }
-        ],
-        41: [
-            { name: "الآيات من 1 إلى 8", file: "041-1-8" }, { name: "الآيات من 9 إلى 24", file: "041-9-24" },
-            { name: "الآيات من 25 إلى 46", file: "041-25-46" }, { name: "الآيات من 47 إلى 54", file: "041-47-54" }
-        ],
-        42: [
-            { name: "الآيات من 1 إلى 12", file: "042-1-12" }, { name: "الآيات من 13 إلى 26", file: "042-13-26" },
-            { name: "الآيات من 27 إلى 50", file: "042-27-50" }, { name: "الآيات من 51 إلى 53", file: "042-51-53" }
-        ],
-        43: [
-            { name: "الآيات من 1 إلى 23", file: "043-1-23" }, { name: "الآيات من 24 إلى 56", file: "043-24-56" },
-            { name: "الآيات من 57 إلى 89", file: "043-57-89" }
-        ],
-        44: [
-            { name: "الآيات من 1 إلى 16", file: "044-1-16" }, { name: "الآيات من 17 إلى 59", file: "044-17-59" }
-        ],
-        45: [
-            { name: "الآيات من 1 إلى 11", file: "045-1-11" }, { name: "الآيات من 12 إلى 37", file: "045-12-37" }
-        ],
-        46: [
-            { name: "الآيات من 1 إلى 20", file: "046-1-20" }, { name: "الآيات من 21 إلى 35", file: "046-21-35" }
-        ],
-        47: [
-            { name: "الآيات من 1 إلى 9", file: "047-1-9" }, { name: "الآيات من 10 إلى 32", file: "047-10-32" },
-            { name: "الآيات من 33 إلى 38", file: "047-33-38" }
-        ],
-        48: [
-            { name: "الآيات من 1 إلى 17", file: "048-1-17" }, { name: "الآيات من 18 إلى 29", file: "048-18-29" }
-        ],
-        49: [
-            { name: "الآيات من 1 إلى 13", file: "049-1-13" }, { name: "الآيات من 14 إلى 18", file: "049-14-18" }
-        ],
-        50: [
-            { name: "الآيات من 1 إلى 26", file: "050-1-26" }, { name: "الآيات من 27 إلى 45", file: "050-27-45" }
-        ],
-        51: [
-            { name: "الآيات من 1 إلى 30", file: "051-1-30" }, { name: "الآيات من 31 إلى 60", file: "051-31-60" }
-        ],
-        52: [
-            { name: "الآيات من 1 إلى 23", file: "052-1-23" }, { name: "الآيات من 24 إلى 49", file: "052-24-49" }
-        ],
-        53: [
-            { name: "الآيات من 1 إلى 25", file: "053-1-25" }, { name: "الآيات من 26 إلى 62", file: "053-26-62" }
-        ],
-        54: [
-            { name: "الآيات من 1 إلى 8", file: "054-1-8" }, { name: "الآيات من 9 إلى 55", file: "054-9-55" }
-        ],
-        55: [
-            { name: "سورة الرحمن كاملة", file: "055" }
-        ],
-        56: [
-            { name: "الآيات من 1 إلى 74", file: "056-1-74" }, { name: "الآيات من 75 إلى 96", file: "056-75-96" }
-        ],
-        57: [
-            { name: "الآيات من 1 إلى 15", file: "057-1-15" }, { name: "الآيات من 16 إلى 29", file: "057-16-29" }
-        ],
-        58: [
-            { name: "الآيات من 1 إلى 13", file: "058-1-13" }, { name: "الآيات من 14 إلى 22", file: "058-14-22" }
-        ],
-        59: [
-            { name: "الآيات من 1 إلى 10", file: "059-1-10" }, { name: "الآيات من 11 إلى 24", file: "059-11-24" }
-        ],
-        60: [
-            { name: "الآيات من 1 إلى 6", file: "060-1-6" }, { name: "الآيات من 7 إلى 13", file: "060-7-13" }
-        ]
-    };
-
-    function toggleModal(show) { document.getElementById('featModal').style.display = show ? 'flex' : 'none'; }
-
-    for(let i=1; i<=20; i++) {
-        let opt = document.createElement('option');
-        opt.value = i; opt.text = i == 1 ? "بدون تكرار" : `${i} مرات`;
-        repeatSelect.appendChild(opt);
-    }
-
-    function normalizeArabic(text) {
-        if (!text) return "";
-        return text.replace(/[أإآء]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064b-\u065f]/g, '');
-    }
-
-    async function init() {
-        try {
-            const res = await fetch("https://www.mp3quran.net/api/v3/reciters?language=ar");
-            const data = await res.json();
-            allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
-
-            const tafsirRes = await fetch("https://www.mp3quran.net/api/v3/tafsir?language=ar");
-            const tafsirData = await tafsirRes.json();
-            tafsirList = tafsirData.tafsirs || [];
-            
-            buildTafsirTypeDropdown();
-            buildMainSurahDropdown();
-
-            const lastSave = JSON.parse(localStorage.getItem('lastQuranSession'));
-            if (lastSave) {
-                currentMode = lastSave.mode || 'مرتل';
-                updateActiveBtn(document.getElementById(getModeBtnId(currentMode)));
-                toggleModeUI();
-                if (currentMode === 'تفسير') {
-                    tafsirTypeSelect.value = lastSave.server;
-                    tafsirMainSurahSelect.value = lastSave.surahId || 1;
-                    updatePartDropdown(lastSave.surahId || 1);
-                    tafsirPartSelect.value = lastSave.fileCode;
-                } else {
-                    filterReciters();
-                    loadSurahs(currentMode === 'معلم');
-                    reciterSelect.value = lastSave.server;
-                    surahSelect.value = lastSave.surahNum;
-                }
-                audio.src = lastSave.audioUrl || getAudioUrl(lastSave.server, lastSave.surahNum);
-                audio.load();
-                audio.currentTime = lastSave.time;
-                repeatStatus.innerText = "🔄 تم استعادة آخر موقع تلقائياً";
-            } else {
-                filterReciters(); loadSurahs(false);
-            }
-        } catch(e) { 
-            repeatStatus.innerText = "خطأ في جلب البيانات من السيرفر"; 
-        }
-    }
-
-    function saveCurrentProgress() {
-        if (!audio.src || audio.paused) return;
-        let activeServer = (currentMode === 'تفسير') ? tafsirTypeSelect.value : reciterSelect.value;
-        let activeSurahId = tafsirMainSurahSelect.value;
-        let activeFileCode = tafsirPartSelect.value;
-        localStorage.setItem('lastQuranSession', JSON.stringify({
-            server: activeServer,
-            surahId: activeSurahId,
-            fileCode: activeFileCode,
-            audioUrl: audio.src,
-            time: audio.currentTime,
-            mode: currentMode
-        }));
-    }
-    setInterval(saveCurrentProgress, 2000);
-
-    function getModeBtnId(m) { 
-        if (m === 'مجود') return 'mojawadMode';
-        if (m === 'معلم') return 'childMode';
-        if (m === 'تفسير') return 'tafsirMode';
-        return 'allMode'; 
-    }
-    
-    function playAudioSafe() { 
-        audio.play().catch(() => { repeatStatus.innerText = "تم التجهيز.. اضغط (▶) للمواصلة"; }); 
-    }
-
-    function getAudioUrl(server, fileCode) {
-        let baseUrl = server.endsWith('/') ? server : server + '/';
-        return `${baseUrl}${fileCode}.mp3`;
-    }
-
-    function buildTafsirTypeDropdown() {
-        tafsirTypeSelect.innerHTML = '';
-        if (tafsirList.length > 0) {
-            tafsirList.forEach(t => {
-                let opt = document.createElement('option');
-                opt.value = t.server;
-                opt.text = `تفسير القرآن الكريم: ${t.name}`;
-                tafsirTypeSelect.appendChild(opt);
-            });
-        } else {
-            let opt = document.createElement('option');
-            opt.value = "https://server17.mp3quran.net/tafseer/tabri/";
-            opt.text = "تفسير القرآن الكريم: الطبري";
-            tafsirTypeSelect.appendChild(opt);
-        }
-    }
-
-    function buildMainSurahDropdown() {
-        tafsirMainSurahSelect.innerHTML = '';
-        surahNames.forEach((name, index) => {
-            let sNum = index + 1;
-            let opt = document.createElement('option');
-            opt.value = sNum;
-            opt.text = `${sNum}. سورة ${name}`;
-            tafsirMainSurahSelect.appendChild(opt);
-        });
-        updatePartDropdown(1);
-    }
-
-    function updatePartDropdown(surahId) {
-        tafsirPartSelect.innerHTML = '';
-        let parts = tafsirDatabase[surahId];
-        
-        if (!parts) {
-            let sNum = parseInt(surahId, 10);
-            let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
-            parts = [{ name: `سورة ${surahNames[sNum-1]} كاملة`, file: sStr }];
-        }
-
-        parts.forEach(p => {
-            let opt = document.createElement('option');
-            opt.value = p.file;
-            opt.text = p.name;
-            tafsirPartSelect.appendChild(opt);
-        });
-    }
-
-    function playTafsirAudio() {
-        if (!tafsirTypeSelect.value || !tafsirPartSelect.value) return;
-        audio.src = getAudioUrl(tafsirTypeSelect.value, tafsirPartSelect.value);
-        currentRepeat = 1;
-        updateStatus();
-        audio.load();
-        playAudioSafe();
-    }
-
-    function autoPlayTrack() {
-        if(!reciterSelect.value || !surahSelect.value) return;
-        audio.src = getAudioUrl(reciterSelect.value, surahSelect.value);
-        currentRepeat = 1;
-        updateStatus();
-        checkFavStatus();
-        audio.load();
-        playAudioSafe();
-    }
-
-    function filterReciters(term = "") {
-        reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
-        const cleanTerm = normalizeArabic(term.trim());
-
-        if (term === "") {
-            let favGroup = document.createElement('optgroup'); 
-            favGroup.label = "⭐ القراء المفضلون";
-            favorites.filter(f => f.mode === currentMode).forEach(f => {
-                let opt = document.createElement('option'); 
-                opt.value = f.server; 
-                opt.text = "❤️ " + f.name; 
-                favGroup.appendChild(opt);
-            });
-            if(favGroup.children.length > 0) reciterSelect.appendChild(favGroup);
-        }
-
-        let allGroup = document.createElement('optgroup'); 
-        allGroup.label = term === "" ? "📋 القائمة الأبجدية" : "🔍 نتائج البحث";
-        
-        allReciters.forEach(r => {
-            const cleanName = normalizeArabic(r.name);
-            if (cleanTerm === "" || cleanName.includes(cleanTerm)) {
-                let found = r.moshaf.find(m => {
-                    if (currentMode === 'معلم') return m.name.includes("معلم");
-                    if (currentMode === 'مجود') return m.name.includes("مجود");
-                    return m.name.includes("مرتل") || m.name.includes("حفص");
-                });
-                if(found) { 
-                    const opt = document.createElement('option'); 
-                    opt.value = found.server; 
-                    opt.text = r.name; 
-                    allGroup.appendChild(opt); 
-                }
-            }
-        });
-        reciterSelect.appendChild(allGroup);
-    }
-
-    function loadSurahs(isAmma) {
-        const prev = surahSelect.value;
-        surahSelect.innerHTML = '';
-        surahNames.forEach((n, i) => {
-            if(!isAmma || i >= 77 || i === 0) {
-                const opt = document.createElement('option'); 
-                opt.value = (i+1).toString().padStart(3, '0');
-                opt.text = `${i+1}. سورة ${n}`; 
-                surahSelect.appendChild(opt);
-            }
-        });
-        if(prev && !isAmma) surahSelect.value = prev;
-    }
-
-    playBtn.onclick = () => { 
-        if(!audio.src) {
-            if(currentMode === 'تفسير') {
-                playTafsirAudio();
-            } else {
-                autoPlayTrack();
-            }
-        } else { 
-            audio.paused ? playAudioSafe() : audio.pause(); 
-        } 
-    };
-    
-    document.getElementById('nextBtn').onclick = () => {
-        if (currentMode === 'تفسير') {
-            if (tafsirPartSelect.selectedIndex < tafsirPartSelect.options.length - 1) {
-                tafsirPartSelect.selectedIndex++;
-            } else if (tafsirMainSurahSelect.selectedIndex < tafsirMainSurahSelect.options.length - 1) {
-                tafsirMainSurahSelect.selectedIndex++;
-                updatePartDropdown(tafsirMainSurahSelect.value);
-                tafsirPartSelect.selectedIndex = 0;
-            } else {
-                tafsirMainSurahSelect.selectedIndex = 0;
-                updatePartDropdown(tafsirMainSurahSelect.value);
-                tafsirPartSelect.selectedIndex = 0;
-            }
-            playTafsirAudio();
-        } else {
-            if(surahSelect.selectedIndex === surahSelect.options.length - 1) {
-                if(reciterSelect.selectedIndex < reciterSelect.options.length - 1) {
-                    reciterSelect.selectedIndex++; surahSelect.selectedIndex = 0; autoPlayTrack();
-                }
-            } else { surahSelect.selectedIndex++; autoPlayTrack(); }
-        }
-    };
-    
-    document.getElementById('prevBtn').onclick = () => { 
-        if (currentMode === 'تفسير') {
-            if (tafsirPartSelect.selectedIndex > 0) {
-                tafsirPartSelect.selectedIndex--;
-            } else if (tafsirMainSurahSelect.selectedIndex > 0) {
-                tafsirMainSurahSelect.selectedIndex--;
-                updatePartDropdown(tafsirMainSurahSelect.value);
-                tafsirPartSelect.selectedIndex = tafsirPartSelect.options.length - 1;
-            } else {
-                tafsirMainSurahSelect.selectedIndex = tafsirMainSurahSelect.options.length - 1;
-                updatePartDropdown(tafsirMainSurahSelect.value);
-                tafsirPartSelect.selectedIndex = tafsirPartSelect.options.length - 1;
-            }
-            playTafsirAudio();
-        } else {
-            if(surahSelect.selectedIndex > 0) { surahSelect.selectedIndex--; autoPlayTrack(); } 
-        }
-    };
-
-    function updateStatus() {
-        let max = parseInt(repeatSelect.value);
-        repeatStatus.innerText = max > 1 ? `تكرار: ${currentRepeat} من ${max}` : "جاري الاستماع الآن...";
-    }
-
-    audio.onplay = () => playBtn.innerText = "⏸";
-    audio.onpause = () => playBtn.innerText = "▶";
-    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر جلب الملف الصوتي"; };
-    
-    audio.onended = () => {
-        let max = parseInt(repeatSelect.value);
-        if (currentRepeat < max) { currentRepeat++; updateStatus(); audio.currentTime = 0; playAudioSafe(); }
-        else { document.getElementById('nextBtn').click(); }
-    };
-
-    audio.ontimeupdate = () => { 
-        if(!isNaN(audio.duration)) { 
-            seekSlider.value = (audio.currentTime/audio.duration)*100; 
-            document.getElementById('currentTime').innerText = formatTime(audio.currentTime); 
-            document.getElementById('duration').innerText = formatTime(audio.duration); 
-        } 
-    };
-    
-    seekSlider.oninput = () => audio.currentTime = audio.duration * (seekSlider.value/100);
-    function formatTime(s) { let m=Math.floor(s/60), sc=Math.floor(s%60); return `${m}:${sc<10?'0'+sc:sc}`; }
-
-    favBtn.onclick = () => {
-        if (currentMode === 'تفسير') return;
-        const server = reciterSelect.value; if(!server) return;
-        let name = reciterSelect.options[reciterSelect.selectedIndex].text.replace("❤️ ", "");
-        const idx = favorites.findIndex(f => f.server === server);
-        if(idx === -1) favorites.push({server, name, mode: currentMode}); else favorites.splice(idx, 1);
-        localStorage.setItem('quranFavs', JSON.stringify(favorites));
-        filterReciters(document.getElementById('searchReciter').value);
-        reciterSelect.value = server; checkFavStatus();
-    };
-
-    function checkFavStatus() { 
-        if (currentMode === 'تفسير') { favBtn.classList.remove('active'); return; }
-        const exists = favorites.some(f => f.server === reciterSelect.value); 
-        favBtn.classList.toggle('active', exists); 
-    }
-
-    reciterSelect.onchange = autoPlayTrack;
-    surahSelect.onchange = autoPlayTrack;
-    
-    tafsirMainSurahSelect.onchange = () => {
-        updatePartDropdown(tafsirMainSurahSelect.value);
-        playTafsirAudio();
-    };
-
-    tafsirPartSelect.onchange = playTafsirAudio;
-    tafsirTypeSelect.onchange = () => {
-        if(audio.src) playTafsirAudio();
-    };
-
-    document.getElementById('searchReciter').oninput = (e) => filterReciters(e.target.value);
-
-    function updateActiveBtn(btn) { document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode')); btn.classList.add('active-mode'); }
-    
-    function toggleModeUI() {
-        const isTafsir = (currentMode === 'تفسير');
-        document.getElementById('normalReciterSection').style.display = isTafsir ? 'none' : 'block';
-        document.getElementById('tafsirSection').style.display = isTafsir ? 'block' : 'none';
-        document.getElementById('pageTitle').innerText = isTafsir ? "تفسير القرآن الكريم" : "إذاعة القرآن الكريم";
-        favBtn.style.display = isTafsir ? 'none' : 'flex';
-    }
-
-    const modes = { 'allMode': 'مرتل', 'mojawadMode': 'مجود', 'childMode': 'معلم', 'tafsirMode': 'تفسير' };
-    Object.keys(modes).forEach(id => {
-        document.getElementById(id).onclick = function() {
-            currentMode = modes[id]; 
-            updateActiveBtn(this); 
-            toggleModeUI();
-
-            if (currentMode === 'تفسير') {
-                playTafsirAudio();
-            } else {
-                loadSurahs(currentMode === 'معلم'); 
-                filterReciters();
-                audio.pause(); 
-                playBtn.innerText = "▶";
-            }
-        };
-    });
-
-    init();
+​<!-- قسم التفسير بنظام القائمتين المنفصلتين -->
+<div id="tafsirSection" style="display: none;">
+<select id="tafsirTypeSelect"></select>
+<select id="tafsirMainSurahSelect"></select>
+<select id="tafsirPartSelect"></select>
+</div>
+​<div class="repeat-box">
+<label style="font-size: 0.9rem; font-weight: bold;">🔁 تكرار التلاوة آلياً:</label>
+<select id="repeatSelect" style="width: auto; margin:0; padding:5px 10px;"></select>
+</div>
+​<div id="repeatStatus" style="font-size: 0.85rem; color: var(--accent); margin-bottom: 10px; min-height: 1.2em;"></div>
+​<div class="progress-box">
+<span id="currentTime">0:00</span>
+<input type="range" id="seekSlider" value="0" min="0" step="1">
+<span id="duration">0:00</span>
+</div>
+​<div class="controls">
+<button id="prevBtn" class="nav-btn">⏭</button>
+<button id="addFav" class="fav-btn">❤</button>
+<button id="playBtn" class="play-btn">▶</button>
+<button id="nextBtn" class="nav-btn">⏮</button>
+</div>
+​<div class="footer">صدقة جارية لجميع موتى المسلمين</div>
+</div>
+​<div id="featModal" class="modal">
+<div class="modal-content">
+<span class="close-modal" onclick="toggleModal(false)">×</span>
+<h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
+<ul class="feat-list">
+<li>⭐ تصفح التفسير بنظام القائمتين بدقة متناهية وسلاسة.</li>
+<li>⭐ ضبط ترتيب وتصحيح سور القرآن (بما فيها سورة الرحمن وما بعدها).</li>
+<li>⭐ استكمال الاستماع تلقائياً من حيث توقفت.</li>
+</ul>
+</div>
+</div>
+​<audio id="audioPlayer" preload="auto"></audio>
+​<script>
+const reciterSelect = document.getElementById('reciterSelect');
+const surahSelect = document.getElementById('surahSelect');
+const tafsirTypeSelect = document.getElementById('tafsirTypeSelect');
+const tafsirMainSurahSelect = document.getElementById('tafsirMainSurahSelect');
+const tafsirPartSelect = document.getElementById('tafsirPartSelect');
+const repeatSelect = document.getElementById('repeatSelect');
+const repeatStatus = document.getElementById('repeatStatus');
+const playBtn = document.getElementById('playBtn');
+const audio = document.getElementById('audioPlayer');
+const seekSlider = document.getElementById('seekSlider');
+const favBtn = document.getElementById('addFav');
+​let allReciters = [];
+let tafsirList = [];
+let currentRepeat = 1;
+let favorites = JSON.parse(localStorage.getItem('quranFavs')) || [];
+let currentMode = 'مرتل';
+​const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
+​const tafsirDatabase = {
+1: [{ name: "سورة الفاتحة كاملة", file: "001" }],
+2: [
+{ name: "الآيات من 1 إلى 25", file: "002-1-25" }, { name: "الآيات من 26 إلى 43", file: "002-26-43" },
+{ name: "الآيات من 44 إلى 59", file: "002-44-59" }, { name: "الآيات من 60 إلى 74", file: "002-60-74" },
+{ name: "الآيات من 75 إلى 91", file: "002-75-91" }, { name: "الآيات من 92 إلى 105", file: "002-92-105" },
+{ name: "الآيات من 106 إلى 123", file: "002-106-123" }, { name: "الآيات من 124 إلى 141", file: "002-124-141" },
+{ name: "الآيات من 142 إلى 157", file: "002-142-157" }, { name: "الآيات من 158 إلى 176", file: "002-158-176" },
+{ name: "الآيات من 177 إلى 188", file: "002-177-188" }, { name: "الآيات من 189 إلى 202", file: "002-189-202" },
+{ name: "الآيات من 203 إلى 218", file: "002-203-218" }, { name: "الآيات من 219 إلى 232", file: "002-219-232" },
+{ name: "الآيات من 233 إلى 242", file: "002-233-242" }, { name: "الآيات من 243 إلى 252", file: "002-243-252" },
+{ name: "الآيات من 253 إلى 262", file: "002-253-262" }, { name: "الآيات من 263 إلى 271", file: "002-263-271" },
+{ name: "الآيات من 272 إلى 282", file: "002-272-282" }, { name: "الآيات من 283 إلى 286", file: "002-283-286" }
+],
+3: [
+{ name: "الآيات من 1 إلى 14", file: "003-1-14" }, { name: "الآيات من 15 إلى 32", file: "003-15-32" },
+{ name: "الآيات من 33 إلى 51", file: "003-33-51" }, { name: "الآيات من 52 إلى 74", file: "003-52-74" },
+{ name: "الآيات من 75 إلى 92", file: "003-75-92" }, { name: "الآيات من 93 إلى 112", file: "003-93-112" },
+{ name: "الآيات من 113 إلى 132", file: "003-113-132" }, { name: "الآيات من 133 إلى 152", file: "003-133-152" },
+{ name: "الآيات من 153 إلى 171", file: "003-153-171" }, { name: "الآيات من 172 إلى 185", file: "003-172-185" },
+{ name: "الآيات من 186 إلى 200", file: "003-186-200" }
+],
+4: [
+{ name: "الآيات من 1 إلى 11", file: "004-1-11" }, { name: "الآيات من 12 إلى 23", file: "004-12-23" },
+{ name: "الآيات من 24 إلى 35", file: "004-24-35" }, { name: "الآيات من 36 إلى 57", file: "004-36-57" },
+{ name: "الآيات من 58 إلى 73", file: "004-58-73" }, { name: "الآيات من 74 إلى 87", file: "004-74-87" },
+{ name: "الآيات من 88 إلى 99", file: "004-88-99" }, { name: "الآيات من 100 إلى 113", file: "004-100-113" },
+{ name: "الآيات من 114 إلى 134", file: "004-114-134" }, { name: "الآيات من 135 إلى 147", file: "004-135-147" },
+{ name: "الآيات من 148 إلى 162", file: "004-148-162" }, { name: "الآيات من 163 إلى 176", file: "004-163-176" }
+],
+5: [
+{ name: "الآيات من 1 إلى 11", file: "005-1-11" }, { name: "الآيات من 12 إلى 26", file: "005-12-26" },
+{ name: "الآيات من 27 إلى 40", file: "005-27-40" }, { name: "الآيات من 41 إلى 50", file: "005-41-50" },
+{ name: "الآيات من 51 إلى 66", file: "005-51-66" }, { name: "الآيات من 67 إلى 81", file: "005-67-81" },
+{ name: "الآيات من 82 إلى 96", file: "005-82-96" }, { name: "الآيات من 97 إلى 108", file: "005-97-108" },
+{ name: "الآيات من 109 إلى 120", file: "005-109-120" }
+],
+6: [
+{ name: "الآيات من 1 إلى 12", file: "006-1-12" }, { name: "الآيات من 13 إلى 35", file: "006-13-35" },
+{ name: "الآيات من 36 إلى 58", file: "006-36-58" }, { name: "الآيات من 59 إلى 73", file: "006-59-73" },
+{ name: "الآيات من 74 إلى 94", file: "006-74-94" }, { name: "الآيات من 95 إلى 110", file: "006-95-110" },
+{ name: "الآيات من 111 إلى 126", file: "006-111-126" }, { name: "الآيات من 127 إلى 140", file: "006-127-140" },
+{ name: "الآيات من 141 إلى 150", file: "006-141-150" }, { name: "الآيات من 151 إلى 165", file: "006-151-165" }
+],
+7: [
+{ name: "الآيات من 1 إلى 30", file: "007-1-30" }, { name: "الآيات من 31 إلى 46", file: "007-31-46" },
+{ name: "الآيات من 47 إلى 64", file: "007-47-64" }, { name: "الآيات من 65 إلى 87", file: "007-65-87" },
+{ name: "الآيات من 88 إلى 116", file: "007-88-116" }, { name: "الآيات من 117 إلى 141", file: "007-117-141" },
+{ name: "الآيات من 142 إلى 155", file: "007-142-155" }, { name: "الآيات من 156 إلى 170", file: "007-156-170" },
+{ name: "الآيات من 171 إلى 188", file: "007-171-188" }, { name: "الآيات من 189 إلى 206", file: "007-189-206" }
+],
+8: [
+{ name: "الآيات من 1 إلى 21", file: "008-1-21" }, { name: "الآيات من 22 إلى 40", file: "008-22-40" },
+{ name: "الآيات من 41 إلى 60", file: "008-41-60" }, { name: "الآيات من 61 إلى 75", file: "008-61-75" }
+],
+9: [
+{ name: "الآيات من 1 إلى 18", file: "009-1-18" }, { name: "الآيات من 19 إلى 33", file: "009-19-33" },
+{ name: "الآيات من 34 إلى 45", file: "009-34-45" }, { name: "الآيات من 46 إلى 59", file: "009-46-59" },
+{ name: "الآيات من 60 إلى 74", file: "009-60-74" }, { name: "الآيات من 75 إلى 92", file: "009-75-92" },
+{ name: "الآيات من 93 إلى 110", file: "009-93-110" }, { name: "الآيات من 111 إلى 121", file: "009-111-121" },
+{ name: "الآيات من 122 إلى 129", file: "009-122-129" }
+],
+10: [
+{ name: "الآيات من 1 إلى 10", file: "010-1-10" }, { name: "الآيات من 11 إلى 25", file: "010-11-25" },
+{ name: "الآيات من 26 إلى 52", file: "010-26-52" }, { name: "الآيات من 53 إلى 70", file: "010-53-70" },
+{ name: "الآيات من 71 إلى 89", file: "010-71-89" }, { name: "الآيات من 90 إلى 109", file: "010-90-109" }
+],
+11: [
+{ name: "الآيات من 1 إلى 5", file: "011-1-5" }, { name: "الآيات من 6 إلى 23", file: "011-6-23" },
+{ name: "الآيات من 24 إلى 40", file: "011-24-40" }, { name: "الآيات من 41 إلى 60", file: "011-41-60" },
+{ name: "الآيات من 61 إلى 83", file: "011-61-83" }, { name: "الآيات من 84 إلى 107", file: "011-84-107" },
+{ name: "الآيات من 108 إلى 123", file: "011-108-123" }
+],
+12: [
+{ name: "الآيات من 1 إلى 6", file: "012-1-6" }, { name: "الآيات من 7 إلى 29", file: "012-7-29" },
+{ name: "الآيات من 30 إلى 52", file: "012-30-52" }, { name: "الآيات من 53 إلى 76", file: "012-53-76" },
+{ name: "الآيات من 77 إلى 100", file: "012-77-100" }, { name: "الآيات من 101 إلى 111", file: "012-101-111" }
+],
+13: [
+{ name: "الآيات من 1 إلى 18", file: "013-1-18" }, { name: "الآيات من 19 إلى 34", file: "013-19-34" },
+{ name: "الآيات من 35 إلى 43", file: "013-35-43" }
+],
+14: [
+{ name: "الآيات من 1 إلى 9", file: "014-1-9" }, { name: "الآيات من 10 إلى 27", file: "014-10-27" },
+{ name: "الآيات من 28 إلى 52", file: "014-28-52" }
+],
+15: [
+{ name: "الآيات من 1 إلى 48", file: "015-1-48" }, { name: "الآيات من 49 إلى 99", file: "015-49-99" }
+],
+16: [
+{ name: "الآيات من 1 إلى 29", file: "016-1-29" }, { name: "الآيات من 30 إلى 50", file: "016-30-50" },
+{ name: "الآيات من 51 إلى 74", file: "016-51-74" }, { name: "الآيات من 75 إلى 89", file: "016-75-89" },
+{ name: "الآيات من 90 إلى 110", file: "016-90-110" }, { name: "الآيات من 111 إلى 128", file: "016-111-128" }
+],
+17: [
+{ name: "الآيات من 1 إلى 22", file: "017-1-22" }, { name: "الآيات من 23 إلى 49", file: "017-23-49" },
+{ name: "الآيات من 50 إلى 69", file: "017-50-69" }, { name: "الآيات من 70 إلى 98", file: "017-70-98" },
+{ name: "الآيات من 99 إلى 111", file: "017-99-111" }
+],
+18: [
+{ name: "الآيات من 1 إلى 16", file: "018-1-16" }, { name: "الآيات من 17 إلى 31", file: "018-17-31" },
+{ name: "الآيات من 32 إلى 50", file: "018-32-50" }, { name: "الآيات من 51 إلى 74", file: "018-51-74" },
+{ name: "الآيات من 75 إلى 98", file: "018-75-98" }, { name: "الآيات من 99 إلى 110", file: "018-99-110" }
+],
+19: [
+{ name: "الآيات من 1 إلى 21", file: "019-1-21" }, { name: "الآيات من 22 إلى 58", file: "019-22-58" },
+{ name: "الآيات من 59 إلى 98", file: "019-59-98" }
+],
+20: [
+{ name: "الآيات من 1 إلى 54", file: "020-1-54" }, { name: "الآيات من 55 إلى 82", file: "020-55-82" },
+{ name: "الآيات من 83 إلى 110", file: "020-83-110" }, { name: "الآيات من 111 إلى 135", file: "020-111-135" }
+],
+21: [
+{ name: "الآيات من 1 إلى 28", file: "021-1-28" }, { name: "الآيات من 29 إلى 50", file: "021-29-50" },
+{ name: "الآيات من 51 إلى 82", file: "021-51-82" }, { name: "الآيات من 83 إلى 112", file: "021-83-112" }
+],
+22: [
+{ name: "الآيات من 1 إلى 18", file: "022-1-18" }, { name: "الآيات من 19 إلى 37", file: "022-19-37" },
+{ name: "الآيات من 38 إلى 59", file: "022-38-59" }, { name: "الآيات من 60 إلى 78", file: "022-60-78" }
+],
+23: [
+{ name: "الآيات من 1 إلى 35", file: "023-1-35" }, { name: "الآيات من 36 إلى 74", file: "023-36-74" },
+{ name: "الآيات من 75 إلى 118", file: "023-75-118" }
+],
+24: [
+{ name: "الآيات من 1 إلى 20", file: "024-1-20" }, { name: "الآيات من 21 إلى 34", file: "024-21-34" },
+{ name: "الآيات من 35 إلى 52", file: "024-35-52" }, { name: "الآيات من 53 إلى 64", file: "024-53-64" }
+],
+25: [
+{ name: "الآيات من 1 إلى 20", file: "025-1-20" }, { name: "الآيات من 21 إلى 52", file: "025-21-52" },
+{ name: "الآيات من 53 إلى 77", file: "025-53-77" }
+],
+26: [
+{ name: "الآيات من 1 إلى 51", file: "026-1-51" }, { name: "الآيات من 52 إلى 110", file: "026-52-110" },
+{ name: "الآيات من 111 إلى 180", file: "026-111-180" }, { name: "الآيات من 181 إلى 227", file: "026-181-227" }
+],
+27: [
+{ name: "الآيات من 1 إلى 26", file: "027-1-26" }, { name: "الآيات من 27 إلى 55", file: "027-27-55" },
+{ name: "الآيات من 56 إلى 81", file: "027-56-81" }, { name: "الآيات من 82 إلى 93", file: "027-82-93" }
+],
+28: [
+{ name: "الآيات من 1 إلى 11", file: "028-1-11" }, { name: "الآيات من 12 إلى 28", file: "028-12-28" },
+{ name: "الآيات من 29 إلى 50", file: "028-29-50" }, { name: "الآيات من 51 إلى 75", file: "028-51-75" },
+{ name: "الآيات من 76 إلى 88", file: "028-76-88" }
+],
+29: [
+{ name: "الآيات من 1 إلى 25", file: "029-1-25" }, { name: "الآيات من 26 إلى 45", file: "029-26-45" },
+{ name: "الآيات من 46 إلى 69", file: "029-46-69" }
+],
+30: [
+{ name: "الآيات من 1 إلى 30", file: "030-1-30" }, { name: "الآيات من 31 إلى 53", file: "030-31-53" },
+{ name: "الآيات من 54 إلى 60", file: "030-54-60" }
+],
+31: [
+{ name: "الآيات من 1 إلى 21", file: "031-1-21" }, { name: "الآيات من 22 إلى 34", file: "031-22-34" }
+],
+32: [
+{ name: "الآيات من 1 إلى 10", file: "032-1-10" }, { name: "الآيات من 11 إلى 30", file: "032-11-30" }
+],
+33: [
+{ name: "الآيات من 1 إلى 17", file: "033-1-17" }, { name: "الآيات من 18 إلى 30", file: "033-18-30" },
+{ name: "الآيات من 31 إلى 50", file: "033-31-50" }, { name: "الآيات من 51 إلى 59", file: "033-51-59" },
+{ name: "الآيات من 60 إلى 73", file: "033-60-73" }
+],
+34: [
+{ name: "الآيات من 1 إلى 9", file: "034-1-9" }, { name: "الآيات من 10 إلى 23", file: "034-10-23" },
+{ name: "الآيات من 24 إلى 45", file: "034-24-45" }, { name: "الآيات من 46 إلى 54", file: "034-46-54" }
+],
+35: [
+{ name: "الآيات من 1 إلى 14", file: "035-1-14" }, { name: "الآيات من 15 إلى 40", file: "035-15-40" },
+{ name: "الآيات من 41 إلى 45", file: "035-41-45" }
+],
+36: [
+{ name: "الآيات من 1 إلى 27", file: "036-1-27" }, { name: "الآيات من 28 إلى 59", file: "036-28-59" },
+{ name: "الآيات من 60 إلى 83", file: "036-60-83" }
+],
+37: [
+{ name: "الآيات من 1 إلى 21", file: "037-1-21" }, { name: "الآيات من 22 إلى 82", file: "037-22-82" },
+{ name: "الآيات من 83 إلى 144", file: "037-83-144" }, { name: "الآيات من 145 إلى 182", file: "037-145-182" }
+],
+38: [
+{ name: "الآيات من 1 إلى 20", file: "038-1-20" }, { name: "الآيات من 21 إلى 51", file: "038-21-51" },
+{ name: "الآيات من 52 إلى 88", file: "038-52-88" }
+],
+39: [
+{ name: "الآيات من 1 إلى 7", file: "039-1-7" }, { name: "الآيات من 8 إلى 31", file: "039-8-31" },
+{ name: "الآيات من 32 إلى 52", file: "039-32-52" }, { name: "الآيات من 53 إلى 75", file: "039-53-75" }
+],
+40: [
+{ name: "الآيات من 1 إلى 20", file: "040-1-20" }, { name: "الآيات من 21 إلى 40", file: "040-21-40" },
+{ name: "الآيات من 41 إلى 65", file: "040-41-65" }, { name: "الآيات من 66 إلى 85", file: "040-66-85" }
+],
+41: [
+{ name: "الآيات من 1 إلى 8", file: "041-1-8" }, { name: "الآيات من 9 إلى 24", file: "041-9-24" },
+{ name: "الآيات من 25 إلى 46", file: "041-25-46" }, { name: "الآيات من 47 إلى 54", file: "041-47-54" }
+],
+42: [
+{ name: "الآيات من 1 إلى 12", file: "042-1-12" }, { name: "الآيات من 13 إلى 26", file: "042-13-26" },
+{ name: "الآيات من 27 إلى 50", file: "042-27-50" }, { name: "الآيات من 51 إلى 53", file: "042-51-53" }
+],
+43: [
+{ name: "الآيات من 1 إلى 23", file: "043-1-23" }, { name: "الآيات من 24 إلى 56", file: "043-24-56" },
+{ name: "الآيات من 57 إلى 89", file: "043-57-89" }
+],
+44: [
+{ name: "الآيات من 1 إلى 16", file: "044-1-16" }, { name: "الآيات من 17 إلى 59", file: "044-17-59" }
+],
+45: [
+{ name: "الآيات من 1 إلى 11", file: "045-1-11" }, { name: "الآيات من 12 إلى 37", file: "045-12-37" }
+],
+46: [
+{ name: "الآيات من 1 إلى 20", file: "046-1-20" }, { name: "الآيات من 21 إلى 35", file: "046-21-35" }
+],
+47: [
+{ name: "الآيات من 1 إلى 9", file: "047-1-9" }, { name: "الآيات من 10 إلى 32", file: "047-10-32" },
+{ name: "الآيات من 33 إلى 38", file: "047-33-38" }
+],
+48: [
+{ name: "الآيات من 1 إلى 17", file: "048-1-17" }, { name: "الآيات من 18 إلى 29", file: "048-18-29" }
+],
+49: [
+{ name: "الآيات من 1 إلى 13", file: "049-1-13" }, { name: "الآيات من 14 إلى 18", file: "049-14-18" }
+],
+50: [
+{ name: "الآيات من 1 إلى 26", file: "050-1-26" }, { name: "الآيات من 27 إلى 45", file: "050-27-45" }
+],
+51: [
+{ name: "الآيات من 1 إلى 30", file: "051-1-30" }, { name: "الآيات من 31 إلى 60", file: "051-31-60" }
+],
+52: [
+{ name: "الآيات من 1 إلى 23", file: "052-1-23" }, { name: "الآيات من 24 إلى 49", file: "052-24-49" }
+],
+53: [
+{ name: "الآيات من 1 إلى 25", file: "053-1-25" }, { name: "الآيات من 26 إلى 62", file: "053-26-62" }
+],
+54: [
+{ name: "الآيات من 1 إلى 8", file: "054-1-8" }, { name: "الآيات من 9 إلى 55", file: "054-9-55" }
+],
+55: [
+{ name: "سورة الرحمن كاملة", file: "055" }
+],
+56: [
+{ name: "الآيات من 1 إلى 74", file: "056-1-74" }, { name: "الآيات من 75 إلى 96", file: "056-75-96" }
+],
+57: [
+{ name: "الآيات من 1 إلى 15", file: "057-1-15" }, { name: "الآيات من 16 إلى 29", file: "057-16-29" }
+],
+58: [
+{ name: "الآيات من 1 إلى 13", file: "058-1-13" }, { name: "الآيات من 14 إلى 22", file: "058-14-22" }
+],
+59: [
+{ name: "الآيات من 1 إلى 10", file: "059-1-10" }, { name: "الآيات من 11 إلى 24", file: "059-11-24" }
+],
+60: [
+{ name: "الآيات من 1 إلى 6", file: "060-1-6" }, { name: "الآيات من 7 إلى 13", file: "060-7-13" }
+]
+};
+​function toggleModal(show) { document.getElementById('featModal').style.display = show ? 'flex' : 'none'; }
+​for(let i=1; i<=20; i++) {
+let opt = document.createElement('option');
+opt.value = i; opt.text = i == 1 ? "بدون تكرار" : ${i} مرات;
+repeatSelect.appendChild(opt);
+}
+​function normalizeArabic(text) {
+if (!text) return "";
+return text.replace(/[أإآء]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064b-\u065f]/g, '');
+}
+​async function init() {
+try {
+const res = await fetch("https://www.mp3quran.net/api/v3/reciters?language=ar");
+const data = await res.json();
+allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+​const tafsirRes = await fetch("https://www.mp3quran.net/api/v3/tafsir?language=ar");
+const tafsirData = await tafsirRes.json();
+tafsirList = tafsirData.tafsirs || [];
+​buildTafsirTypeDropdown();
+buildMainSurahDropdown();
+​const lastSave = JSON.parse(localStorage.getItem('lastQuranSession'));
+if (lastSave) {
+currentMode = lastSave.mode || 'مرتل';
+updateActiveBtn(document.getElementById(getModeBtnId(currentMode)));
+toggleModeUI();
+if (currentMode === 'تفسير') {
+tafsirTypeSelect.value = lastSave.server;
+tafsirMainSurahSelect.value = lastSave.surahId || 1;
+updatePartDropdown(lastSave.surahId || 1);
+tafsirPartSelect.value = lastSave.fileCode;
+} else {
+filterReciters();
+loadSurahs(currentMode === 'معلم');
+reciterSelect.value = lastSave.server;
+surahSelect.value = lastSave.surahNum;
+}
+audio.src = lastSave.audioUrl || getAudioUrl(lastSave.server, lastSave.surahNum);
+audio.load();
+audio.currentTime = lastSave.time;
+repeatStatus.innerText = "🔄 تم استعادة آخر موقع تلقائياً";
+} else {
+filterReciters(); loadSurahs(false);
+}
+} catch(e) {
+repeatStatus.innerText = "خطأ في جلب البيانات من السيرفر";
+}
+}
+​function saveCurrentProgress() {
+if (!audio.src || audio.paused) return;
+let activeServer = (currentMode === 'تفسير') ? tafsirTypeSelect.value : reciterSelect.value;
+let activeSurahId = tafsirMainSurahSelect.value;
+let activeFileCode = tafsirPartSelect.value;
+localStorage.setItem('lastQuranSession', JSON.stringify({
+server: activeServer,
+surahId: activeSurahId,
+fileCode: activeFileCode,
+audioUrl: audio.src,
+time: audio.currentTime,
+mode: currentMode
+}));
+}
+setInterval(saveCurrentProgress, 2000);
+​function getModeBtnId(m) {
+if (m === 'مجود') return 'mojawadMode';
+if (m === 'معلم') return 'childMode';
+if (m === 'تفسير') return 'tafsirMode';
+return 'allMode';
+}
+​function playAudioSafe() {
+audio.play().catch(() => { repeatStatus.innerText = "تم التجهيز.. اضغط (▶) للمواصلة"; });
+}
+​function getAudioUrl(server, fileCode) {
+let baseUrl = server.endsWith('/') ? server : server + '/';
+return ${baseUrl}${fileCode}.mp3;
+}
+​function buildTafsirTypeDropdown() {
+tafsirTypeSelect.innerHTML = '';
+​// إضافة خيار الشيخ عبدالله الأسمري - المختصر في التفسير
+let asmariOpt = document.createElement('option');
+asmariOpt.value = "asmari_drive";
+asmariOpt.text = "المختصر في تفسير القرآن الكريم - الشيخ عبدالله الأسمري";
+tafsirTypeSelect.appendChild(asmariOpt);
+​if (tafsirList.length > 0) {
+tafsirList.forEach(t => {
+let opt = document.createElement('option');
+opt.value = t.server;
+opt.text = تفسير القرآن الكريم: ${t.name};
+tafsirTypeSelect.appendChild(opt);
+});
+} else {
+let opt = document.createElement('option');
+opt.value = "https://server17.mp3quran.net/tafseer/tabri/";
+opt.text = "تفسير القرآن الكريم: الطبري";
+tafsirTypeSelect.appendChild(opt);
+}
+}
+​function buildMainSurahDropdown() {
+tafsirMainSurahSelect.innerHTML = '';
+surahNames.forEach((name, index) => {
+let sNum = index + 1;
+let opt = document.createElement('option');
+opt.value = sNum;
+opt.text = ${sNum}. سورة ${name};
+tafsirMainSurahSelect.appendChild(opt);
+});
+updatePartDropdown(1);
+}
+​function updatePartDropdown(surahId) {
+tafsirPartSelect.innerHTML = '';
+​if (tafsirTypeSelect.value === "asmari_drive") {
+let sNum = parseInt(surahId, 10);
+let sStr = sNum < 10 ? 00${sNum} : (sNum < 100 ? 0${sNum} : ${sNum});
+let opt = document.createElement('option');
+opt.value = almokhtasar_fe_tafseer_quran_${sStr};
+opt.text = سورة ${surahNames[sNum-1]} كاملة (الشيخ عبد الله الأسمري);
+tafsirPartSelect.appendChild(opt);
+return;
+}
+​let parts = tafsirDatabase[surahId];
+​if (!parts) {
+let sNum = parseInt(surahId, 10);
+let sStr = sNum < 10 ? 00${sNum} : (sNum < 100 ? 0${sNum} : ${sNum});
+parts = [{ name: سورة ${surahNames[sNum-1]} كاملة, file: sStr }];
+}
+​parts.forEach(p => {
+let opt = document.createElement('option');
+opt.value = p.file;
+opt.text = p.name;
+tafsirPartSelect.appendChild(opt);
+});
+}
+​function playTafsirAudio() {
+if (!tafsirTypeSelect.value || !tafsirPartSelect.value) return;
+​if (tafsirTypeSelect.value === "asmari_drive") {
+// ضع هنا رابط الاستضافة أو السيرفر المباشر لملفات الشيخ عبدالله الأسمري
+let baseUrl = "https://your-server-or-drive-link-here/";
+baseUrl = baseUrl.endsWith('/') ? baseUrl : baseUrl + '/';
+audio.src = ${baseUrl}${tafsirPartSelect.value}.mp3;
+} else {
+audio.src = getAudioUrl(tafsirTypeSelect.value, tafsirPartSelect.value);
+}
+​currentRepeat = 1;
+updateStatus();
+audio.load();
+playAudioSafe();
+}
+​function autoPlayTrack() {
+if(!reciterSelect.value || !surahSelect.value) return;
+audio.src = getAudioUrl(reciterSelect.value, surahSelect.value);
+currentRepeat = 1;
+updateStatus();
+checkFavStatus();
+audio.load();
+playAudioSafe();
+}
+​function filterReciters(term = "") {
+reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
+const cleanTerm = normalizeArabic(term.trim());
+​if (term === "") {
+let favGroup = document.createElement('optgroup');
+favGroup.label = "⭐ القراء المفضلون";
+favorites.filter(f => f.mode === currentMode).forEach(f => {
+let opt = document.createElement('option');
+opt.value = f.server;
+opt.text = "❤️ " + f.name;
+favGroup.appendChild(opt);
+});
+if(favGroup.children.length > 0) reciterSelect.appendChild(favGroup);
+}
+​let allGroup = document.createElement('optgroup');
+allGroup.label = term === "" ? "📋 القائمة الأبجدية" : "🔍 نتائج البحث";
+​allReciters.forEach(r => {
+const cleanName = normalizeArabic(r.name);
+if (cleanTerm === "" || cleanName.includes(cleanTerm)) {
+let found = r.moshaf.find(m => {
+if (currentMode === 'معلم') return m.name.includes("معلم");
+if (currentMode === 'مجود') return m.name.includes("مجود");
+return m.name.includes("مرتل") || m.name.includes("حفص");
+});
+if(found) {
+const opt = document.createElement('option');
+opt.value = found.server;
+opt.text = r.name;
+allGroup.appendChild(opt);
+}
+}
+});
+reciterSelect.appendChild(allGroup);
+}
+​function loadSurahs(isAmma) {
+const prev = surahSelect.value;
+surahSelect.innerHTML = '';
+surahNames.forEach((n, i) => {
+if(!isAmma || i >= 77 || i === 0) {
+const opt = document.createElement('option');
+opt.value = (i+1).toString().padStart(3, '0');
+opt.text = ${i+1}. سورة ${n};
+surahSelect.appendChild(opt);
+}
+});
+if(prev && !isAmma) surahSelect.value = prev;
+}
+​playBtn.onclick = () => {
+if(!audio.src) {
+if(currentMode === 'تفسير') {
+playTafsirAudio();
+} else {
+autoPlayTrack();
+}
+} else {
+audio.paused ? playAudioSafe() : audio.pause();
+}
+};
+​document.getElementById('nextBtn').onclick = () => {
+if (currentMode === 'تفسير') {
+if (tafsirPartSelect.selectedIndex < tafsirPartSelect.options.length - 1) {
+tafsirPartSelect.selectedIndex++;
+} else if (tafsirMainSurahSelect.selectedIndex < tafsirMainSurahSelect.options.length - 1) {
+tafsirMainSurahSelect.selectedIndex++;
+updatePartDropdown(tafsirMainSurahSelect.value);
+tafsirPartSelect.selectedIndex = 0;
+} else {
+tafsirMainSurahSelect.selectedIndex = 0;
+updatePartDropdown(tafsirMainSurahSelect.value);
+tafsirPartSelect.selectedIndex = 0;
+}
+playTafsirAudio();
+} else {
+if(surahSelect.selectedIndex === surahSelect.options.length - 1) {
+if(reciterSelect.selectedIndex < reciterSelect.options.length - 1) {
+reciterSelect.selectedIndex++; surahSelect.selectedIndex = 0; autoPlayTrack();
+}
+} else { surahSelect.selectedIndex++; autoPlayTrack(); }
+}
+};
+​document.getElementById('prevBtn').onclick = () => {
+if (currentMode === 'تفسير') {
+if (tafsirPartSelect.selectedIndex > 0) {
+tafsirPartSelect.selectedIndex--;
+} else if (tafsirMainSurahSelect.selectedIndex > 0) {
+tafsirMainSurahSelect.selectedIndex--;
+updatePartDropdown(tafsirMainSurahSelect.value);
+tafsirPartSelect.selectedIndex = tafsirPartSelect.options.length - 1;
+} else {
+tafsirMainSurahSelect.selectedIndex = tafsirMainSurahSelect.options.length - 1;
+updatePartDropdown(tafsirMainSurahSelect.value);
+tafsirPartSelect.selectedIndex = tafsirPartSelect.options.length - 1;
+}
+playTafsirAudio();
+} else {
+if(surahSelect.selectedIndex > 0) { surahSelect.selectedIndex--; autoPlayTrack(); }
+}
+};
+​function updateStatus() {
+let max = parseInt(repeatSelect.value);
+repeatStatus.innerText = max > 1 ? تكرار: ${currentRepeat} من ${max} : "جاري الاستماع الآن...";
+}
+​audio.onplay = () => playBtn.innerText = "⏸";
+audio.onpause = () => playBtn.innerText = "▶";
+audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر جلب الملف الصوتي"; };
+​audio.onended = () => {
+let max = parseInt(repeatSelect.value);
+if (currentRepeat < max) { currentRepeat++; updateStatus(); audio.currentTime = 0; playAudioSafe(); }
+else { document.getElementById('nextBtn').click(); }
+};
+​audio.ontimeupdate = () => {
+if(!isNaN(audio.duration)) {
+seekSlider.value = (audio.currentTime/audio.duration)*100;
+document.getElementById('currentTime').innerText = formatTime(audio.currentTime);
+document.getElementById('duration').innerText = formatTime(audio.duration);
+}
+};
+​seekSlider.oninput = () => audio.currentTime = audio.duration * (seekSlider.value/100);
+function formatTime(s) { let m=Math.floor(s/60), sc=Math.floor(s%60); return ${m}:${sc<10?'0'+sc:sc}; }
+​favBtn.onclick = () => {
+if (currentMode === 'تفسير') return;
+const server = reciterSelect.value; if(!server) return;
+let name = reciterSelect.options[reciterSelect.selectedIndex].text.replace("❤️ ", "");
+const idx = favorites.findIndex(f => f.server === server);
+if(idx === -1) favorites.push({server, name, mode: currentMode}); else favorites.splice(idx, 1);
+localStorage.setItem('quranFavs', JSON.stringify(favorites));
+filterReciters(document.getElementById('searchReciter').value);
+reciterSelect.value = server; checkFavStatus();
+};
+​function checkFavStatus() {
+if (currentMode === 'تفسير') { favBtn.classList.remove('active'); return; }
+const exists = favorites.some(f => f.server === reciterSelect.value);
+favBtn.classList.toggle('active', exists);
+}
+​reciterSelect.onchange = autoPlayTrack;
+surahSelect.onchange = autoPlayTrack;
+​tafsirMainSurahSelect.onchange = () => {
+updatePartDropdown(tafsirMainSurahSelect.value);
+playTafsirAudio();
+};
+​tafsirPartSelect.onchange = playTafsirAudio;
+tafsirTypeSelect.onchange = () => {
+updatePartDropdown(tafsirMainSurahSelect.value);
+if(audio.src) playTafsirAudio();
+};
+​document.getElementById('searchReciter').oninput = (e) => filterReciters(e.target.value);
+​function updateActiveBtn(btn) { document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode')); btn.classList.add('active-mode'); }
+​function toggleModeUI() {
+const isTafsir = (currentMode === 'تفسير');
+document.getElementById('normalReciterSection').style.display = isTafsir ? 'none' : 'block';
+document.getElementById('tafsirSection').style.display = isTafsir ? 'block' : 'none';
+document.getElementById('pageTitle').innerText = isTafsir ? "تفسير القرآن الكريم" : "إذاعة القرآن الكريم";
+favBtn.style.display = isTafsir ? 'none' : 'flex';
+}
+​const modes = { 'allMode': 'مرتل', 'mojawadMode': 'مجود', 'childMode': 'معلم', 'tafsirMode': 'تفسير' };
+Object.keys(modes).forEach(id => {
+document.getElementById(id).onclick = function() {
+currentMode = modes[id];
+updateActiveBtn(this);
+toggleModeUI();
+​if (currentMode === 'تفسير') {
+playTafsirAudio();
+} else {
+loadSurahs(currentMode === 'معلم');
+filterReciters();
+audio.pause();
+playBtn.innerText = "▶";
+}
+};
+});
+​init();
 </script>
 </body>
 </html>
