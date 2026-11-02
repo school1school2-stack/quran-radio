@@ -48,18 +48,26 @@
             box-sizing: border-box; text-align: right;
         }
 
-        /* شبكة أزرار السور للتفسير تماماً مثل TV Quran */
-        .tafsir-grid { 
-            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; 
-            max-height: 220px; overflow-y: auto; margin-bottom: 12px; 
+        /* تصميم قائمة سور التفسير تماماً مثل TV Quran (صفوف مع أزرار تشغيل) */
+        .tafsir-list-container { 
+            display: flex; flex-direction: column; gap: 8px; 
+            max-height: 250px; overflow-y: auto; margin-bottom: 12px; 
             padding: 5px; background: rgba(255,255,255,0.05); border-radius: 12px; 
         }
-        .surah-tafsir-btn {
-            background: white; color: #1e3c72; border: none; padding: 10px;
-            border-radius: 10px; font-weight: bold; font-size: 0.9rem; cursor: pointer;
-            transition: 0.2s; text-align: center;
+        .tafsir-surah-row {
+            background: white; color: #1e3c72; border-radius: 12px; padding: 10px 15px;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .surah-tafsir-btn:hover, .surah-tafsir-btn.active { background: var(--accent); color: black; }
+        .tafsir-surah-row span { font-weight: bold; font-size: 0.95rem; }
+        
+        .surah-play-btn {
+            background: var(--accent); border: none; width: 38px; height: 38px;
+            border-radius: 50%; cursor: pointer; display: flex; align-items: center;
+            justify-content: center; font-size: 1rem; color: #333; transition: 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .surah-play-btn:hover { background: #d4ac0d; }
 
         .repeat-box { 
             background: rgba(255,255,255,0.1); padding: 12px; border-radius: 12px; 
@@ -115,10 +123,10 @@
         <select id="surahSelect"></select>
     </div>
 
-    <!-- قسم شبكة التفسير (مطابق لـ TV Quran) -->
+    <!-- قسم التفسير بتصميم مطابق لـ TV Quran (صفوف مع أزرار تشغيل مستقلة) -->
     <div id="tafsirSection" style="display: none;">
         <select id="tafsirTypeSelect"></select>
-        <div id="tafsirSurahGrid" class="tafsir-grid"></div>
+        <div id="tafsirSurahList" class="tafsir-list-container"></div>
     </div>
 
     <div class="repeat-box">
@@ -162,7 +170,7 @@
     const reciterSelect = document.getElementById('reciterSelect');
     const surahSelect = document.getElementById('surahSelect');
     const tafsirTypeSelect = document.getElementById('tafsirTypeSelect');
-    const tafsirSurahGrid = document.getElementById('tafsirSurahGrid');
+    const tafsirSurahList = document.getElementById('tafsirSurahList');
     const repeatSelect = document.getElementById('repeatSelect');
     const repeatStatus = document.getElementById('repeatStatus');
     const playBtn = document.getElementById('playBtn');
@@ -203,7 +211,7 @@
             tafsirList = tafsirData.tafsirs || [];
             
             buildTafsirTypeDropdown();
-            buildTafsirSurahGrid();
+            buildTafsirSurahList();
 
             const lastSave = JSON.parse(localStorage.getItem('lastQuranSession'));
             if (lastSave) {
@@ -255,14 +263,12 @@
         audio.play().catch(() => { repeatStatus.innerText = "تم التجهيز.. اضغط (▶) للمواصلة"; }); 
     }
 
-    // الدالة المُصححة للروابط: تتأكد من أن روابط التفسير متوافقة 100% مع خوادم TV Quran
     function getAudioUrl(server, surahNum) {
         let sNum = parseInt(surahNum, 10);
         let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
 
         if (currentMode === 'تفسير') {
             let baseUrl = server.endsWith('/') ? server : server + '/';
-            // ضمان التوافق التام مع مسارات خوادم التفسير الرسمية
             return `${baseUrl}${sStr}.mp3`;
         }
         return `${server}${sStr}.mp3`;
@@ -285,20 +291,29 @@
         }
     }
 
-    function buildTafsirSurahGrid() {
-        tafsirSurahGrid.innerHTML = '';
+    function buildTafsirSurahList() {
+        tafsirSurahList.innerHTML = '';
         surahNames.forEach((name, index) => {
             let sNum = index + 1;
-            let btn = document.createElement('button');
-            btn.className = `surah-tafsir-btn ${selectedTafsirSurah === sNum ? 'active' : ''}`;
-            btn.innerText = `سورة ${name}`;
-            btn.onclick = () => {
+            let row = document.createElement('div');
+            row.className = 'tafsir-surah-row';
+            
+            let titleSpan = document.createElement('span');
+            titleSpan.innerText = `سورة ${name} كاملة`;
+            
+            let playButton = document.createElement('button');
+            playButton.className = 'surah-play-btn';
+            playButton.innerHTML = '▶';
+            playButton.title = `تشغيل سورة ${name}`;
+            
+            playButton.onclick = () => {
                 selectedTafsirSurah = sNum;
-                document.querySelectorAll('.surah-tafsir-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
                 playTafsirAudio();
             };
-            tafsirSurahGrid.appendChild(btn);
+
+            row.appendChild(titleSpan);
+            row.appendChild(playButton);
+            tafsirSurahList.appendChild(row);
         });
     }
 
@@ -375,8 +390,12 @@
 
     playBtn.onclick = () => { 
         if(!audio.src) {
-            if(currentMode === 'تفسير') playTafsirAudio();
-            else autoPlayTrack();
+            if(currentMode === 'تفسير') {
+                selectedTafsirSurah = 1;
+                playTafsirAudio();
+            } else {
+                autoPlayTrack();
+            }
         } else { 
             audio.paused ? playAudioSafe() : audio.pause(); 
         } 
@@ -385,7 +404,6 @@
     document.getElementById('nextBtn').onclick = () => {
         if (currentMode === 'تفسير') {
             if (selectedTafsirSurah < 114) { selectedTafsirSurah++; } else { selectedTafsirSurah = 1; }
-            buildTafsirSurahGrid();
             playTafsirAudio();
         } else {
             if(surahSelect.selectedIndex === surahSelect.options.length - 1) {
@@ -399,7 +417,6 @@
     document.getElementById('prevBtn').onclick = () => { 
         if (currentMode === 'تفسير') {
             if (selectedTafsirSurah > 1) { selectedTafsirSurah--; } else { selectedTafsirSurah = 114; }
-            buildTafsirSurahGrid();
             playTafsirAudio();
         } else {
             if(surahSelect.selectedIndex > 0) { surahSelect.selectedIndex--; autoPlayTrack(); } 
@@ -413,7 +430,7 @@
 
     audio.onplay = () => playBtn.innerText = "⏸";
     audio.onpause = () => playBtn.innerText = "▶";
-    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر جلب الملف الصوتي، جرب مرة أخرى"; };
+    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر جلب الملف الصوتي للتفسير، تأكد من الاتصال"; };
     
     audio.onended = () => {
         let max = parseInt(repeatSelect.value);
@@ -449,9 +466,11 @@
         favBtn.classList.toggle('active', exists); 
     }
 
-    reciterSelect.onchange = autoPlayTrack;
+    reciterSelect.onchange = autoPlayTrust = autoPlayTrack;
     surahSelect.onchange = autoPlayTrack;
-    tafsirTypeSelect.onchange = playTafsirAudio;
+    tafsirTypeSelect.onchange = () => {
+        if(audio.src) playTafsirAudio();
+    };
     document.getElementById('searchReciter').oninput = (e) => filterReciters(e.target.value);
 
     function updateActiveBtn(btn) { document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode')); btn.classList.add('active-mode'); }
@@ -472,8 +491,7 @@
             toggleModeUI();
 
             if (currentMode === 'تفسير') {
-                buildTafsirSurahGrid();
-                playTafsirAudio();
+                buildTafsirSurahList();
             } else {
                 loadSurahs(currentMode === 'معلم'); 
                 filterReciters();
