@@ -507,8 +507,8 @@
     }
 
     function getAudioUrl(server, fileCode) {
-        if (server === "CUSTOM_ALASLAMI") {
-            return fileCode; // رابط سورة الشيخ عبد الله الأسلمي من جوجل درايف
+        if (server === "MEGA_ALASLAMI") {
+            return fileCode; // رابط ملف ميجا المباشر المتولد تلقائياً للسورة
         }
         let baseUrl = server.endsWith('/') ? server : server + '/';
         return `${baseUrl}${fileCode}.mp3`;
@@ -517,10 +517,10 @@
     function buildTafsirTypeDropdown() {
         tafsirTypeSelect.innerHTML = '';
         
-        // إضافة خيار تفسير الشيخ عبد الله الأسلمي من مجلد جوجل درايف
+        // إضافة خيار تفسير الشيخ عبد الله الأسلمي المرتبط بملفات ميجا المسلسلة
         let optAslami = document.createElement('option');
-        optAslami.value = "CUSTOM_ALASLAMI";
-        optAslami.text = "تفسير الشيخ: عبد الله الأسلمي (جوجل درايف)";
+        optAslami.value = "MEGA_ALASLAMI";
+        optAslami.text = "تفسير الشيخ: عبد الله الأسلمي (مجلد ميجا)";
         tafsirTypeSelect.appendChild(optAslami);
 
         if (tafsirList.length > 0) {
@@ -553,14 +553,14 @@
     function updatePartDropdown(surahId) {
         tafsirPartSelect.innerHTML = '';
         
-        // إذا كان المختار هو الشيخ عبد الله الأسلمي، يتم توليد الرابط بالتنسيق التسلسلي (001, 002, ...)
-        if (tafsirTypeSelect.value === "CUSTOM_ALASLAMI") {
+        if (tafsirTypeSelect.value === "MEGA_ALASLAMI") {
             let sNum = parseInt(surahId, 10);
             let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
             
             let opt = document.createElement('option');
-            // استبدل FILE_ID_FOR_... برابط التنزيل المباشر أو المعرفات الخاصة بملفاتك في درايف
-            opt.value = `https://docs.google.com/uc?export=download&id=FILE_ID_FOR_${sStr}`;
+            // توليد اسم الملف المطابق لملفاتك في ميجا: almokhtasar_fe_tafseer_quran_001.mp3
+            // يمكنك استبدال الرابط أدناه برابط استضافتك أو رابط الملف المباشر من ميجا
+            opt.value = `https://your-domain-or-mega-direct-link/almokhtasar_fe_tafseer_quran_${sStr}.mp3`;
             opt.text = `سورة ${surahNames[sNum-1]} - الشيخ عبد الله الأسلمي`;
             tafsirPartSelect.appendChild(opt);
             return;
@@ -714,7 +714,7 @@
 
     audio.onplay = () => playBtn.innerText = "⏸";
     audio.onpause = () => playBtn.innerText = "▶";
-    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر جلب الملف الصوتي"; };
+    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر جلب الملف الصوتي من ميجا"; };
     
     audio.onended = () => {
         let max = parseInt(repeatSelect.value);
