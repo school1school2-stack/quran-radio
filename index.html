@@ -508,7 +508,7 @@
 
     function getAudioUrl(server, fileCode) {
         if (server === "ARCHIVE_ALASLAMI") {
-            return fileCode; // رابط سورة الشيخ عبد الله الأسلمي المباشر من الأرشيف
+            return fileCode; // رابط سورة الشيخ عبد الله الأسلمي   
         }
         let baseUrl = server.endsWith('/') ? server : server + '/';
         return `${baseUrl}${fileCode}.mp3`;
@@ -517,10 +517,10 @@
     function buildTafsirTypeDropdown() {
         tafsirTypeSelect.innerHTML = '';
         
-        // إضافة خيار تفسير الشيخ عبد الله الأسلمي من أرشيف الإنترنت
+        // إضافة خيار تفسير الشيخ عبد الله الأسلمي   
         let optAslami = document.createElement('option');
         optAslami.value = "ARCHIVE_ALASLAMI";
-        optAslami.text = "تفسير الشيخ: عبد الله الأسلمي (أرشيف الإنترنت)";
+        optAslami.text = "تفسير الشيخ: عبد الله الأسلمي  ";
         tafsirTypeSelect.appendChild(optAslami);
 
         if (tafsirList.length > 0) {
