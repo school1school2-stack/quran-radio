@@ -129,7 +129,7 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
-            <li>⭐ تشغيل تفاسير القرآن ومختصر التفسير داخل الصفحة.</li>
+            <li>⭐ تصفح واختيار تفاسير القرآن كالموقع الرسمي داخلياً.</li>
             <li>⭐ تكرار السورة (حتى 20 مرة) للحفظ والاستذكار.</li>
             <li>⭐ استكمال التلاوة تلقائياً من حيث توقفت.</li>
             <li>⭐ بحث ذكي وشامل بأي جزء من الاسم.</li>
@@ -181,7 +181,7 @@
             const data = await res.json();
             allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
 
-            // جلب التفاسير مباشرة من واجهة موقع Mp3Quran الرسمية
+            // جلب تفاسير القرآن من موقع mp3quran رسمياً
             const tafsirRes = await fetch("https://www.mp3quran.net/api/v3/tafsir?language=ar");
             const tafsirData = await tafsirRes.json();
             tafsirList = tafsirData.tafsirs || [];
@@ -230,12 +230,11 @@
         }); 
     }
 
-    // دالة بناء الرابط التلقائي المباشر لملفات التفسير حسب رقم السورة
+    // دالة تكوين الرابط المباشر بناءً على طريقة موقع mp3quran للتفاسير
     function getAudioUrl(server, surahNum) {
         if (currentMode === 'تفسير') {
             let sNum = parseInt(surahNum, 10);
             let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
-            // يتأكد من إضافة السلاش الآمنة في نهاية مسار السيرفر ثم رقم السورة بصيغة 001.mp3
             let baseUrl = server.endsWith('/') ? server : server + '/';
             return `${baseUrl}${sStr}.mp3`;
         }
@@ -271,7 +270,7 @@
                 });
             } else {
                 let opt = document.createElement('option');
-                opt.value = "https://download.quranicaudio.com/quran/muasasat_al_bayan/mokhtasar";
+                opt.value = "https://download.quranicaudio.com/quran/muasasat_al_bayan/mokhtasar/";
                 opt.text = "مختصر تفسير القرآن الكريم";
                 tafsirGroup.appendChild(opt);
             }
@@ -346,7 +345,7 @@
 
     audio.onplay = () => playBtn.innerText = "⏸";
     audio.onpause = () => playBtn.innerText = "▶";
-    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر تشغيل الملف الصوتي، جرب سورة أخرى"; };
+    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر جلب الملف الصوتي، جرب سورة أخرى"; };
     
     audio.onended = () => {
         let max = parseInt(repeatSelect.value);
@@ -378,7 +377,7 @@
     function checkFavStatus() { const exists = favorites.some(f => f.server === reciterSelect.value); favBtn.classList.toggle('active', exists); }
 
     reciterSelect.onchange = autoPlayTrack;
-    surahSelect.onchange = autoPlayTrack;
+    surahSelect.onchange = autoPayTrack;
     document.getElementById('searchReciter').oninput = (e) => filterReciters(e.target.value);
 
     function updateActiveBtn(btn) { document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode')); btn.classList.add('active-mode'); }
