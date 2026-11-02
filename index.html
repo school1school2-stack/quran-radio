@@ -32,7 +32,6 @@
         }
         .feat-link:hover { background: var(--accent); color: black; }
 
-        /* الأقسام الأربعة (شبكة 2x2 متناسقة) */
         .sections-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
         
         .mode-btn { 
@@ -90,7 +89,6 @@
     
     <button class="feat-link" onclick="toggleModal(true)">📋 أهم المميزات</button>
 
-    <!-- الأقسام الأربعة -->
     <div class="sections-container">
         <button class="mode-btn active-mode" id="allMode">📖 المصحف المرتل</button>
         <button class="mode-btn" id="mojawadMode">🎤 المصحف المجود</button>
@@ -177,12 +175,10 @@
 
     async function init() {
         try {
-            // جلب القراء العاديين
             const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
             const data = await res.json();
             allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
 
-            // جلب قائمة التفاسير المعتمدة من API الموقع الرسمي
             const tafsirRes = await fetch("https://www.mp3quran.net/api/v3/tafsir?language=ar");
             const tafsirData = await tafsirRes.json();
             tafsirList = tafsirData.tafsirs || [];
@@ -231,13 +227,17 @@
         }); 
     }
 
-    // دالة بناء الرابط المتوافقة مع بنية روابط الـ API وموقع TV Quran للتفاسير
+    // بناء رابط التفسير الدقيق والمطابق لسيرفرات TV Quran و mp3quran
     function getAudioUrl(server, surahNum) {
         let sNum = parseInt(surahNum, 10);
         let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
 
         if (currentMode === 'تفسير') {
             let baseUrl = server.endsWith('/') ? server : server + '/';
+            // التحقق مما إذا كان الرابط يعود بمختصر التفسير المباشر
+            if (baseUrl.includes("muasasat_al_bayan") || baseUrl.includes("mokhtasar")) {
+                return `https://server11.mp3quran.net/tafseer/katheer/${sStr}.mp3`;
+            }
             return `${baseUrl}${sStr}.mp3`;
         }
         return `${server}${sStr}.mp3`;
@@ -271,9 +271,8 @@
                     }
                 });
             } else {
-                // رابط احتياطي دقيق في حال تعذر جلب الـ API الخارجي
                 let opt = document.createElement('option');
-                opt.value = "https://download.quranicaudio.com/quran/muasasat_al_bayan/mokhtasar/";
+                opt.value = "https://server11.mp3quran.net/tafseer/katheer/";
                 opt.text = "مختصر تفسير القرآن الكريم";
                 tafsirGroup.appendChild(opt);
             }
