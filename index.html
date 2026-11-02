@@ -32,6 +32,7 @@
         }
         .feat-link:hover { background: var(--accent); color: black; }
 
+        /* الأقسام الأربعة (شبكة 2x2 متناسقة) */
         .sections-container { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
         
         .mode-btn { 
@@ -89,12 +90,11 @@
     
     <button class="feat-link" onclick="toggleModal(true)">📋 أهم المميزات</button>
 
-    <!-- الأقسام الأربعة (زر مختصر التفسير سينتقل مباشرة للموقع) -->
     <div class="sections-container">
         <button class="mode-btn active-mode" id="allMode">📖 المصحف المرتل</button>
         <button class="mode-btn" id="mojawadMode">🎤 المصحف المجود</button>
         <button class="mode-btn" id="childMode">👶 قسم الأطفال</button>
-        <button class="mode-btn" id="tafsirMode" onclick="window.open('https://www.mp3quran.net/ar/tafsirs', '_blank')">📚 مختصر التفسير</button>
+        <button class="mode-btn" id="tafsirMode">📚 مختصر التفسير</button>
     </div>
 
     <input type="text" id="searchReciter" placeholder="🔍 ابحث بأي جزء من الاسم...">
@@ -129,10 +129,10 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
-            <li>⭐ انتقال مباشر لصفحة مختصر التفسير الرسمية.</li>
+            <li>⭐ تشغيل تفاسير القرآن ومختصر التفسير داخل الصفحة.</li>
             <li>⭐ تكرار السورة (حتى 20 مرة) للحفظ والاستذكار.</li>
             <li>⭐ استكمال التلاوة تلقائياً من حيث توقفت.</li>
-            <li>⭐ بحث ذكي وشامل بأي جزء من اسم القارئ.</li>
+            <li>⭐ بحث ذكي وشامل بأي جزء من الاسم.</li>
         </ul>
     </div>
 </div>
@@ -150,6 +150,7 @@
     const favBtn = document.getElementById('addFav');
     
     let allReciters = [];
+    let tafsirList = [];
     let currentRepeat = 1;
     let favorites = JSON.parse(localStorage.getItem('quranFavs')) || [];
     let currentMode = 'مرتل';
@@ -175,9 +176,15 @@
 
     async function init() {
         try {
+            // جلب القراء العاديين
             const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
             const data = await res.json();
             allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+
+            // جلب التفاسير مباشرة من واجهة موقع Mp3Quran الرسمية
+            const tafsirRes = await fetch("https://www.mp3quran.net/api/v3/tafsir?language=ar");
+            const tafsirData = await tafsirRes.json();
+            tafsirList = tafsirData.tafsirs || [];
             
             const lastSave = JSON.parse(localStorage.getItem('lastQuranSession'));
             if (lastSave) {
@@ -187,7 +194,7 @@
                 loadSurahs(currentMode === 'معلم');
                 reciterSelect.value = lastSave.server;
                 surahSelect.value = lastSave.surahNum;
-                audio.src = `${lastSave.server}${lastSave.surahNum}.mp3`;
+                audio.src = getAudioUrl(lastSave.server, lastSave.surahNum);
                 audio.load();
                 audio.currentTime = lastSave.time;
                 repeatStatus.innerText = "🔄 تم استعادة آخر موقع تلقائياً";
@@ -200,7 +207,7 @@
     }
 
     function saveCurrentProgress() {
-        if (!audio.src || audio.paused || currentMode === 'تفسير') return;
+        if (!audio.src || audio.paused) return;
         localStorage.setItem('lastQuranSession', JSON.stringify({
             server: reciterSelect.value,
             surahNum: surahSelect.value,
@@ -210,7 +217,12 @@
     }
     setInterval(saveCurrentProgress, 2000);
 
-    function getModeBtnId(m) { return m === 'مجود' ? 'mojawadMode' : (m === 'معلم' ? 'childMode' : 'allMode'); }
+    function getModeBtnId(m) { 
+        if (m === 'مجود') return 'mojawadMode';
+        if (m === 'معلم') return 'childMode';
+        if (m === 'تفسير') return 'tafsirMode';
+        return 'allMode'; 
+    }
     
     function playAudioSafe() { 
         audio.play().catch(e => { 
@@ -218,9 +230,21 @@
         }); 
     }
 
+    // دالة بناء الرابط التلقائي المباشر لملفات التفسير حسب رقم السورة
+    function getAudioUrl(server, surahNum) {
+        if (currentMode === 'تفسير') {
+            let sNum = parseInt(surahNum, 10);
+            let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
+            // يتأكد من إضافة السلاش الآمنة في نهاية مسار السيرفر ثم رقم السورة بصيغة 001.mp3
+            let baseUrl = server.endsWith('/') ? server : server + '/';
+            return `${baseUrl}${sStr}.mp3`;
+        }
+        return `${server}${surahNum}.mp3`;
+    }
+
     function autoPlayTrack() {
         if(!reciterSelect.value || !surahSelect.value) return;
-        audio.src = `${reciterSelect.value}${surahSelect.value}.mp3`;
+        audio.src = getAudioUrl(reciterSelect.value, surahSelect.value);
         currentRepeat = 1;
         updateStatus();
         checkFavStatus();
@@ -229,24 +253,55 @@
     }
 
     function filterReciters(term = "") {
-        reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
+        reciterSelect.innerHTML = '<option value="">-- اختر العنصر --</option>';
         const cleanTerm = normalizeArabic(term.trim());
 
+        if (currentMode === 'تفسير') {
+            let tafsirGroup = document.createElement('optgroup');
+            tafsirGroup.label = "📚 تفاسير القرآن الكريم";
+            
+            if (tafsirList.length > 0) {
+                tafsirList.forEach(t => {
+                    if (cleanTerm === "" || normalizeArabic(t.name).includes(cleanTerm)) {
+                        let opt = document.createElement('option');
+                        opt.value = t.server;
+                        opt.text = t.name;
+                        tafsirGroup.appendChild(opt);
+                    }
+                });
+            } else {
+                let opt = document.createElement('option');
+                opt.value = "https://download.quranicaudio.com/quran/muasasat_al_bayan/mokhtasar";
+                opt.text = "مختصر تفسير القرآن الكريم";
+                tafsirGroup.appendChild(opt);
+            }
+            reciterSelect.appendChild(tafsirGroup);
+            return;
+        }
+
         if (term === "") {
-            let favGroup = document.createElement('optgroup'); favGroup.label = "⭐ القراء المفضلون";
+            let favGroup = document.createElement('optgroup'); 
+            favGroup.label = "⭐ القراء المفضلون";
             favorites.filter(f => f.mode === currentMode).forEach(f => {
-                let opt = document.createElement('option'); opt.value = f.server; opt.text = "❤️ " + f.name; favGroup.appendChild(opt);
+                let opt = document.createElement('option'); 
+                opt.value = f.server; 
+                opt.text = "❤️ " + f.name; 
+                favGroup.appendChild(opt);
             });
             if(favGroup.children.length > 0) reciterSelect.appendChild(favGroup);
         }
-        
+
         let allGroup = document.createElement('optgroup'); 
         allGroup.label = term === "" ? "📋 القائمة الأبجدية" : "🔍 نتائج البحث";
         
         allReciters.forEach(r => {
             const cleanName = normalizeArabic(r.name);
             if (cleanTerm === "" || cleanName.includes(cleanTerm)) {
-                let found = r.moshaf.find(m => currentMode === 'معلم' ? m.name.includes("معلم") : (currentMode === 'مجود' ? m.name.includes("مجود") : (m.name.includes("مرتل") || m.name === "حفص عن عاصم")));
+                let found = r.moshaf.find(m => {
+                    if (currentMode === 'معلم') return m.name.includes("معلم");
+                    if (currentMode === 'مجود') return m.name.includes("مجود");
+                    return m.name.includes("مرتل") || m.name.includes("حفص");
+                });
                 if(found) { 
                     const opt = document.createElement('option'); 
                     opt.value = found.server; 
@@ -263,8 +318,10 @@
         surahSelect.innerHTML = '';
         surahNames.forEach((n, i) => {
             if(!isAmma || i >= 77 || i === 0) {
-                const opt = document.createElement('option'); opt.value = (i+1).toString().padStart(3, '0');
-                opt.text = `${i+1}. ${n}`; surahSelect.appendChild(opt);
+                const opt = document.createElement('option'); 
+                opt.value = (i+1).toString().padStart(3, '0');
+                opt.text = `${i+1}. ${n}`; 
+                surahSelect.appendChild(opt);
             }
         });
         if(prev && !isAmma) surahSelect.value = prev;
@@ -289,13 +346,22 @@
 
     audio.onplay = () => playBtn.innerText = "⏸";
     audio.onpause = () => playBtn.innerText = "▶";
+    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر تشغيل الملف الصوتي، جرب سورة أخرى"; };
+    
     audio.onended = () => {
         let max = parseInt(repeatSelect.value);
         if (currentRepeat < max) { currentRepeat++; updateStatus(); audio.currentTime = 0; playAudioSafe(); }
         else { document.getElementById('nextBtn').click(); }
     };
 
-    audio.ontimeupdate = () => { if(!isNaN(audio.duration)) { seekSlider.value = (audio.currentTime/audio.duration)*100; document.getElementById('currentTime').innerText = formatTime(audio.currentTime); document.getElementById('duration').innerText = formatTime(audio.duration); } };
+    audio.ontimeupdate = () => { 
+        if(!isNaN(audio.duration)) { 
+            seekSlider.value = (audio.currentTime/audio.duration)*100; 
+            document.getElementById('currentTime').innerText = formatTime(audio.currentTime); 
+            document.getElementById('duration').innerText = formatTime(audio.duration); 
+        } 
+    };
+    
     seekSlider.oninput = () => audio.currentTime = audio.duration * (seekSlider.value/100);
     function formatTime(s) { let m=Math.floor(s/60), sc=Math.floor(s%60); return `${m}:${sc<10?'0'+sc:sc}`; }
 
@@ -317,11 +383,21 @@
 
     function updateActiveBtn(btn) { document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode')); btn.classList.add('active-mode'); }
     
-    const modes = { 'allMode': 'مرتل', 'mojawadMode': 'مجود', 'childMode': 'معلم' };
+    const modes = { 'allMode': 'مرتل', 'mojawadMode': 'مجود', 'childMode': 'معلم', 'tafsirMode': 'تفسير' };
     Object.keys(modes).forEach(id => {
         document.getElementById(id).onclick = function() {
-            currentMode = modes[id]; updateActiveBtn(this); loadSurahs(currentMode === 'معلم'); filterReciters();
-            audio.pause(); playBtn.innerText = "▶";
+            currentMode = modes[id]; 
+            updateActiveBtn(this); 
+            loadSurahs(currentMode === 'معلم'); 
+            filterReciters();
+            
+            if (currentMode === 'تفسير' && reciterSelect.options.length > 1) {
+                reciterSelect.selectedIndex = 1;
+                autoPlayTrack();
+            } else {
+                audio.pause(); 
+                playBtn.innerText = "▶";
+            }
         };
     });
 
