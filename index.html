@@ -90,6 +90,7 @@
     
     <button class="feat-link" onclick="toggleModal(true)">📋 أهم المميزات</button>
 
+    <!-- الأقسام الأربعة (المصحف المرتل، المجود، الأطفال، ومختصر التفسير) -->
     <div class="sections-container">
         <button class="mode-btn active-mode" id="allMode">📖 المصحف المرتل</button>
         <button class="mode-btn" id="mojawadMode">🎤 المصحف المجود</button>
@@ -129,7 +130,7 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
-            <li>⭐ تصفح واختيار تفاسير القرآن كالموقع الرسمي داخلياً.</li>
+            <li>⭐ تشغيل مختصر التفسير وباقي القراء داخلياً.</li>
             <li>⭐ تكرار السورة (حتى 20 مرة) للحفظ والاستذكار.</li>
             <li>⭐ استكمال التلاوة تلقائياً من حيث توقفت.</li>
             <li>⭐ بحث ذكي وشامل بأي جزء من الاسم.</li>
@@ -181,7 +182,7 @@
             const data = await res.json();
             allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
 
-            // جلب تفاسير القرآن من موقع mp3quran رسمياً
+            // جلب التفاسير ومختصر التفسير من واجهة الموقع الرسمية
             const tafsirRes = await fetch("https://www.mp3quran.net/api/v3/tafsir?language=ar");
             const tafsirData = await tafsirRes.json();
             tafsirList = tafsirData.tafsirs || [];
@@ -230,15 +231,16 @@
         }); 
     }
 
-    // دالة تكوين الرابط المباشر بناءً على طريقة موقع mp3quran للتفاسير
+    // دالة بناء الرابط الآمن لكل قسم (تفسير أو قراء عاديين)
     function getAudioUrl(server, surahNum) {
+        let sNum = parseInt(surahNum, 10);
+        let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
+
         if (currentMode === 'تفسير') {
-            let sNum = parseInt(surahNum, 10);
-            let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
             let baseUrl = server.endsWith('/') ? server : server + '/';
             return `${baseUrl}${sStr}.mp3`;
         }
-        return `${server}${surahNum}.mp3`;
+        return `${server}${sStr}.mp3`;
     }
 
     function autoPlayTrack() {
@@ -257,7 +259,7 @@
 
         if (currentMode === 'تفسير') {
             let tafsirGroup = document.createElement('optgroup');
-            tafsirGroup.label = "📚 تفاسير القرآن الكريم";
+            tafsirGroup.label = "📚 التفاسير ومختصر التفسير";
             
             if (tafsirList.length > 0) {
                 tafsirList.forEach(t => {
@@ -377,7 +379,7 @@
     function checkFavStatus() { const exists = favorites.some(f => f.server === reciterSelect.value); favBtn.classList.toggle('active', exists); }
 
     reciterSelect.onchange = autoPlayTrack;
-    surahSelect.onchange = autoPayTrack;
+    surahSelect.onchange = autoPlayTrack;
     document.getElementById('searchReciter').oninput = (e) => filterReciters(e.target.value);
 
     function updateActiveBtn(btn) { document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-mode')); btn.classList.add('active-mode'); }
