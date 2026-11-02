@@ -553,14 +553,13 @@
     function updatePartDropdown(surahId) {
         tafsirPartSelect.innerHTML = '';
         
-        // إذا كان المختار هو الشيخ عبد الله الأسلمي، يتم ربطه برابط أرشيف الإنترنت المباشر
+        // إذا كان المختار هو الشيخ عبد الله الأسلمي، يتم ربطه برابط الخادم المباشر للأرشيف الذي أرسلته
         if (tafsirTypeSelect.value === "ARCHIVE_ALASLAMI") {
             let sNum = parseInt(surahId, 10);
             let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
             
             let opt = document.createElement('option');
-            // الرابط المباشر من الأرشيف بناءً على اسم المعرف الخاص بك
-            opt.value = `https://archive.org/download/almokhtasar_fe_tafseer_quran_002/almokhtasar_fe_tafseer_quran_${sStr}.mp3`;
+            opt.value = `https://ia601001.us.archive.org/21/items/almokhtasar_fe_tafseer_quran_002/almokhtasar_fe_tafseer_quran_${sStr}.mp3`;
             opt.text = `سورة ${surahNames[sNum-1]} - الشيخ عبد الله الأسلمي`;
             tafsirPartSelect.appendChild(opt);
             return;
