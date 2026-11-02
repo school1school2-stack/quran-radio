@@ -48,7 +48,6 @@
             box-sizing: border-box; text-align: right;
         }
 
-        /* قائمة سور التفسير المماثلة تماماً لـ TV Quran */
         .tafsir-list-container { 
             display: flex; flex-direction: column; gap: 8px; 
             max-height: 250px; overflow-y: auto; margin-bottom: 12px; 
@@ -123,7 +122,7 @@
         <select id="surahSelect"></select>
     </div>
 
-    <!-- قسم التفسير (مطابق لـ TV Quran تماماً) -->
+    <!-- قسم التفسير -->
     <div id="tafsirSection" style="display: none;">
         <select id="tafsirTypeSelect"></select>
         <div id="tafsirSurahList" class="tafsir-list-container"></div>
@@ -202,11 +201,10 @@
 
     async function init() {
         try {
-            const res = await fetch("https://mp3quran.net/api/v3/reciters?language=ar");
+            const res = await fetch("https://www.mp3quran.net/api/v3/reciters?language=ar");
             const data = await res.json();
             allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
 
-            // جلب روابط التفاسير الرسمية المعتمدة في خوادم TV Quran
             const tafsirRes = await fetch("https://www.mp3quran.net/api/v3/tafsir?language=ar");
             const tafsirData = await tafsirRes.json();
             tafsirList = tafsirData.tafsirs || [];
@@ -264,7 +262,7 @@
         audio.play().catch(() => { repeatStatus.innerText = "تم التجهيز.. اضغط (▶) للمواصلة"; }); 
     }
 
-    // بناء الرابط المباشر لجلب الصوت من خوادم TV Quran الرسمية حسب رقم السورة (001, 002...)
+    // دالة بناء الروابط المحدثة التي تتولى تنسيق مسار التفسير بشكل صحيح تماماً
     function getAudioUrl(server, surahNum) {
         let sNum = parseInt(surahNum, 10);
         let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
@@ -308,7 +306,6 @@
             playButton.innerHTML = '▶';
             playButton.title = `تشغيل سورة ${name}`;
             
-            // عند النقر هنا يتم جلب الصوت وتشغيله مباشرة من خوادم TV Quran المباشرة
             playButton.onclick = () => {
                 selectedTafsirSurah = sNum;
                 playTafsirAudio();
@@ -433,7 +430,7 @@
 
     audio.onplay = () => playBtn.innerText = "⏸";
     audio.onpause = () => playBtn.innerText = "▶";
-    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر جلب الملف الصوتي من سيرفر التفسير"; };
+    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر جلب الملف الصوتي للتفسير"; };
     
     audio.onended = () => {
         let max = parseInt(repeatSelect.value);
