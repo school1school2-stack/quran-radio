@@ -48,7 +48,7 @@
             box-sizing: border-box; text-align: right;
         }
 
-        /* تصميم قائمة سور التفسير تماماً مثل TV Quran (صفوف مع أزرار تشغيل) */
+        /* قائمة سور التفسير المماثلة تماماً لـ TV Quran */
         .tafsir-list-container { 
             display: flex; flex-direction: column; gap: 8px; 
             max-height: 250px; overflow-y: auto; margin-bottom: 12px; 
@@ -123,7 +123,7 @@
         <select id="surahSelect"></select>
     </div>
 
-    <!-- قسم التفسير بتصميم مطابق لـ TV Quran (صفوف مع أزرار تشغيل مستقلة) -->
+    <!-- قسم التفسير (مطابق لـ TV Quran تماماً) -->
     <div id="tafsirSection" style="display: none;">
         <select id="tafsirTypeSelect"></select>
         <div id="tafsirSurahList" class="tafsir-list-container"></div>
@@ -157,7 +157,7 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
-            <li>⭐ تصفح وتشغيل التفسير تماماً مثل موقع TV Quran.</li>
+            <li>⭐ تصفح وتشغيل التفسير مباشرة من خوادم TV Quran.</li>
             <li>⭐ تكرار السورة (حتى 20 مرة) للحفظ والاستذكار.</li>
             <li>⭐ استكمال الاستماع تلقائياً من حيث توقفت.</li>
         </ul>
@@ -206,6 +206,7 @@
             const data = await res.json();
             allReciters = data.reciters.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
 
+            // جلب روابط التفاسير الرسمية المعتمدة في خوادم TV Quran
             const tafsirRes = await fetch("https://www.mp3quran.net/api/v3/tafsir?language=ar");
             const tafsirData = await tafsirRes.json();
             tafsirList = tafsirData.tafsirs || [];
@@ -263,6 +264,7 @@
         audio.play().catch(() => { repeatStatus.innerText = "تم التجهيز.. اضغط (▶) للمواصلة"; }); 
     }
 
+    // بناء الرابط المباشر لجلب الصوت من خوادم TV Quran الرسمية حسب رقم السورة (001, 002...)
     function getAudioUrl(server, surahNum) {
         let sNum = parseInt(surahNum, 10);
         let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
@@ -306,6 +308,7 @@
             playButton.innerHTML = '▶';
             playButton.title = `تشغيل سورة ${name}`;
             
+            // عند النقر هنا يتم جلب الصوت وتشغيله مباشرة من خوادم TV Quran المباشرة
             playButton.onclick = () => {
                 selectedTafsirSurah = sNum;
                 playTafsirAudio();
@@ -430,7 +433,7 @@
 
     audio.onplay = () => playBtn.innerText = "⏸";
     audio.onpause = () => playBtn.innerText = "▶";
-    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر جلب الملف الصوتي للتفسير، تأكد من الاتصال"; };
+    audio.onerror = () => { repeatStatus.innerText = "⚠️ تعذر جلب الملف الصوتي من سيرفر التفسير"; };
     
     audio.onended = () => {
         let max = parseInt(repeatSelect.value);
@@ -466,7 +469,7 @@
         favBtn.classList.toggle('active', exists); 
     }
 
-    reciterSelect.onchange = autoPlayTrust = autoPlayTrack;
+    reciterSelect.onchange = autoPlayTrack;
     surahSelect.onchange = autoPlayTrack;
     tafsirTypeSelect.onchange = () => {
         if(audio.src) playTafsirAudio();
