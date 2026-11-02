@@ -507,7 +507,7 @@
     }
 
     function getAudioUrl(server, fileCode) {
-        if (server === "ARCHIVE_ALASLAMI") {
+        if (server === "ARCHIVE_ALASLAMI" || server === "ARCHIVE_ASMARI") {
             return fileCode; 
         }
         let baseUrl = server.endsWith('/') ? server : server + '/';
@@ -519,8 +519,13 @@
         
         let optAslami = document.createElement('option');
         optAslami.value = "ARCHIVE_ALASLAMI";
-        optAslami.text = "قراءة التفسير علي بشير أحمد تلاوة أنس العمادي";
+        optAslami.text = "قراءة التفسير علي بشير أحمد | تلاوة أنس العمادي";
         tafsirTypeSelect.appendChild(optAslami);
+
+        let optAsmari = document.createElement('option');
+        optAsmari.value = "ARCHIVE_ASMARI";
+        optAsmari.text = "قراءة التفسير عبدالله الأسمري | تلاوة صابر عبد الحكم";
+        tafsirTypeSelect.appendChild(optAsmari);
 
         if (tafsirList.length > 0) {
             tafsirList.forEach(t => {
@@ -529,11 +534,6 @@
                 opt.text = `تفسير القرآن الكريم: ${t.name}`;
                 tafsirTypeSelect.appendChild(opt);
             });
-        } else {
-            let opt = document.createElement('option');
-            opt.value = "https://server17.mp3quran.net/tafseer/tabri/";
-            opt.text = "تفسير القرآن الكريم: الطبري";
-            tafsirTypeSelect.appendChild(opt);
         }
     }
 
@@ -551,11 +551,10 @@
 
     function updatePartDropdown(surahId) {
         tafsirPartSelect.innerHTML = '';
+        let sNum = parseInt(surahId, 10);
+        let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
         
         if (tafsirTypeSelect.value === "ARCHIVE_ALASLAMI") {
-            let sNum = parseInt(surahId, 10);
-            let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
-            
             let opt = document.createElement('option');
             opt.value = `https://ia601001.us.archive.org/21/items/almokhtasar_fe_tafseer_quran_002/almokhtasar_fe_tafseer_quran_${sStr}.mp3`;
             opt.text = `سورة ${surahNames[sNum-1]} - أنس العمادي`;
@@ -563,11 +562,17 @@
             return;
         }
 
+        if (tafsirTypeSelect.value === "ARCHIVE_ASMARI") {
+            let opt = document.createElement('option');
+            opt.value = `https://ia608003.us.archive.org/34/items/mokhtasar-tafseer-abdullah-asmari/${sStr}.mp3`;
+            opt.text = `سورة ${surahNames[sNum-1]} - صابر عبد الحكم`;
+            tafsirPartSelect.appendChild(opt);
+            return;
+        }
+
         let parts = tafsirDatabase[surahId];
         
         if (!parts) {
-            let sNum = parseInt(surahId, 10);
-            let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
             parts = [{ name: `سورة ${surahNames[sNum-1]} كاملة`, file: sStr }];
         }
 
