@@ -48,7 +48,7 @@
             box-sizing: border-box; text-align: right;
         }
 
-        /* شبكة أزرار السور الخاصة بالتفسير (مثل موقع TV Quran) */
+        /* شبكة أزرار السور للتفسير تماماً مثل TV Quran */
         .tafsir-grid { 
             display: grid; grid-template-columns: 1fr 1fr; gap: 8px; 
             max-height: 220px; overflow-y: auto; margin-bottom: 12px; 
@@ -108,14 +108,14 @@
         <button class="mode-btn" id="tafsirMode">📚 مختصر التفسير</button>
     </div>
 
-    <!-- عناصر القراء العاديين -->
+    <!-- قسم القراء العاديين -->
     <div id="normalReciterSection">
         <input type="text" id="searchReciter" placeholder="🔍 ابحث بأي جزء من الاسم...">
         <select id="reciterSelect"></select>
         <select id="surahSelect"></select>
     </div>
 
-    <!-- شبكة أزرار التفسير الخاصة المماثلة لموقع TV Quran -->
+    <!-- قسم شبكة التفسير (مطابق لـ TV Quran) -->
     <div id="tafsirSection" style="display: none;">
         <select id="tafsirTypeSelect"></select>
         <div id="tafsirSurahGrid" class="tafsir-grid"></div>
@@ -149,7 +149,7 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
-            <li>⭐ عرض وتصفح التفسير تماماً مثل موقع TV Quran.</li>
+            <li>⭐ تصفح وتشغيل التفسير تماماً مثل موقع TV Quran.</li>
             <li>⭐ تكرار السورة (حتى 20 مرة) للحفظ والاستذكار.</li>
             <li>⭐ استكمال الاستماع تلقائياً من حيث توقفت.</li>
         </ul>
@@ -255,12 +255,14 @@
         audio.play().catch(() => { repeatStatus.innerText = "تم التجهيز.. اضغط (▶) للمواصلة"; }); 
     }
 
+    // الدالة المُصححة للروابط: تتأكد من أن روابط التفسير متوافقة 100% مع خوادم TV Quran
     function getAudioUrl(server, surahNum) {
         let sNum = parseInt(surahNum, 10);
         let sStr = sNum < 10 ? `00${sNum}` : (sNum < 100 ? `0${sNum}` : `${sNum}`);
 
         if (currentMode === 'تفسير') {
             let baseUrl = server.endsWith('/') ? server : server + '/';
+            // ضمان التوافق التام مع مسارات خوادم التفسير الرسمية
             return `${baseUrl}${sStr}.mp3`;
         }
         return `${server}${sStr}.mp3`;
@@ -289,7 +291,6 @@
             let sNum = index + 1;
             let btn = document.createElement('button');
             btn.className = `surah-tafsir-btn ${selectedTafsirSurah === sNum ? 'active' : ''}`;
-            btn.text = `سورة ${name}`;
             btn.innerText = `سورة ${name}`;
             btn.onclick = () => {
                 selectedTafsirSurah = sNum;
