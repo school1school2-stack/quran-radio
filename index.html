@@ -48,7 +48,7 @@
             width: 100%; padding: 14px; border-radius: 12px; border: none; 
             margin-bottom: 12px; background: white; color: #333; 
             font-size: 1rem; font-weight: bold; outline: none;
-            box-sizing: border-box; /* لضمان عدم الخروج عن الإطار */
+            box-sizing: border-box; 
             text-align: right;
         }
 
@@ -89,7 +89,7 @@
 <body>
 
 <div class="container">
-    <div class="main-title">إذاعة القرآن الكريم </div>
+    <div class="main-title">إذاعة القرآن الكريم</div>
     
     <button class="feat-link" onclick="toggleModal(true)">📋 أهم المميزات</button>
 
@@ -99,7 +99,8 @@
         <button class="mode-btn full-width" id="childMode">👶 قسم الأطفال (المعلم)</button>
     </div>
 
-    <input type="text" id="searchReciter" placeholder="🔍  ابحث عن قارئ...">
+    <!-- تم تحديث اسم البحث ليدعم البحث الفعال بأي جزء من الاسم -->
+    <input type="text" id="searchReciter" placeholder="🔍 ابحث بأي جزء من الاسم (مثل: الحصري)...">
     <select id="reciterSelect"></select>
     <select id="surahSelect"></select>
 
@@ -137,8 +138,7 @@
             <li>⭐ قائمة مفضلة لحفظ قراءك المختارين.</li>
             <li>⭐ أنماط متعددة (مرتل، مجود، معلم).</li>
             <li>⭐ نظام إعادة تشغيل عند عودة الإنترنت.</li>
-            <li>⭐ بحث سريع وفوري بمجرد كتابة الاسم.</li>
-            <li>⭐ التحكم في الصوت من شاشة القفل.</li>
+            <li>⭐ بحث سريع وفوري بمجرد كتابة أي جزء من الاسم.</li>
         </ul>
     </div>
 </div>
@@ -168,6 +168,16 @@
         let opt = document.createElement('option');
         opt.value = i; opt.text = i == 1 ? "بدون تكرار" : `${i} مرات`;
         repeatSelect.appendChild(opt);
+    }
+
+    // دالة لتنحيف النص العربي وتوحيده للبحث الفعال بأي جزء (بدون حساسيات للهمزات والتنوين)
+    function normalizeArabic(text) {
+        if (!text) return "";
+        return text
+            .replace(/[أإآء]/g, 'ا')
+            .replace(/ة/g, 'ه')
+            .replace(/ى/g, 'ي')
+            .replace(/[\u064b-\u065f]/g, '');
     }
 
     async function init() {
@@ -223,8 +233,11 @@
         playAudioSafe();
     }
 
+    // تفعيل البحث بأي جزء من الاسم مع دعم التصحيح التلقائي للهمزات
     function filterReciters(term = "") {
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
+        const cleanTerm = normalizeArabic(term.trim());
+
         if (term === "") {
             let favGroup = document.createElement('optgroup'); favGroup.label = "⭐ القراء المفضلون";
             favorites.filter(f => f.mode === currentMode).forEach(f => {
@@ -232,10 +245,21 @@
             });
             if(favGroup.children.length > 0) reciterSelect.appendChild(favGroup);
         }
-        let allGroup = document.createElement('optgroup'); allGroup.label = term === "" ? "📋 القائمة الأبجدية" : "🔍 نتائج البحث";
-        allReciters.filter(r => term === "" || r.name.includes(term)).forEach(r => {
-            let found = r.moshaf.find(m => currentMode === 'معلم' ? m.name.includes("معلم") : (currentMode === 'مجود' ? m.name.includes("مجود") : (m.name.includes("مرتل") || m.name === "حفص عن عاصم")));
-            if(found) { const opt = document.createElement('option'); opt.value = found.server; opt.text = r.name; allGroup.appendChild(opt); }
+        
+        let allGroup = document.createElement('optgroup'); 
+        allGroup.label = term === "" ? "📋 القائمة الأبجدية" : "🔍 نتائج البحث";
+        
+        allReciters.forEach(r => {
+            const cleanName = normalizeArabic(r.name);
+            if (cleanTerm === "" || cleanName.includes(cleanTerm)) {
+                let found = r.moshaf.find(m => currentMode === 'معلم' ? m.name.includes("معلم") : (currentMode === 'مجود' ? m.name.includes("مجود") : (m.name.includes("مرتل") || m.name === "حفص عن عاصم")));
+                if(found) { 
+                    const opt = document.createElement('option'); 
+                    opt.value = found.server; 
+                    opt.text = r.name; 
+                    allGroup.appendChild(opt); 
+                }
+            }
         });
         reciterSelect.appendChild(allGroup);
     }
