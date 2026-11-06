@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>إذاعة القرآن الكريم والتفسير - بطاقة الآية التفاعلية</title>
+    <title>إذاعة القرآن الكريم والتفسير - تتبع وتمرير تفاعلي</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
@@ -318,11 +318,11 @@
         <div class="quran-text-container" id="quranCard">
             <div class="quran-header">
                 <div class="quran-title" id="textSurahTitle">📖 المصحف المكتوب</div>
-                <div class="step-hint">👈 يسار للآية التالية | يمين للآية السابقة 👉</div>
+                <div class="step-hint">👈 يسار = التالية | يمين = السابقة 👉</div>
             </div>
             
             <div class="quran-body" id="quranTextBody">
-                <div style="text-align: center; color: var(--accent);">جاري تحضير السورة...</div>
+                <div style="text-align: center; color: var(--accent);">جاري التحميل...</div>
             </div>
 
             <div class="touch-controls">
@@ -343,8 +343,8 @@
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
             <li>⭐ 4 أيقونات سريعة للتحكم المباشر والربط المنسدل.</li>
-            <li>⭐ عرض الآية المسموعة أو المقروءة حالياً فقط في المنتصف.</li>
-            <li>⭐ لمس يسار البطاقة للانتقال للآية التالية، ولمس يمينها للعودة للسابقة.</li>
+            <li>⭐ مزامنة زمنية مع صوت القارئ تلقائياً.</li>
+            <li>⭐ تحكم يدوي باللمس في أي لحظة (يمين ويسار) بدون إيقاف الصوت.</li>
         </ul>
     </div>
 </div>
@@ -375,6 +375,7 @@
     let currentSurahNumber = 1;
     let currentAyahIndex = 1;
     let totalAyahs = 0;
+    let verseTimings = [];
 
     const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
@@ -391,13 +392,28 @@
         return text.replace(/[أإآء]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064b-\u065f]/g, '');
     }
 
+    // جلب نص السورة كاملاً وتوقيتاتها المزامنة
     async function fetchVerses(surahNum) {
         currentSurahNumber = parseInt(surahNum, 10);
         textSurahTitle.innerText = `📖 سورة ${surahNames[currentSurahNumber - 1]}`;
         quranTextBody.innerHTML = '<div style="text-align: center; color: var(--accent);">جاري التحميل...</div>';
         currentAyahIndex = 1;
+        verseTimings = [];
 
         try {
+            // جلب بيانات التوقيت الزمني إن وجدت للقارئ
+            const timingRes = await fetch(`https://api.quran.com/api/v4/chapter_recitations/7/${currentSurahNumber}`).catch(() => null);
+            if (timingRes && timingRes.ok) {
+                const timingData = await timingRes.json();
+                if (timingData.audio_file && timingData.audio_file.timestamps) {
+                    verseTimings = timingData.audio_file.timestamps.map(t => ({
+                        ayah: parseInt(t.verse_key.split(':')[1], 10),
+                        start: t.timestamp_from / 1000,
+                        end: t.timestamp_to / 1000
+                    }));
+                }
+            }
+
             const res = await fetch(`https://api.alquran.cloud/v1/surah/${currentSurahNumber}/quran-uthmani`);
             const data = await res.json();
             
@@ -446,26 +462,34 @@
         renderAyah(currentAyahIndex);
     }
 
-    // تحديد اتجاه اللمس/النقر على بطاقة الآية (يسار = التالية، يمين = السابقة)
+    // الانتقال باللمس على الشاشة حسب الجهة (يسار = التالي، يمين = السابق)
     quranCard.onclick = (e) => {
         const rect = quranCard.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
         const cardWidth = rect.width;
 
         if (clickX < cardWidth / 2) {
-            // اللمس على النصف الأيسر من الشاشة
             nextAyah();
         } else {
-            // اللمس على النصف الأيمن من الشاشة
             prevAyah();
         }
     };
 
+    // مزامنة آليّة تلقائية أثناء الاستماع عند مطابقة الصوت للتوقيت
     audio.ontimeupdate = () => { 
         if(!isNaN(audio.duration) && audio.duration > 0) { 
             seekSlider.value = (audio.currentTime / audio.duration) * 100; 
             document.getElementById('currentTime').innerText = formatTime(audio.currentTime); 
             document.getElementById('duration').innerText = formatTime(audio.duration); 
+
+            if(verseTimings.length > 0) {
+                const currentTime = audio.currentTime;
+                const activeVerse = verseTimings.find(v => currentTime >= v.start && currentTime <= v.end);
+                if(activeVerse && activeVerse.ayah !== currentAyahIndex) {
+                    currentAyahIndex = activeVerse.ayah;
+                    renderAyah(currentAyahIndex);
+                }
+            }
         } 
     };
 
