@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>إذاعة القرآن الكريم والتفسير - تتبع وتمرير تفاعلي</title>
+    <title>إذاعة القرآن الكريم والتفسير - استئناف الآية</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
@@ -343,7 +343,7 @@
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
             <li>⭐ 4 أيقونات سريعة للتحكم المباشر والربط المنسدل.</li>
-            <li>⭐ مزامنة زمنية مع صوت القارئ تلقائياً.</li>
+            <li>⭐ حفظ آلي وتلقائي للآية الحالية المسموعة لاستئناف القراءة غداً.</li>
             <li>⭐ تحكم يدوي باللمس في أي لحظة (يمين ويسار) بدون إيقاف الصوت.</li>
         </ul>
     </div>
@@ -376,6 +376,7 @@
     let currentAyahIndex = 1;
     let totalAyahs = 0;
     let verseTimings = [];
+    let pendingSavedAyah = null; // لتخزين رقم الآية المحفوظة عند فتح التطبيق
 
     const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
@@ -392,16 +393,14 @@
         return text.replace(/[أإآء]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064b-\u065f]/g, '');
     }
 
-    // جلب نص السورة كاملاً وتوقيتاتها المزامنة
-    async function fetchVerses(surahNum) {
+    async function fetchVerses(surahNum, targetAyah = 1) {
         currentSurahNumber = parseInt(surahNum, 10);
         textSurahTitle.innerText = `📖 سورة ${surahNames[currentSurahNumber - 1]}`;
         quranTextBody.innerHTML = '<div style="text-align: center; color: var(--accent);">جاري التحميل...</div>';
-        currentAyahIndex = 1;
+        currentAyahIndex = targetAyah;
         verseTimings = [];
 
         try {
-            // جلب بيانات التوقيت الزمني إن وجدت للقارئ
             const timingRes = await fetch(`https://api.quran.com/api/v4/chapter_recitations/7/${currentSurahNumber}`).catch(() => null);
             if (timingRes && timingRes.ok) {
                 const timingData = await timingRes.json();
@@ -429,11 +428,12 @@
                     if (currentSurahNumber !== 1 && ayah.numberInSurah === 1 && text.startsWith('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ')) {
                         text = text.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', '').trim();
                     }
-                    const activeClass = (index === 0) ? 'active-verse' : '';
+                    const activeClass = (ayah.numberInSurah === targetAyah) ? 'active-verse' : '';
                     html += `<div class="verse ${activeClass}" id="verse-${ayah.numberInSurah}">${text} <span class="verse-num">﴿${ayah.numberInSurah}﴾</span></div>`;
                 });
                 
                 quranTextBody.innerHTML = html;
+                renderAyah(currentAyahIndex);
             }
         } catch(e) {
             quranTextBody.innerHTML = '<div style="text-align: center; color: var(--red);">خطأ في جلب بيانات السورة</div>';
@@ -453,6 +453,7 @@
         currentAyahIndex++;
         if (currentAyahIndex > totalAyahs) currentAyahIndex = 1;
         renderAyah(currentAyahIndex);
+        saveCurrentProgress();
     }
 
     function prevAyah() {
@@ -460,9 +461,9 @@
         currentAyahIndex--;
         if (currentAyahIndex < 1) currentAyahIndex = totalAyahs;
         renderAyah(currentAyahIndex);
+        saveCurrentProgress();
     }
 
-    // الانتقال باللمس على الشاشة حسب الجهة (يسار = التالي، يمين = السابق)
     quranCard.onclick = (e) => {
         const rect = quranCard.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
@@ -475,7 +476,26 @@
         }
     };
 
-    // مزامنة آليّة تلقائية أثناء الاستماع عند مطابقة الصوت للتوقيت
+    // حفظ رقم الآية ورقم الوقت بدقة في التخزين المحلي
+    function saveCurrentProgress() {
+        if (!audio.src) return;
+        let activeServer = (currentMode === 'تفسير') ? tafsirTypeSelect.value : reciterSelect.value;
+        let activeSurahId = (currentMode === 'تفسير') ? tafsirMainSurahSelect.value : surahSelect.value;
+        let activeFileCode = (currentMode === 'تفسير') ? tafsirPartSelect.value : surahSelect.value;
+        
+        localStorage.setItem('lastQuranSession', JSON.stringify({
+            server: activeServer,
+            surahId: activeSurahId,
+            surahNum: surahSelect.value,
+            fileCode: activeFileCode,
+            audioUrl: audio.src,
+            time: audio.currentTime,
+            ayahIndex: currentAyahIndex,
+            mode: currentMode
+        }));
+    }
+    setInterval(saveCurrentProgress, 2000);
+
     audio.ontimeupdate = () => { 
         if(!isNaN(audio.duration) && audio.duration > 0) { 
             seekSlider.value = (audio.currentTime / audio.duration) * 100; 
@@ -511,49 +531,35 @@
                 currentMode = lastSave.mode || 'مرتل';
                 updateActiveBtn(document.getElementById(getModeBtnId(currentMode)));
                 toggleModeUI();
+                
+                let savedAyah = lastSave.ayahIndex || 1;
+                
                 if (currentMode === 'تفسير') {
                     tafsirTypeSelect.value = lastSave.server;
                     tafsirMainSurahSelect.value = lastSave.surahId || 1;
                     updatePartDropdown(lastSave.surahId || 1);
                     tafsirPartSelect.value = lastSave.fileCode;
-                    fetchVerses(lastSave.surahId || 1);
+                    fetchVerses(lastSave.surahId || 1, savedAyah);
                 } else {
                     filterReciters();
                     loadSurahs(currentMode === 'معلم');
                     reciterSelect.value = lastSave.server;
                     surahSelect.value = lastSave.surahNum;
-                    fetchVerses(lastSave.surahNum || 1);
+                    fetchVerses(lastSave.surahNum || 1, savedAyah);
                 }
                 audio.src = lastSave.audioUrl || getAudioUrl(lastSave.server, lastSave.surahNum);
                 audio.load();
-                audio.currentTime = lastSave.time;
-                repeatStatus.innerText = "🔄 تم استعادة موقعك الأخير";
+                audio.currentTime = lastSave.time || 0;
+                repeatStatus.innerText = `🔄 تم استعادة الآية ﴿${savedAyah}﴾ وموقعك الأخير`;
             } else {
                 filterReciters(); 
                 loadSurahs(false);
-                fetchVerses(1);
+                fetchVerses(1, 1);
             }
         } catch(e) { 
             repeatStatus.innerText = "خطأ في جلب البيانات من السيرفر"; 
         }
     }
-
-    function saveCurrentProgress() {
-        if (!audio.src || audio.paused) return;
-        let activeServer = (currentMode === 'تفسير') ? tafsirTypeSelect.value : reciterSelect.value;
-        let activeSurahId = (currentMode === 'تفسير') ? tafsirMainSurahSelect.value : surahSelect.value;
-        let activeFileCode = (currentMode === 'تفسير') ? tafsirPartSelect.value : surahSelect.value;
-        localStorage.setItem('lastQuranSession', JSON.stringify({
-            server: activeServer,
-            surahId: activeSurahId,
-            surahNum: surahSelect.value,
-            fileCode: activeFileCode,
-            audioUrl: audio.src,
-            time: audio.currentTime,
-            mode: currentMode
-        }));
-    }
-    setInterval(saveCurrentProgress, 2000);
 
     function getModeBtnId(m) { 
         if (m === 'مجود') return 'mojawadMode';
@@ -635,7 +641,7 @@
         updateStatus();
         audio.load();
         playAudioSafe();
-        fetchVerses(tafsirMainSurahSelect.value);
+        fetchVerses(tafsirMainSurahSelect.value, 1);
     }
 
     function autoPlayTrack() {
@@ -646,7 +652,7 @@
         checkFavStatus();
         audio.load();
         playAudioSafe();
-        fetchVerses(surahSelect.value);
+        fetchVerses(surahSelect.value, 1);
     }
 
     function filterReciters(term = "") {
