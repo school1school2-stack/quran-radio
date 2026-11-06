@@ -139,6 +139,7 @@
             justify-content: space-between;
             cursor: pointer;
             user-select: none;
+            position: relative;
         }
 
         .quran-header {
@@ -182,7 +183,6 @@
             font-size: 1.7rem;
         }
 
-        /* إخفاء الآيات افتراضياً */
         .verse {
             display: none;
             font-size: 2.2rem;
@@ -194,7 +194,6 @@
             width: 100%;
         }
 
-        /* إظهار الآية الحالية فقط عند التمرير باللمس */
         .verse.active-verse {
             display: block !important;
             background: rgba(241, 196, 15, 0.1);
@@ -316,11 +315,10 @@
             </div>
         </div>
 
-        <!-- بطاقة الآية التفاعلية للانتقال باللمس -->
         <div class="quran-text-container" id="quranCard">
             <div class="quran-header">
                 <div class="quran-title" id="textSurahTitle">📖 المصحف المكتوب</div>
-                <div class="step-hint">👈 المس بطاقة الآية للانتقال</div>
+                <div class="step-hint">👈 يسار للآية التالية | يمين للآية السابقة 👉</div>
             </div>
             
             <div class="quran-body" id="quranTextBody">
@@ -328,14 +326,14 @@
             </div>
 
             <div class="touch-controls">
-                <button class="touch-btn" onclick="event.stopPropagation(); prevAyah();">▶ الآية السابقة</button>
-                <button class="touch-btn" onclick="event.stopPropagation(); nextAyah();">الآية التالية ◀</button>
+                <button class="touch-btn" onclick="event.stopPropagation(); prevAyah();">▶ الآية السابقة (يمين)</button>
+                <button class="touch-btn" onclick="event.stopPropagation(); nextAyah();">الآية التالية ◀ (يسار)</button>
             </div>
         </div>
     </div>
 
     <div class="footer">
-        صدقة جارية لجميع موتى المسلمين | ثانوية الأمير عبدالمجيد 😉
+        صدقة جارية لجميع موتى المسلمين
     </div>
 </div>
 
@@ -346,7 +344,7 @@
         <ul class="feat-list">
             <li>⭐ 4 أيقونات سريعة للتحكم المباشر والربط المنسدل.</li>
             <li>⭐ عرض الآية المسموعة أو المقروءة حالياً فقط في المنتصف.</li>
-            <li>⭐ التبديل السريع آية بآية بمجرد لمس الشاشة أو البطاقة.</li>
+            <li>⭐ لمس يسار البطاقة للانتقال للآية التالية، ولمس يمينها للعودة للسابقة.</li>
         </ul>
     </div>
 </div>
@@ -393,7 +391,6 @@
         return text.replace(/[أإآء]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064b-\u065f]/g, '');
     }
 
-    // جلب السورة وتأهيل بطاقات الآيات (آية آية)
     async function fetchVerses(surahNum) {
         currentSurahNumber = parseInt(surahNum, 10);
         textSurahTitle.innerText = `📖 سورة ${surahNames[currentSurahNumber - 1]}`;
@@ -427,7 +424,6 @@
         }
     }
 
-    // دالة إظهار آية محددة
     function renderAyah(index) {
         document.querySelectorAll('.verse').forEach(el => el.classList.remove('active-verse'));
         const target = document.getElementById(`verse-${index}`);
@@ -450,9 +446,19 @@
         renderAyah(currentAyahIndex);
     }
 
-    // الانتقال للآية التالية بمجرد لمس/الضغط على البطاقة
-    quranCard.onclick = () => {
-        nextAyah();
+    // تحديد اتجاه اللمس/النقر على بطاقة الآية (يسار = التالية، يمين = السابقة)
+    quranCard.onclick = (e) => {
+        const rect = quranCard.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const cardWidth = rect.width;
+
+        if (clickX < cardWidth / 2) {
+            // اللمس على النصف الأيسر من الشاشة
+            nextAyah();
+        } else {
+            // اللمس على النصف الأيمن من الشاشة
+            prevAyah();
+        }
     };
 
     audio.ontimeupdate = () => { 
