@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>إذاعة القرآن الكريم والتفسير - المصحف التفاعلي</title>
+    <title>إذاعة القرآن الكريم والتفسير - بطاقة الآية التفاعلية</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
@@ -133,9 +133,12 @@
             padding: 25px 20px;
             border: 1px solid rgba(255,255,255,0.1);
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-            max-height: 520px;
+            min-height: 350px;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
         }
 
         .quran-header {
@@ -153,62 +156,89 @@
             font-weight: bold;
         }
 
-        .next-verse-btn {
-            background: linear-gradient(45deg, #f1c40f, #e67e22);
-            color: #000;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 10px rgba(241, 196, 15, 0.3);
-        }
-
-        .next-verse-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(241, 196, 15, 0.5);
+        .step-hint {
+            font-size: 0.8rem;
+            color: var(--green);
+            background: rgba(66, 230, 149, 0.1);
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid var(--green);
         }
 
         .quran-body {
-            overflow-y: auto;
-            padding-left: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
             font-family: 'Amiri Quran', serif;
             direction: rtl;
-            line-height: 2.8;
-            font-size: 1.8rem;
-            text-align: justify;
         }
 
         .bismillah {
             text-align: center;
             color: var(--accent);
             margin-bottom: 15px;
-            font-size: 1.8rem;
+            font-size: 1.7rem;
         }
 
+        /* إخفاء الآيات افتراضياً */
         .verse {
-            display: inline;
+            display: none;
+            font-size: 2.2rem;
+            line-height: 2.6;
+            text-align: center;
             color: #fff8e7;
-            padding: 2px 6px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            padding: 20px;
+            border-radius: 15px;
+            width: 100%;
         }
 
-        /* تظليل وتوضيح الآية الحالية أثناء التمرير */
+        /* إظهار الآية الحالية فقط عند التمرير باللمس */
         .verse.active-verse {
-            background: rgba(241, 196, 15, 0.25);
-            color: var(--accent);
-            box-shadow: 0 0 10px rgba(241, 196, 15, 0.3);
-            font-weight: bold;
+            display: block !important;
+            background: rgba(241, 196, 15, 0.1);
+            border: 1px solid var(--accent);
+            box-shadow: 0 0 20px rgba(241, 196, 15, 0.2);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.97); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .verse-num {
             color: var(--accent);
-            font-size: 1.2rem;
-            margin: 0 6px;
+            font-size: 1.3rem;
+            margin-right: 8px;
             display: inline-block;
+            vertical-align: middle;
+        }
+
+        .touch-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            gap: 10px;
+        }
+
+        .touch-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .touch-btn:hover {
+            background: var(--accent);
+            color: black;
         }
 
         .modal { display: none; position: fixed; z-index: 2000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 20px; }
@@ -286,19 +316,26 @@
             </div>
         </div>
 
-        <div class="quran-text-container">
+        <!-- بطاقة الآية التفاعلية للانتقال باللمس -->
+        <div class="quran-text-container" id="quranCard">
             <div class="quran-header">
                 <div class="quran-title" id="textSurahTitle">📖 المصحف المكتوب</div>
-                <button class="next-verse-btn" id="stepVerseBtn">◀ الآية التالية</button>
+                <div class="step-hint">👈 المس بطاقة الآية للانتقال</div>
             </div>
+            
             <div class="quran-body" id="quranTextBody">
-                <div style="text-align: center; color: var(--accent);">جاري تحضير المصحف...</div>
+                <div style="text-align: center; color: var(--accent);">جاري تحضير السورة...</div>
+            </div>
+
+            <div class="touch-controls">
+                <button class="touch-btn" onclick="event.stopPropagation(); prevAyah();">▶ الآية السابقة</button>
+                <button class="touch-btn" onclick="event.stopPropagation(); nextAyah();">الآية التالية ◀</button>
             </div>
         </div>
     </div>
 
     <div class="footer">
-        صدقة جارية لجميع موتى المسلمين
+        صدقة جارية لجميع موتى المسلمين | ثانوية الأمير عبدالمجيد 😉
     </div>
 </div>
 
@@ -308,8 +345,8 @@
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
             <li>⭐ 4 أيقونات سريعة للتحكم المباشر والربط المنسدل.</li>
-            <li>⭐ عرض المصحف كاملاً مع التمرير السلس.</li>
-            <li>⭐ زر انتقال مخصص لتسهيل القراءة والتنقل آية آية.</li>
+            <li>⭐ عرض الآية المسموعة أو المقروءة حالياً فقط في المنتصف.</li>
+            <li>⭐ التبديل السريع آية بآية بمجرد لمس الشاشة أو البطاقة.</li>
         </ul>
     </div>
 </div>
@@ -330,7 +367,7 @@
     const favBtn = document.getElementById('addFav');
     const quranTextBody = document.getElementById('quranTextBody');
     const textSurahTitle = document.getElementById('textSurahTitle');
-    const stepVerseBtn = document.getElementById('stepVerseBtn');
+    const quranCard = document.getElementById('quranCard');
     
     let allReciters = [];
     let tafsirList = [];
@@ -338,7 +375,7 @@
     let favorites = JSON.parse(localStorage.getItem('quranFavs')) || [];
     let currentMode = 'مرتل';
     let currentSurahNumber = 1;
-    let activeVerseIndex = 1;
+    let currentAyahIndex = 1;
     let totalAyahs = 0;
 
     const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
@@ -356,12 +393,12 @@
         return text.replace(/[أإآء]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064b-\u065f]/g, '');
     }
 
-    // جلب السورة كاملة لعرض المصحف كاملاً
+    // جلب السورة وتأهيل بطاقات الآيات (آية آية)
     async function fetchVerses(surahNum) {
         currentSurahNumber = parseInt(surahNum, 10);
         textSurahTitle.innerText = `📖 سورة ${surahNames[currentSurahNumber - 1]}`;
-        quranTextBody.innerHTML = '<div style="text-align: center; color: var(--accent);">جاري تحميل المصحف...</div>';
-        activeVerseIndex = 1;
+        quranTextBody.innerHTML = '<div style="text-align: center; color: var(--accent);">جاري التحميل...</div>';
+        currentAyahIndex = 1;
 
         try {
             const res = await fetch(`https://api.alquran.cloud/v1/surah/${currentSurahNumber}/quran-uthmani`);
@@ -380,7 +417,7 @@
                         text = text.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', '').trim();
                     }
                     const activeClass = (index === 0) ? 'active-verse' : '';
-                    html += `<span class="verse ${activeClass}" id="verse-${ayah.numberInSurah}">${text} <span class="verse-num">﴿${ayah.numberInSurah}﴾</span></span> `;
+                    html += `<div class="verse ${activeClass}" id="verse-${ayah.numberInSurah}">${text} <span class="verse-num">﴿${ayah.numberInSurah}﴾</span></div>`;
                 });
                 
                 quranTextBody.innerHTML = html;
@@ -390,18 +427,32 @@
         }
     }
 
-    // الانتقال للآية التالية والتحريك المباشر إليها عند التمرير
-    stepVerseBtn.onclick = () => {
-        if (totalAyahs === 0) return;
-        activeVerseIndex++;
-        if (activeVerseIndex > totalAyahs) activeVerseIndex = 1;
-        
+    // دالة إظهار آية محددة
+    function renderAyah(index) {
         document.querySelectorAll('.verse').forEach(el => el.classList.remove('active-verse'));
-        const targetVerse = document.getElementById(`verse-${activeVerseIndex}`);
-        if (targetVerse) {
-            targetVerse.classList.add('active-verse');
-            targetVerse.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const target = document.getElementById(`verse-${index}`);
+        if(target) {
+            target.classList.add('active-verse');
         }
+    }
+
+    function nextAyah() {
+        if (totalAyahs === 0) return;
+        currentAyahIndex++;
+        if (currentAyahIndex > totalAyahs) currentAyahIndex = 1;
+        renderAyah(currentAyahIndex);
+    }
+
+    function prevAyah() {
+        if (totalAyahs === 0) return;
+        currentAyahIndex--;
+        if (currentAyahIndex < 1) currentAyahIndex = totalAyahs;
+        renderAyah(currentAyahIndex);
+    }
+
+    // الانتقال للآية التالية بمجرد لمس/الضغط على البطاقة
+    quranCard.onclick = () => {
+        nextAyah();
     };
 
     audio.ontimeupdate = () => { 
