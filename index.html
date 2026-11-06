@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>إذاعة القرآن الكريم والتفسير - المصحف الإلكتروني التلقائي</title>
+    <title>إذاعة القرآن الكريم والتفسير - المصحف التفاعلي التلقائي</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
@@ -632,7 +632,6 @@
         }
     }
 
-    // الانتقال للآية والصوت معاً عند النقر على أي آية
     function jumpToAyah(sNum, aNum) {
         currentSurahNumber = sNum;
         currentAyahIndex = aNum;
@@ -661,7 +660,7 @@
     }
     setInterval(saveCurrentProgress, 2000);
 
-    // التتبع والانتقال التلقائي للآية التالية والصفحة التالية أثناء الاستماع للقرآن
+    // تتبع التلاوة والانتقال التلقائي للآية وصفحة المصحف بالتزامن مع الصوت
     audio.ontimeupdate = async () => { 
         if(!isNaN(audio.duration) && audio.duration > 0) { 
             seekSlider.value = (audio.currentTime / audio.duration) * 100; 
@@ -831,7 +830,7 @@
         loadTimings(tafsirMainSurahSelect.value);
     }
 
-    function autoPlayTrack() {
+    async function autoPlayTrack() {
         if(!reciterSelect.value || !surahSelect.value) return;
         let sNum = parseInt(surahSelect.value, 10);
         audio.src = getAudioUrl(reciterSelect.value, surahSelect.value);
@@ -840,7 +839,8 @@
         checkFavStatus();
         audio.load();
         playAudioSafe();
-        loadTimings(sNum);
+        
+        await loadTimings(sNum);
         
         fetch(`https://api.alquran.cloud/v1/surah/${sNum}`)
             .then(res => res.json())
