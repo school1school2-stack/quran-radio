@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>إذاعة القرآن الكريم والتفسير - المصحف التفاعلي التلقائي</title>
+    <title>إذاعة القرآن الكريم والتفسير - المصحف التفاعلي المتزامن</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
@@ -410,9 +410,9 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 المميزات العامة</h3>
         <ul class="feat-list">
-            <li>⭐ <b>انتقال تلقائي مؤكد:</b> تتبع التلاوة والانتقال التلقائي بين الآيات والصفحات بدون توقف[span_4](start_span)[span_4](end_span).</li>
-            <li>⭐ <b>عرض المصحف كاملاً (604 صفحة):</b> تجربة مصحف حقيقي بدون سكرول[span_5](start_span)[span_5](end_span).</li>
-            <li>⭐ <b>الاستئناف التلقائي:</b> حفظ المكان والتأطير دائماً عند إعادة فتح التطبيق.</li>
+            <li>⭐ <b>تزامن دقيق ومحسّن:</b> مطابقة ذكية للآيات مع الصوت لتفادي التسارع والتأخير.</li>
+            <li>⭐ <b>عرض 604 صفحة كاملة:</b> تجربة مصحف ورقي متكاملة بدون سكرول.</li>
+            <li>⭐ <b>الاستئناف التلقائي:</b> حفظ مكان الاستماع دائماً.</li>
         </ul>
     </div>
 </div>
@@ -642,9 +642,12 @@
             }
         }
         if (surahAyahsData.length > 0 && audio.duration) {
-            let totalAyahs = surahAyahsData.length;
-            let approxTime = ((currentAyahIndex - 1) / totalAyahs) * audio.duration;
-            audio.currentTime = approxTime;
+            let totalChars = surahAyahsData.reduce((acc, curr) => acc + curr.text.length, 0);
+            let charCountSoFar = 0;
+            for (let i = 0; i < currentAyahIndex - 1; i++) {
+                charCountSoFar += surahAyahsData[i].text.length;
+            }
+            audio.currentTime = (charCountSoFar / totalChars) * audio.duration;
             playAudioSafe();
         }
     }
@@ -677,7 +680,7 @@
     }
     setInterval(saveCurrentProgress, 2000);
 
-    // تتبع التلاوة والمزامنة والانتقال الآلي الفعال للآية والصفحة التالية
+    // خوارزمية ذكية مطورة للتزامن المستند لطول الآيات الفعلي والصوت
     audio.ontimeupdate = async () => { 
         if(!isNaN(audio.duration) && audio.duration > 0) { 
             seekSlider.value = (audio.currentTime / audio.duration) * 100; 
@@ -693,9 +696,17 @@
                     targetAyah = activeVerse.ayah;
                 }
             } else if (surahAyahsData.length > 0) {
-                let total = surahAyahsData.length;
-                let calculatedIndex = Math.floor((audio.currentTime / audio.duration) * total) + 1;
-                targetAyah = Math.min(total, Math.max(1, calculatedIndex));
+                let totalChars = surahAyahsData.reduce((acc, curr) => acc + curr.text.length, 0);
+                let currentCharIndex = (audio.currentTime / audio.duration) * totalChars;
+                
+                let accumulated = 0;
+                for (let i = 0; i < surahAyahsData.length; i++) {
+                    accumulated += surahAyahsData[i].text.length;
+                    if (currentCharIndex <= accumulated) {
+                        targetAyah = surahAyahsData[i].numberInSurah;
+                        break;
+                    }
+                }
             }
 
             if (targetAyah !== currentAyahIndex) {
