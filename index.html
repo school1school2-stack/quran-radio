@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>إذاعة القرآن الكريم والتفسير مع المصحف المكتوب</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:ital,wght@0,400;0,700;1,400&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { 
             --accent: #f1c40f; 
@@ -133,7 +136,7 @@
             }
         }
 
-        /* قسم المصحف المكتوب */
+        /* قسم المصحف المكتوب بالرسم العثماني */
         .quran-text-container {
             background: var(--card-bg);
             border-radius: 20px;
@@ -162,27 +165,42 @@
 
         .quran-body {
             overflow-y: auto;
-            padding-left: 10px;
-            font-size: 1.35rem;
-            line-height: 2.3;
+            padding: 10px 15px;
+            font-size: 1.6rem;
+            line-height: 2.5;
             text-align: justify;
-            color: #f8fafc;
-            font-family: 'Traditional Arabic', 'Amiri', 'Segoe UI', serif;
+            text-justify: inter-word;
+            color: #fff8e7;
+            font-family: 'Amiri Quran', 'Scheherazade New', 'Amiri', serif;
+            letter-spacing: 0;
+            word-spacing: 1px;
+            direction: rtl;
+        }
+
+        .bismillah {
+            text-align: center;
+            color: var(--accent);
+            margin: 10px 0 20px 0;
+            font-size: 1.8rem;
+            font-family: 'Amiri Quran', 'Amiri', serif;
         }
 
         .verse {
             display: inline;
+            white-space: normal;
         }
 
         .verse-num {
             color: var(--accent);
-            font-size: 0.9rem;
-            margin: 0 5px;
+            font-size: 1.1rem;
+            margin: 0 6px;
             display: inline-block;
-            background: rgba(241, 196, 15, 0.15);
-            padding: 2px 7px;
+            background: rgba(241, 196, 15, 0.12);
+            padding: 2px 8px;
             border-radius: 50%;
-            border: 1px solid rgba(241, 196, 15, 0.3);
+            border: 1px solid rgba(241, 196, 15, 0.4);
+            font-family: 'Amiri', serif;
+            vertical-align: middle;
         }
 
         .modal { display: none; position: fixed; z-index: 2000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; padding: 20px; }
@@ -264,14 +282,14 @@
             </div>
         </div>
 
-        <!-- قسم المصحف المكتوب للمتابعة -->
+        <!-- قسم المصحف المكتوب بالرسم العثماني -->
         <div class="quran-text-container">
             <div class="quran-header">
-                <div class="quran-title" id="textSurahTitle">📖 المصحف المكتوب - سورة الفاتحة</div>
+                <div class="quran-title" id="textSurahTitle">📖 المصحف المكتوب (بالرسم العثماني)</div>
                 <div style="font-size: 0.8rem; color: #cbd5e1;" id="surahInfo">المتابعة المباشرة</div>
             </div>
             <div class="quran-body" id="quranTextBody">
-                <div style="text-align: center; color: var(--accent);">جاري تحميل نص السورة...</div>
+                <div style="text-align: center; color: var(--accent);">جاري تحميل نص السورة بالرسم العثماني...</div>
             </div>
         </div>
     </div>
@@ -287,6 +305,7 @@
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
             <li>⭐ 4 أيقونات سريعة للتحكم المباشر والربط المنسدل.</li>
+            <li>⭐ عرض المصحف الشريف بالرسم العثماني الواضح بخط مخصص.</li>
             <li>⭐ قراءة ومتابعة المصحف مكتوباً بالكامل تزامناً مع الاستماع.</li>
             <li>⭐ تصفح التفسير بنظام القائمتين بدقة متناهية وسلاسة.</li>
             <li>⭐ استكمال الاستماع تلقائياً من حيث توقفت.</li>
@@ -349,26 +368,28 @@
         return text.replace(/[أإآء]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064b-\u065f]/g, '');
     }
 
-    // جلب نص السورة المكتوب
+    // جلب نص السورة المكتوب بالرسم العثماني
     async function loadQuranText(surahNum) {
         currentSurahNumber = parseInt(surahNum, 10);
-        textSurahTitle.innerText = `📖 سورة ${surahNames[currentSurahNumber - 1]}`;
-        quranTextBody.innerHTML = '<div style="text-align: center; color: var(--accent);">جاري تحميل السورة...</div>';
+        textSurahTitle.innerText = `📖 سورة ${surahNames[currentSurahNumber - 1]} (بالرسم العثماني)`;
+        quranTextBody.innerHTML = '<div style="text-align: center; color: var(--accent);">جاري تحميل السورة بالرسم العثماني...</div>';
         
         try {
-            const res = await fetch(`https://api.alquran.cloud/v1/surah/${currentSurahNumber}`);
+            // استخدام API الرسم العثماني quran-uthmani
+            const res = await fetch(`https://api.alquran.cloud/v1/surah/${currentSurahNumber}/quran-uthmani`);
             const data = await res.json();
             if (data.code === 200) {
                 let html = '';
                 if (currentSurahNumber !== 1 && currentSurahNumber !== 9) {
-                    html += '<div style="text-align: center; color: var(--accent); margin-bottom: 15px; font-size: 1.5rem;">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>';
+                    html += '<div class="bismillah">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>';
                 }
                 data.data.ayahs.forEach(ayah => {
                     let text = ayah.text;
-                    if (currentSurahNumber !== 1 && ayah.numberInSurah === 1) {
-                        text = text.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', '').trim();
+                    // إزالة البسملة من أول آية إذا كانت موجودة لمنع التكرار
+                    if (currentSurahNumber !== 1 && ayah.numberInSurah === 1 && text.startsWith('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ')) {
+                        text = text.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', '').trim();
                     }
-                    html += `<div class="verse">${text} <span class="verse-num">${ayah.numberInSurah}</span></div> `;
+                    html += `<span class="verse">${text} <span class="verse-num">﴿${ayah.numberInSurah}﴾</span></span> `;
                 });
                 quranTextBody.innerHTML = html;
             } else {
