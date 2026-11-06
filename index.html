@@ -137,7 +137,6 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            cursor: pointer;
             user-select: none;
             position: relative;
         }
@@ -149,12 +148,30 @@
             border-bottom: 1px solid rgba(255,255,255,0.1);
             padding-bottom: 10px;
             margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .quran-title {
             color: var(--accent);
             font-size: 1.2rem;
             font-weight: bold;
+        }
+
+        .view-mode-toggle {
+            background: rgba(241, 196, 15, 0.15);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 5px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .view-mode-toggle:hover {
+            background: var(--accent);
+            color: black;
         }
 
         .step-hint {
@@ -169,26 +186,22 @@
         .quran-body {
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
-            min-height: 200px;
+            min-height: 220px;
             font-family: 'Amiri Quran', serif;
             direction: rtl;
-            max-height: 300px;
+            max-height: 450px;
             overflow-y: auto;
             padding: 10px;
         }
 
-        .bismillah {
-            text-align: center;
-            color: var(--accent);
-            margin-bottom: 15px;
-            font-size: 1.7rem;
-            width: 100%;
+        /* نمط عرض الآية المفردة */
+        .mode-ayah-only .verse {
+            display: none !important;
         }
-
-        .verse {
-            display: none;
+        .mode-ayah-only .verse.active-verse {
+            display: block !important;
             font-size: 2rem;
             line-height: 2.6;
             text-align: center;
@@ -196,14 +209,36 @@
             padding: 15px;
             border-radius: 15px;
             width: 100%;
-        }
-
-        .verse.active-verse {
-            display: block !important;
             background: rgba(241, 196, 15, 0.12);
             border: 1px solid var(--accent);
             box-shadow: 0 0 20px rgba(241, 196, 15, 0.2);
             animation: fadeIn 0.3s ease-in-out;
+        }
+
+        /* نمط عرض المصحف الكامل (الصفحة أو السورة كاملة متسلسلة) */
+        .mode-full-page .verse {
+            display: inline !important;
+            font-size: 1.6rem;
+            line-height: 2.4;
+            color: #fcf6bd;
+            padding: 2px 4px;
+            margin: 0 2px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+        .mode-full-page .verse.active-verse {
+            background: rgba(241, 196, 15, 0.35);
+            color: #fff;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .bismillah {
+            text-align: center;
+            color: var(--accent);
+            margin: 15px 0;
+            font-size: 1.7rem;
+            width: 100%;
+            display: block;
         }
 
         @keyframes fadeIn {
@@ -213,8 +248,9 @@
 
         .verse-num {
             color: var(--accent);
-            font-size: 1.2rem;
-            margin-right: 8px;
+            font-size: 1.1rem;
+            margin-right: 4px;
+            margin-left: 4px;
             display: inline-block;
             vertical-align: middle;
         }
@@ -319,10 +355,11 @@
             </div>
         </div>
 
-        <div class="quran-text-container" id="quranCard">
+        <div class="quran-text-container mode-ayah-only" id="quranCard">
             <div class="quran-header">
                 <div class="quran-title" id="textSurahTitle">📖 المصحف المكتوب</div>
-                <div class="step-hint">👈 يسار = التالية | يمين = السابقة 👉</div>
+                <button class="view-mode-toggle" id="viewModeToggleBtn" onclick="toggleViewMode()">📄 عرض الصفحة كاملة</button>
+                <div class="step-hint" id="stepHint">👈 يسار = التالية | يمين = السابقة 👉</div>
             </div>
             
             <div class="quran-body" id="quranTextBody">
@@ -330,8 +367,8 @@
             </div>
 
             <div class="touch-controls">
-                <button class="touch-btn" onclick="event.stopPropagation(); prevAyah();">▶ الآية السابقة (يمين)</button>
-                <button class="touch-btn" onclick="event.stopPropagation(); nextAyah();">الآية التالية ◀ (يسار)</button>
+                <button class="touch-btn" onclick="event.stopPropagation(); prevAyah();">▶ الآية السابقة</button>
+                <button class="touch-btn" onclick="event.stopPropagation(); nextAyah();">الآية التالية ◀</button>
             </div>
         </div>
     </div>
@@ -346,9 +383,9 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
-            <li>⭐ 4 أيقونات سريعة للتحكم المباشر والربط المنسدل.</li>
-            <li>⭐ عرض الآية وتتبعها بصوت الشيخ آلياً مع التحكم اليدوي المباشر للصوت والنص.</li>
-            <li>⭐ حفظ آلي وتلقائي للآية الحالية المسموعة لاستئناف القراءة.</li>
+            <li>⭐ خياران للعرض: عرض الآية الحالية فقط بتركيز عالٍ، أو عرض الصفحة/السورة كاملة كالمصحف الشريف.</li>
+            <li>⭐ 4 أيقونات سريعة للتحكم المباشر والربط المنسدل (مرتل، مجود، أطفال، تفسير).</li>
+            <li>⭐ تتبع صوت الشيخ آلياً مع التحكم اليدوي وحفظ موقعك الحالي تلقائياً.</li>
         </ul>
     </div>
 </div>
@@ -370,6 +407,8 @@
     const quranTextBody = document.getElementById('quranTextBody');
     const textSurahTitle = document.getElementById('textSurahTitle');
     const quranCard = document.getElementById('quranCard');
+    const viewModeToggleBtn = document.getElementById('viewModeToggleBtn');
+    const stepHint = document.getElementById('stepHint');
     
     let allReciters = [];
     let tafsirList = [];
@@ -380,10 +419,28 @@
     let currentAyahIndex = 1;
     let totalAyahs = 0;
     let verseTimings = [];
+    let isFullPageMode = false; // افتراضياً عرض الآية فقط
 
     const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
     function toggleModal(show) { document.getElementById('featModal').style.display = show ? 'flex' : 'none'; }
+
+    // تبديل نمط العرض بين الآية فقط أو الصفحة الكاملة
+    function toggleViewMode() {
+        isFullPageMode = !isFullPageMode;
+        if (isFullPageMode) {
+            quranCard.classList.remove('mode-ayah-only');
+            quranCard.classList.add('mode-full-page');
+            viewModeToggleBtn.innerText = "🔍 عرض الآية فقط";
+            stepHint.style.display = 'none';
+        } else {
+            quranCard.classList.remove('mode-full-page');
+            quranCard.classList.add('mode-ayah-only');
+            viewModeToggleBtn.innerText = "📄 عرض الصفحة كاملة";
+            stepHint.style.display = 'block';
+        }
+        renderAyah(currentAyahIndex);
+    }
 
     for(let i=1; i<=20; i++) {
         let opt = document.createElement('option');
@@ -431,7 +488,7 @@
                     if (currentSurahNumber !== 1 && ayah.numberInSurah === 1 && text.startsWith('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ')) {
                         text = text.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', '').trim();
                     }
-                    html += `<div class="verse" id="verse-${ayah.numberInSurah}">${text} <span class="verse-num">﴿${ayah.numberInSurah}﴾</span></div>`;
+                    html += `<span class="verse" id="verse-${ayah.numberInSurah}">${text} <span class="verse-num">﴿${ayah.numberInSurah}﴾</span></span>`;
                 });
                 
                 quranTextBody.innerHTML = html;
@@ -478,6 +535,8 @@
     }
 
     quranCard.onclick = (e) => {
+        // التفاعل بالنقر على الجانبين يعمل فقط في نمط الآية المفردة
+        if (isFullPageMode) return;
         const rect = quranCard.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
         if (clickX < rect.width / 2) {
@@ -501,7 +560,8 @@
             audioUrl: audio.src,
             time: audio.currentTime,
             ayahIndex: currentAyahIndex,
-            mode: currentMode
+            mode: currentMode,
+            isFullPageMode: isFullPageMode
         }));
     }
     setInterval(saveCurrentProgress, 2000);
@@ -539,6 +599,14 @@
             const lastSave = JSON.parse(localStorage.getItem('lastQuranSession'));
             if (lastSave) {
                 currentMode = lastSave.mode || 'مرتل';
+                isFullPageMode = lastSave.isFullPageMode || false;
+                if(isFullPageMode) {
+                    quranCard.classList.remove('mode-ayah-only');
+                    quranCard.classList.add('mode-full-page');
+                    viewModeToggleBtn.innerText = "🔍 عرض الآية فقط";
+                    stepHint.style.display = 'none';
+                }
+
                 updateActiveBtn(document.getElementById(getModeBtnId(currentMode)));
                 toggleModeUI();
                 
