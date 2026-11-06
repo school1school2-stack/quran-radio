@@ -347,7 +347,7 @@
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
             <li>⭐ 4 أيقونات سريعة للتحكم المباشر والربط المنسدل.</li>
-            <li>⭐ عرض الآية وتتبعها بصوت الشيخ آلياً مع تطابق تام عند التنقل اليدوي.</li>
+            <li>⭐ عرض الآية وتتبعها بصوت الشيخ آلياً مع التحكم اليدوي المباشر للصوت والنص.</li>
             <li>⭐ حفظ آلي وتلقائي للآية الحالية المسموعة لاستئناف القراءة.</li>
         </ul>
     </div>
@@ -436,7 +436,6 @@
                 
                 quranTextBody.innerHTML = html;
                 renderAyah(currentAyahIndex);
-                syncAudioToCurrentAyah();
             }
         } catch(e) {
             quranTextBody.innerHTML = '<div style="text-align: center; color: var(--red);">خطأ في جلب بيانات السورة</div>';
@@ -473,6 +472,7 @@
             const timing = verseTimings.find(v => v.ayah === currentAyahIndex);
             if (timing) {
                 audio.currentTime = timing.start;
+                playAudioSafe();
             }
         }
     }
