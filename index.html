@@ -376,7 +376,7 @@
                 
                 <div class="page-selector-box" id="pageSelectorBox">
                     <label>الصفحة:</label>
-                    <select id="pageSelect" onchange="goToPage(this.value)"></select>
+                    <select id="pageSelect" onchange="goToPageFromSelector(this.value)"></select>
                     <span>/ 604</span>
                 </div>
             </div>
@@ -410,9 +410,9 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 المميزات العامة</h3>
         <ul class="feat-list">
-            <li>⭐ <b>تزامن دقيق ومحسّن:</b> مطابقة ذكية للآيات مع الصوت لتفادي التسارع والتأخير.</li>
-            <li>⭐ <b>عرض 604 صفحة كاملة:</b> تجربة مصحف ورقي متكاملة بدون سكرول.</li>
-            <li>⭐ <b>الاستئناف التلقائي:</b> حفظ مكان الاستماع دائماً.</li>
+            <li>⭐ <b>حفظ دقيق ومطابق:</b> ربط السورة والصفحة وصوت القارئ معاً بدقة تامة عند التحديث.</li>
+            <li>⭐ <b>عرض صفحات المصحف (604 صفحة):</b> تجربة مصحف ورقي متكاملة بدون سكرول.</li>
+            <li>⭐ <b>الاستئناف الفوري:</b> استعادة موقعك بدقة تعند فتح التطبيق أو تحديث الصفحة.</li>
         </ul>
     </div>
 </div>
@@ -448,6 +448,7 @@
     let verseTimings = [];
     let surahAyahsData = [];
     let isFullPageMode = true;
+    let isUserManualNavigation = false;
 
     const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
@@ -512,7 +513,9 @@
                 data.data.ayahs.forEach((ayah) => {
                     if (ayah.surah.number !== lastSurah) {
                         lastSurah = ayah.surah.number;
-                        if (surahSelect) surahSelect.value = lastSurah.toString().padStart(3, '0');
+                        if (surahSelect && isUserManualNavigation) {
+                            surahSelect.value = lastSurah.toString().padStart(3, '0');
+                        }
                         
                         if (lastSurah !== 1 && lastSurah !== 9 && ayah.numberInSurah === 1) {
                             html += '<div class="bismillah-text">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>';
@@ -607,7 +610,13 @@
 
     function goToPage(pNum) {
         pNum = Math.max(1, Math.min(604, pNum));
+        isUserManualNavigation = true;
         fetchPage(pNum);
+        setTimeout(() => { isUserManualNavigation = false; }, 500);
+    }
+
+    function goToPageFromSelector(pNum) {
+        goToPage(pNum);
     }
 
     function nextPageOrAyah() {
@@ -659,6 +668,7 @@
         syncAudioToCurrentAyah();
     }
 
+    // حفظ البيانات بدقة متناهية لتفادي أي خطأ عند التحديث
     function saveCurrentProgress() {
         if (!audio.src) return;
         let activeServer = (currentMode === 'تفسير') ? tafsirTypeSelect.value : reciterSelect.value;
@@ -678,9 +688,8 @@
             isFullPageMode: isFullPageMode
         }));
     }
-    setInterval(saveCurrentProgress, 2000);
+    setInterval(saveCurrentProgress, 1000);
 
-    // خوارزمية ذكية مطورة للتزامن المستند لطول الآيات الفعلي والصوت
     audio.ontimeupdate = async () => { 
         if(!isNaN(audio.duration) && audio.duration > 0) { 
             seekSlider.value = (audio.currentTime / audio.duration) * 100; 
@@ -744,6 +753,7 @@
                 currentMode = lastSave.mode || 'مرتل';
                 isFullPageMode = lastSave.isFullPageMode !== undefined ? lastSave.isFullPageMode : true;
                 currentPageNumber = lastSave.pageNumber || 1;
+                currentSurahNumber = parseInt(lastSave.surahNum || 1, 10);
 
                 if(!isFullPageMode) {
                     quranCard.classList.remove('mode-full-page');
@@ -769,13 +779,14 @@
                     surahSelect.value = lastSave.surahNum;
                 }
 
+                await loadTimings(currentSurahNumber);
+
                 if (isFullPageMode) {
-                    fetchPage(currentPageNumber);
+                    await fetchPage(currentPageNumber, {surah: currentSurahNumber, ayah: savedAyah});
                 } else {
-                    fetchVersesForSurah(lastSave.surahNum || 1, savedAyah);
+                    await fetchVersesForSurah(currentSurahNumber, savedAyah);
                 }
 
-                loadTimings(lastSave.surahNum || 1);
                 audio.src = lastSave.audioUrl || getAudioUrl(lastSave.server, lastSave.surahNum);
                 audio.load();
                 audio.currentTime = lastSave.time || 0;
