@@ -347,7 +347,7 @@
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
             <li>⭐ 4 أيقونات سريعة للتحكم المباشر والربط المنسدل.</li>
-            <li>⭐ عرض الآية أولاً ليتبعها صوت الشيخ مباشرة عند التنقل اليدوي.</li>
+            <li>⭐ عرض الآية وتتبعها بصوت الشيخ آلياً مع التحكم اليدوي المباشر للصوت والنص.</li>
             <li>⭐ حفظ آلي وتلقائي للآية الحالية المسموعة لاستئناف القراءة.</li>
         </ul>
     </div>
@@ -451,7 +451,6 @@
         }
     }
 
-    // هنا يتم عكس المعادلة: الآية المعروضة هي التي تقود الصوت وتوجهه عند الضغط
     function nextAyah() {
         if (totalAyahs === 0) return;
         currentAyahIndex++;
@@ -474,14 +473,7 @@
             if (timing) {
                 audio.currentTime = timing.start;
                 playAudioSafe();
-                return;
             }
-        }
-        // طريقة تقريبية ذكية في حال عدم توفر التوقيت الدقيق
-        if (!isNaN(audio.duration) && audio.duration > 0 && totalAyahs > 0) {
-            const estimatedTime = (audio.duration / totalAyahs) * (currentAyahIndex - 1);
-            audio.currentTime = estimatedTime;
-            playAudioSafe();
         }
     }
 
@@ -519,6 +511,15 @@
             seekSlider.value = (audio.currentTime / audio.duration) * 100; 
             document.getElementById('currentTime').innerText = formatTime(audio.currentTime); 
             document.getElementById('duration').innerText = formatTime(audio.duration); 
+
+            if(verseTimings.length > 0) {
+                const currentTime = audio.currentTime;
+                const activeVerse = verseTimings.find(v => currentTime >= v.start && currentTime <= v.end);
+                if(activeVerse && activeVerse.ayah !== currentAyahIndex) {
+                    currentAyahIndex = activeVerse.ayah;
+                    renderAyah(currentAyahIndex);
+                }
+            }
         } 
     };
 
@@ -749,7 +750,7 @@
 
     function updateStatus() {
         let max = parseInt(repeatSelect.value);
-        repeatStatus.innerText = max > 1 ? `تكرار: ${currentRepeat} من ${max}` : "الآية تقود الصوت مباشرة...";
+        repeatStatus.innerText = max > 1 ? `تكرار: ${currentRepeat} من ${max}` : "جاري الاستماع والتتبع...";
     }
 
     audio.onplay = () => playBtn.innerText = "⏸";
