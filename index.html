@@ -238,9 +238,10 @@
             transition: background 0.2s;
         }
         .mode-full-page .verse-item.active-verse {
-            background: rgba(241, 196, 15, 0.4);
+            background: rgba(241, 196, 15, 0.45);
             color: #000;
             font-weight: bold;
+            box-shadow: 0 0 5px rgba(241, 196, 15, 0.6);
         }
 
         .bismillah-text {
@@ -409,9 +410,9 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 المميزات العامة</h3>
         <ul class="feat-list">
-            <li>⭐ <b>الانتقال التلقائي للآية والتلاوة:</b> تتبع صوت الشيخ والانتقال الآلي للآية والصفحة التالية فوراً[span_1](start_span)[span_1](end_span).</li>
-            <li>⭐ <b>عرض صفحات المصحف (604 صفحة):</b> عرض كامل بدون سكرول مطابق للمصحف الورقي تماماً[span_2](start_span)[span_2](end_span).</li>
-            <li>⭐ <b>الاستئناف التلقائي:</b> حفظ دائم لآخر صفحة وآية وصل إليها المستخدم.</li>
+            <li>⭐ <b>انتقال تلقائي مؤكد:</b> تتبع التلاوة والانتقال التلقائي بين الآيات والصفحات بدون توقف[span_4](start_span)[span_4](end_span).</li>
+            <li>⭐ <b>عرض المصحف كاملاً (604 صفحة):</b> تجربة مصحف حقيقي بدون سكرول[span_5](start_span)[span_5](end_span).</li>
+            <li>⭐ <b>الاستئناف التلقائي:</b> حفظ المكان والتأطير دائماً عند إعادة فتح التطبيق.</li>
         </ul>
     </div>
 </div>
@@ -445,6 +446,7 @@
     let currentAyahIndex = 1;
     let currentPageNumber = 1;
     let verseTimings = [];
+    let surahAyahsData = [];
     let isFullPageMode = true;
 
     const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
@@ -548,6 +550,7 @@
             const data = await res.json();
             
             if (data.code === 200) {
+                surahAyahsData = data.data.ayahs;
                 let html = '';
                 if (currentSurahNumber !== 1 && currentSurahNumber !== 9) {
                     html += '<div class="bismillah-text" style="color:var(--accent);">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>';
@@ -572,6 +575,12 @@
     async function loadTimings(surahNum) {
         verseTimings = [];
         try {
+            const res = await fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/quran-uthmani`);
+            const d = await res.json();
+            if (d.code === 200) {
+                surahAyahsData = d.data.ayahs;
+            }
+
             const timingRes = await fetch(`https://api.quran.com/api/v4/chapter_recitations/7/${surahNum}`);
             if (timingRes.ok) {
                 const timingData = await timingRes.json();
@@ -592,6 +601,7 @@
         const target = document.getElementById(`verse-${surah}-${ayah}`);
         if(target) {
             target.classList.add('active-verse');
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }
 
@@ -628,7 +638,14 @@
             if (timing) {
                 audio.currentTime = timing.start;
                 playAudioSafe();
+                return;
             }
+        }
+        if (surahAyahsData.length > 0 && audio.duration) {
+            let totalAyahs = surahAyahsData.length;
+            let approxTime = ((currentAyahIndex - 1) / totalAyahs) * audio.duration;
+            audio.currentTime = approxTime;
+            playAudioSafe();
         }
     }
 
@@ -660,31 +677,40 @@
     }
     setInterval(saveCurrentProgress, 2000);
 
-    // تتبع التلاوة والانتقال التلقائي للآية وصفحة المصحف بالتزامن مع الصوت
+    // تتبع التلاوة والمزامنة والانتقال الآلي الفعال للآية والصفحة التالية
     audio.ontimeupdate = async () => { 
         if(!isNaN(audio.duration) && audio.duration > 0) { 
             seekSlider.value = (audio.currentTime / audio.duration) * 100; 
             document.getElementById('currentTime').innerText = formatTime(audio.currentTime); 
             document.getElementById('duration').innerText = formatTime(audio.duration); 
 
-            if(verseTimings.length > 0) {
+            let targetAyah = currentAyahIndex;
+
+            if (verseTimings.length > 0) {
                 const currentTime = audio.currentTime;
                 const activeVerse = verseTimings.find(v => currentTime >= v.start && currentTime <= v.end);
-                if(activeVerse && activeVerse.ayah !== currentAyahIndex) {
-                    currentAyahIndex = activeVerse.ayah;
-                    
-                    if (isFullPageMode) {
-                        try {
-                            const res = await fetch(`https://api.alquran.cloud/v1/ayah/${currentSurahNumber}:${currentAyahIndex}`);
-                            const data = await res.json();
-                            if (data.code === 200 && data.data.page !== currentPageNumber) {
-                                await fetchPage(data.data.page, {surah: currentSurahNumber, ayah: currentAyahIndex});
-                                return;
-                            }
-                        } catch(e){}
-                    }
-                    renderActiveAyah(currentSurahNumber, currentAyahIndex);
+                if (activeVerse) {
+                    targetAyah = activeVerse.ayah;
                 }
+            } else if (surahAyahsData.length > 0) {
+                let total = surahAyahsData.length;
+                let calculatedIndex = Math.floor((audio.currentTime / audio.duration) * total) + 1;
+                targetAyah = Math.min(total, Math.max(1, calculatedIndex));
+            }
+
+            if (targetAyah !== currentAyahIndex) {
+                currentAyahIndex = targetAyah;
+
+                if (isFullPageMode) {
+                    if (surahAyahsData.length > 0 && surahAyahsData[currentAyahIndex - 1]) {
+                        let pageOfAyah = surahAyahsData[currentAyahIndex - 1].page;
+                        if (pageOfAyah && pageOfAyah !== currentPageNumber) {
+                            await fetchPage(pageOfAyah, {surah: currentSurahNumber, ayah: currentAyahIndex});
+                            return;
+                        }
+                    }
+                }
+                renderActiveAyah(currentSurahNumber, currentAyahIndex);
             }
         } 
     };
