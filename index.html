@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>إذاعة القرآن الكريم والتفسير - التزامن الدقيق</title>
+    <title>إذاعة القرآن الكريم - المطابقة المباشرة برقم الآية</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
@@ -282,10 +282,10 @@
         <div class="quran-text-container">
             <div class="quran-header">
                 <div class="quran-title" id="textSurahTitle">📖 المصحف المكتوب</div>
-                <div style="font-size: 0.8rem; color: var(--green);" id="surahInfo">⚡ تتبع فوري مع الصوت</div>
+                <div style="font-size: 0.8rem; color: var(--green);" id="surahInfo">🎯 رقم الآية = صوت الآية</div>
             </div>
             <div class="quran-body" id="quranTextBody">
-                <div style="text-align: center; color: var(--accent);">جاري تحضير السورة...</div>
+                <div style="text-align: center; color: var(--accent);">جاري التحميل...</div>
             </div>
         </div>
     </div>
@@ -301,8 +301,8 @@
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
             <li>⭐ 4 أيقونات سريعة للتحكم المباشر والربط المنسدل.</li>
-            <li>⭐ خوارزمية مزامنة فورية تضمن ظهور الآية المسموعة فقط بدقة مع صوت القارئ.</li>
-            <li>⭐ دعم التكرار التلقائي والتنقل بين السور.</li>
+            <li>⭐ مطابقة رقمية دقيقة (صوت الآية المسموعة يطابق رقم السورة والآية المعروضة 100%).</li>
+            <li>⭐ تتابع وتحديث الآيات تلقائياً فور انتهاء تلاوة الآية الحالية.</li>
         </ul>
     </div>
 </div>
@@ -329,13 +329,12 @@
     let currentRepeat = 1;
     let favorites = JSON.parse(localStorage.getItem('quranFavs')) || [];
     let currentMode = 'مرتل';
-    let currentSurahNumber = 1;
 
-    // متغيرات خوارزمية المزامنة الصوتية آية بآية
-    let currentAyahIndex = 1;
+    // متغيرات المزامنة المباشرة برقم الآية
+    let currentAyahNumber = 1;
     let totalAyahsInSurah = 0;
+    let currentSurahNumber = 1;
     let isAyahByAyahMode = true;
-    let selectedReciterFolder = "Alafasy_128kbps"; // المجلد الافتراضي لروابط الآيات
 
     const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
@@ -352,12 +351,12 @@
         return text.replace(/[أإآء]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064b-\u065f]/g, '');
     }
 
-    // خوارزمية جلب نص السورة وعرض الآية الحالية فقط
+    // جلب نص السورة كاملاً وبناء العناصر مع ربطها برقم الآية 1 مقابل 1
     async function loadQuranSurah(surahNum) {
         currentSurahNumber = parseInt(surahNum, 10);
         textSurahTitle.innerText = `📖 سورة ${surahNames[currentSurahNumber - 1]}`;
         quranTextBody.innerHTML = '<div style="text-align: center; color: var(--accent);">جاري التحميل...</div>';
-        currentAyahIndex = 1;
+        currentAyahNumber = 1;
 
         try {
             const res = await fetch(`https://api.alquran.cloud/v1/surah/${currentSurahNumber}/quran-uthmani`);
@@ -370,12 +369,12 @@
                     html += '<div class="bismillah">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>';
                 }
 
-                data.data.ayahs.forEach((ayah, index) => {
+                data.data.ayahs.forEach((ayah) => {
                     let text = ayah.text;
                     if (currentSurahNumber !== 1 && ayah.numberInSurah === 1 && text.startsWith('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ')) {
                         text = text.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', '').trim();
                     }
-                    const activeClass = (index === 0) ? 'active-verse' : '';
+                    const activeClass = (ayah.numberInSurah === 1) ? 'active-verse' : '';
                     html += `<div class="verse ${activeClass}" id="verse-${ayah.numberInSurah}">${text} <span class="verse-num">﴿${ayah.numberInSurah}﴾</span></div>`;
                 });
                 
@@ -386,34 +385,35 @@
         }
     }
 
-    // الخوارزمية الأساسية: توليد رابط صوت الآية المحددة بالملي ثانية
+    // المعادلة الرقمية الصريحة: تكوين رابط ملف الصوت للآية برقم السورة ورقم الآية بدقة (1 مقابل 1)
     function getAyahAudioUrl(surah, ayah) {
         let sStr = surah.toString().padStart(3, '0');
         let aStr = ayah.toString().padStart(3, '0');
-        return `https://everyayah.com/data/${selectedReciterFolder}/${sStr}${aStr}.mp3`;
+        return `https://everyayah.com/data/Alafasy_128kbps/${sStr}${aStr}.mp3`;
     }
 
-    // تشغيل الآية التالية فور انتهاء الآية السابقة مباشرة مع تحديث الشاشة
+    // تشغيل الصوت للآية ورقمها المطابق
     function playCurrentAyah() {
-        if (currentAyahIndex > totalAyahsInSurah) {
-            // انتهاء السورة بالكامل -> الانتقال للسورة التالية
+        if (currentAyahNumber > totalAyahsInSurah) {
             document.getElementById('nextBtn').click();
             return;
         }
 
-        showSingleVerse(currentAyahIndex);
+        // 1. إظهار الآية برقمها المطابق على الشاشة
+        showSingleVerse(currentAyahNumber);
 
+        // 2. تشغيل صوت نفس رقم الآية
         if (isAyahByAyahMode) {
-            audio.src = getAyahAudioUrl(currentSurahNumber, currentAyahIndex);
+            audio.src = getAyahAudioUrl(currentSurahNumber, currentAyahNumber);
             audio.load();
             playAudioSafe();
         }
     }
 
-    // الحدث المحوري للخوارزمية: الانتقال للآية التالية لحظة انتهاء صوت الآية الحالية
+    // عند انتهاء صوت الآية الحالية -> الانتقال الآلي والربط بالآية رقم (الآية الحالية + 1)
     audio.onended = () => {
         if (isAyahByAyahMode) {
-            currentAyahIndex++;
+            currentAyahNumber++;
             playCurrentAyah();
         } else {
             let max = parseInt(repeatSelect.value);
@@ -593,7 +593,7 @@
     function autoPlayTrack() {
         if(!reciterSelect.value || !surahSelect.value) return;
         isAyahByAyahMode = true;
-        currentAyahIndex = 1;
+        currentAyahNumber = 1;
         checkFavStatus();
         loadQuranSurah(surahSelect.value).then(() => {
             playCurrentAyah();
