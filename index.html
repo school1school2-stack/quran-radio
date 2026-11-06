@@ -40,7 +40,6 @@
         }
         .feat-link:hover { background: var(--accent); color: black; }
 
-        /* شريط الأيقونات الأربعة في سطر واحد */
         .icon-bar {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -182,9 +181,10 @@
             padding: 15px;
             border-radius: 15px;
             transition: all 0.3s ease;
+            width: 100%;
         }
 
-        /* إظهار الآية الحالية فقط مع تأثير حركي ورائع */
+        /* إظهار الآية الحالية فقط */
         .verse.active-verse {
             display: block !important;
             background: rgba(241, 196, 15, 0.1);
@@ -227,7 +227,6 @@
         <button class="feat-link" onclick="toggleModal(true)">📋 أهم المميزات</button>
     </div>
 
-    <!-- شريط الأيقونات الأربعة في سطر واحد -->
     <div class="icon-bar">
         <button class="icon-btn active" id="allMode">
             <span class="icon">📖</span>
@@ -282,14 +281,13 @@
             </div>
         </div>
 
-        <!-- بطاقة عرض الآية المسموعة حالياً فقط -->
         <div class="quran-text-container">
             <div class="quran-header">
                 <div class="quran-title" id="textSurahTitle">📖 المصحف المكتوب</div>
                 <div style="font-size: 0.8rem; color: var(--green);" id="surahInfo">✨ عرض الآية الحالية فقط</div>
             </div>
             <div class="quran-body" id="quranTextBody">
-                <div style="text-align: center; color: var(--accent);">جاري تحضير التلاوة والآيات...</div>
+                <div style="text-align: center; color: var(--accent);">جاري تحضير السورة...</div>
             </div>
         </div>
     </div>
@@ -334,8 +332,8 @@
     let favorites = JSON.parse(localStorage.getItem('quranFavs')) || [];
     let currentMode = 'مرتل';
     let currentSurahNumber = 1;
-    let verseTimings = [];
-    let activeVerseIndex = -1;
+    let totalAyahsInSurah = 0;
+    let activeVerseNum = 1;
 
     const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
@@ -352,89 +350,58 @@
         return text.replace(/[أإآء]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064b-\u065f]/g, '');
     }
 
-    // جلب النص وتوليد بطاقات الآيات
-    async function fetchVersesWithTimings(surahNum) {
+    // جلب نص السورة كاملاً وعرض الآية الأولى مباشرة
+    async function loadQuranSurah(surahNum) {
         currentSurahNumber = parseInt(surahNum, 10);
         textSurahTitle.innerText = `📖 سورة ${surahNames[currentSurahNumber - 1]}`;
         quranTextBody.innerHTML = '<div style="text-align: center; color: var(--accent);">جاري التحميل...</div>';
-        verseTimings = [];
-        activeVerseIndex = -1;
+        activeVerseNum = 1;
 
         try {
-            const textRes = await fetch(`https://api.quran.com/api/v4/quran/verses/uthmani?chapter_number=${currentSurahNumber}`);
-            const textData = await textRes.json();
+            const res = await fetch(`https://api.alquran.cloud/v1/surah/${currentSurahNumber}/quran-uthmani`);
+            const data = await res.json();
             
-            const timingRes = await fetch(`https://api.quran.com/api/v4/chapter_recitations/7/${currentSurahNumber}`);
-            const timingData = await timingRes.json();
-            
-            if (textData.verses && timingData.audio_file) {
+            if (data.code === 200) {
+                totalAyahsInSurah = data.data.ayahs.length;
                 let html = '';
                 if (currentSurahNumber !== 1 && currentSurahNumber !== 9) {
                     html += '<div class="bismillah">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>';
                 }
 
-                verseTimings = timingData.audio_file.timestamps.map(t => ({
-                    ayah: t.verse_key.split(':')[1],
-                    start: t.timestamp_from / 1000,
-                    end: t.timestamp_to / 1000
-                }));
-
-                textData.verses.forEach((verseObj, index) => {
-                    const ayahNum = verseObj.verse_key.split(':')[1];
-                    let text = verseObj.text_uthmani;
-                    if (currentSurahNumber !== 1 && ayahNum == 1 && text.startsWith('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ')) {
+                data.data.ayahs.forEach((ayah, index) => {
+                    let text = ayah.text;
+                    if (currentSurahNumber !== 1 && ayah.numberInSurah === 1 && text.startsWith('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ')) {
                         text = text.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', '').trim();
                     }
-                    // إضافة أول آية كـ active افتراضياً
                     const activeClass = (index === 0) ? 'active-verse' : '';
-                    html += `<div class="verse ${activeClass}" id="verse-${ayahNum}">${text} <span class="verse-num">﴿${ayahNum}﴾</span></div>`;
+                    html += `<div class="verse ${activeClass}" id="verse-${ayah.numberInSurah}">${text} <span class="verse-num">﴿${ayah.numberInSurah}﴾</span></div>`;
                 });
                 
                 quranTextBody.innerHTML = html;
             }
         } catch(e) {
-            fallbackTextLoad(currentSurahNumber);
+            quranTextBody.innerHTML = '<div style="text-align: center; color: var(--red);">خطأ في جلب النص القرآني</div>';
         }
     }
 
-    async function fallbackTextLoad(surahNum) {
-        try {
-            const res = await fetch(`https://api.alquran.cloud/v1/surah/${surahNum}/quran-uthmani`);
-            const data = await res.json();
-            if (data.code === 200) {
-                let html = '';
-                if (surahNum !== 1 && surahNum !== 9) {
-                    html += '<div class="bismillah">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>';
-                }
-                data.data.ayahs.forEach((ayah, index) => {
-                    const activeClass = (index === 0) ? 'active-verse' : '';
-                    html += `<div class="verse ${activeClass}" id="verse-${ayah.numberInSurah}">${ayah.text} <span class="verse-num">﴿${ayah.numberInSurah}﴾</span></div>`;
-                });
-                quranTextBody.innerHTML = html;
-            }
-        } catch(err){}
-    }
-
-    // التحدث والتتبع الآلي أثناء استماع الصوت
+    // التحديث والتنقل بين الآيات تناسباً مع شريط تقدم الصوت
     audio.ontimeupdate = () => { 
-        if(!isNaN(audio.duration)) { 
+        if(!isNaN(audio.duration) && audio.duration > 0 && totalAyahsInSurah > 0) { 
             seekSlider.value = (audio.currentTime / audio.duration) * 100; 
             document.getElementById('currentTime').innerText = formatTime(audio.currentTime); 
             document.getElementById('duration').innerText = formatTime(audio.duration); 
 
-            if(verseTimings.length > 0) {
-                const currentTime = audio.currentTime;
-                const current = verseTimings.find(v => currentTime >= v.start && currentTime < v.end);
-                
-                if(current && activeVerseIndex !== current.ayah) {
-                    activeVerseIndex = current.ayah;
-                    showSingleVerse(current.ayah);
-                }
+            // تتبع موضع الصوت وحساب رقم الآية الحالية
+            let progressRatio = audio.currentTime / audio.duration;
+            let currentAyah = Math.min(Math.floor(progressRatio * totalAyahsInSurah) + 1, totalAyahsInSurah);
+            
+            if(currentAyah !== activeVerseNum) {
+                activeVerseNum = currentAyah;
+                showSingleVerse(currentAyah);
             }
         } 
     };
 
-    // إظهار الآية الحالية فقط وإخفاء باقي السورة
     function showSingleVerse(ayahNumber) {
         document.querySelectorAll('.verse').forEach(el => el.classList.remove('active-verse'));
         const activeElem = document.getElementById(`verse-${ayahNumber}`);
@@ -466,13 +433,13 @@
                     tafsirMainSurahSelect.value = lastSave.surahId || 1;
                     updatePartDropdown(lastSave.surahId || 1);
                     tafsirPartSelect.value = lastSave.fileCode;
-                    fetchVersesWithTimings(lastSave.surahId || 1);
+                    loadQuranSurah(lastSave.surahId || 1);
                 } else {
                     filterReciters();
                     loadSurahs(currentMode === 'معلم');
                     reciterSelect.value = lastSave.server;
                     surahSelect.value = lastSave.surahNum;
-                    fetchVersesWithTimings(lastSave.surahNum || 1);
+                    loadQuranSurah(lastSave.surahNum || 1);
                 }
                 audio.src = lastSave.audioUrl || getAudioUrl(lastSave.server, lastSave.surahNum);
                 audio.load();
@@ -481,7 +448,7 @@
             } else {
                 filterReciters(); 
                 loadSurahs(false);
-                fetchVersesWithTimings(1);
+                loadQuranSurah(1);
             }
         } catch(e) { 
             repeatStatus.innerText = "خطأ في جلب البيانات من السيرفر"; 
@@ -585,7 +552,7 @@
         updateStatus();
         audio.load();
         playAudioSafe();
-        fetchVersesWithTimings(tafsirMainSurahSelect.value);
+        loadQuranSurah(tafsirMainSurahSelect.value);
     }
 
     function autoPlayTrack() {
@@ -596,7 +563,7 @@
         checkFavStatus();
         audio.load();
         playAudioSafe();
-        fetchVersesWithTimings(surahSelect.value);
+        loadQuranSurah(surahSelect.value);
     }
 
     function filterReciters(term = "") {
