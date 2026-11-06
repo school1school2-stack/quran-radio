@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>إذاعة القرآن الكريم والتفسير - عرض الآية الحالية</title>
+    <title>إذاعة القرآن الكريم والتفسير - التزامن الدقيق</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
@@ -171,7 +171,7 @@
             font-size: 1.6rem;
         }
 
-        /* إخفاء الآيات افتراضياً */
+        /* إخفاء الآيات غير النشطة */
         .verse {
             display: none;
             font-size: 2.1rem;
@@ -184,7 +184,7 @@
             width: 100%;
         }
 
-        /* إظهار الآية الحالية فقط */
+        /* إظهار الآية الحالية المطابقة للصوت */
         .verse.active-verse {
             display: block !important;
             background: rgba(241, 196, 15, 0.1);
@@ -284,10 +284,10 @@
         <div class="quran-text-container">
             <div class="quran-header">
                 <div class="quran-title" id="textSurahTitle">📖 المصحف المكتوب</div>
-                <div style="font-size: 0.8rem; color: var(--green);" id="surahInfo">✨ عرض الآية الحالية فقط</div>
+                <div style="font-size: 0.8rem; color: var(--green);" id="surahInfo">⚡ التزامن الصوتي المباشر</div>
             </div>
             <div class="quran-body" id="quranTextBody">
-                <div style="text-align: center; color: var(--accent);">جاري تحضير السورة...</div>
+                <div style="text-align: center; color: var(--accent);">جاري تحضير التلاوة...</div>
             </div>
         </div>
     </div>
@@ -303,8 +303,8 @@
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
             <li>⭐ 4 أيقونات سريعة للتحكم المباشر والربط المنسدل.</li>
-            <li>⭐ عرض الآية المسموعة حالياً فقط في منتصف الشاشة وتحديثها تلقائياً.</li>
-            <li>⭐ خط عثماني واضح وكبير يضمن التركيز التام مع القراءة.</li>
+            <li>⭐ مزامنة زمنية دقيقة لظهور الآية المسموعة فقط أثناء تلاوة القارئ.</li>
+            <li>⭐ خط عثماني سليم ومريح للعين.</li>
         </ul>
     </div>
 </div>
@@ -332,8 +332,8 @@
     let favorites = JSON.parse(localStorage.getItem('quranFavs')) || [];
     let currentMode = 'مرتل';
     let currentSurahNumber = 1;
-    let totalAyahsInSurah = 0;
-    let activeVerseNum = 1;
+    let verseTimings = [];
+    let activeVerseIndex = -1;
 
     const surahNames = ["الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"];
 
@@ -350,54 +350,71 @@
         return text.replace(/[أإآء]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/[\u064b-\u065f]/g, '');
     }
 
-    // جلب نص السورة كاملاً وعرض الآية الأولى مباشرة
-    async function loadQuranSurah(surahNum) {
+    // جلب النص وتوقيتات كل آية بالملي ثانية للتزامن الصوتي المباشر
+    async function loadQuranTextAndTimings(surahNum) {
         currentSurahNumber = parseInt(surahNum, 10);
         textSurahTitle.innerText = `📖 سورة ${surahNames[currentSurahNumber - 1]}`;
-        quranTextBody.innerHTML = '<div style="text-align: center; color: var(--accent);">جاري التحميل...</div>';
-        activeVerseNum = 1;
+        quranTextBody.innerHTML = '<div style="text-align: center; color: var(--accent);">جاري التحميل المباشر...</div>';
+        verseTimings = [];
+        activeVerseIndex = -1;
 
         try {
-            const res = await fetch(`https://api.alquran.cloud/v1/surah/${currentSurahNumber}/quran-uthmani`);
-            const data = await res.json();
+            // 1. جلب التوقيتات الدقيقة للآيات
+            const timingRes = await fetch(`https://api.quran.com/api/v4/chapter_recitations/7/${currentSurahNumber}`);
+            const timingData = await timingRes.json();
+
+            // 2. جلب النص بالرسم العثماني
+            const textRes = await fetch(`https://api.alquran.cloud/v1/surah/${currentSurahNumber}/quran-uthmani`);
+            const textData = await textRes.json();
             
-            if (data.code === 200) {
-                totalAyahsInSurah = data.data.ayahs.length;
+            if (textData.code === 200) {
                 let html = '';
                 if (currentSurahNumber !== 1 && currentSurahNumber !== 9) {
                     html += '<div class="bismillah">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>';
                 }
 
-                data.data.ayahs.forEach((ayah, index) => {
+                if (timingData && timingData.audio_file && timingData.audio_file.timestamps) {
+                    verseTimings = timingData.audio_file.timestamps.map(t => ({
+                        ayah: parseInt(t.verse_key.split(':')[1], 10),
+                        start: t.timestamp_from / 1000,
+                        end: t.timestamp_to / 1000
+                    }));
+                }
+
+                dataAyahs = textData.data.ayahs;
+                dataAyahs.forEach((ayah) => {
                     let text = ayah.text;
                     if (currentSurahNumber !== 1 && ayah.numberInSurah === 1 && text.startsWith('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ')) {
                         text = text.replace('بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', '').trim();
                     }
-                    const activeClass = (index === 0) ? 'active-verse' : '';
+                    // إظهار الآية الأولى افتراضياً
+                    const activeClass = (ayah.numberInSurah === 1) ? 'active-verse' : '';
                     html += `<div class="verse ${activeClass}" id="verse-${ayah.numberInSurah}">${text} <span class="verse-num">﴿${ayah.numberInSurah}﴾</span></div>`;
                 });
                 
                 quranTextBody.innerHTML = html;
             }
         } catch(e) {
-            quranTextBody.innerHTML = '<div style="text-align: center; color: var(--red);">خطأ في جلب النص القرآني</div>';
+            quranTextBody.innerHTML = '<div style="text-align: center; color: var(--red);">خطأ في جلب بيانات التزامن</div>';
         }
     }
 
-    // التحديث والتنقل بين الآيات تناسباً مع شريط تقدم الصوت
+    // التتبع الصوتي والتنقل الفوري بين الآيات
     audio.ontimeupdate = () => { 
-        if(!isNaN(audio.duration) && audio.duration > 0 && totalAyahsInSurah > 0) { 
+        if(!isNaN(audio.duration) && audio.duration > 0) { 
             seekSlider.value = (audio.currentTime / audio.duration) * 100; 
             document.getElementById('currentTime').innerText = formatTime(audio.currentTime); 
             document.getElementById('duration').innerText = formatTime(audio.duration); 
 
-            // تتبع موضع الصوت وحساب رقم الآية الحالية
-            let progressRatio = audio.currentTime / audio.duration;
-            let currentAyah = Math.min(Math.floor(progressRatio * totalAyahsInSurah) + 1, totalAyahsInSurah);
-            
-            if(currentAyah !== activeVerseNum) {
-                activeVerseNum = currentAyah;
-                showSingleVerse(currentAyah);
+            // مطابقة الوقت الحالي بالثواني مع نطاق بداية ونهاية كل آية
+            if(verseTimings.length > 0) {
+                const currentTime = audio.currentTime;
+                const current = verseTimings.find(v => currentTime >= v.start && currentTime <= v.end);
+                
+                if(current && activeVerseIndex !== current.ayah) {
+                    activeVerseIndex = current.ayah;
+                    showSingleVerse(current.ayah);
+                }
             }
         } 
     };
@@ -433,13 +450,13 @@
                     tafsirMainSurahSelect.value = lastSave.surahId || 1;
                     updatePartDropdown(lastSave.surahId || 1);
                     tafsirPartSelect.value = lastSave.fileCode;
-                    loadQuranSurah(lastSave.surahId || 1);
+                    loadQuranTextAndTimings(lastSave.surahId || 1);
                 } else {
                     filterReciters();
                     loadSurahs(currentMode === 'معلم');
                     reciterSelect.value = lastSave.server;
                     surahSelect.value = lastSave.surahNum;
-                    loadQuranSurah(lastSave.surahNum || 1);
+                    loadQuranTextAndTimings(lastSave.surahNum || 1);
                 }
                 audio.src = lastSave.audioUrl || getAudioUrl(lastSave.server, lastSave.surahNum);
                 audio.load();
@@ -448,7 +465,7 @@
             } else {
                 filterReciters(); 
                 loadSurahs(false);
-                loadQuranSurah(1);
+                loadQuranTextAndTimings(1);
             }
         } catch(e) { 
             repeatStatus.innerText = "خطأ في جلب البيانات من السيرفر"; 
@@ -552,7 +569,7 @@
         updateStatus();
         audio.load();
         playAudioSafe();
-        loadQuranSurah(tafsirMainSurahSelect.value);
+        loadQuranTextAndTimings(tafsirMainSurahSelect.value);
     }
 
     function autoPlayTrack() {
@@ -563,7 +580,7 @@
         checkFavStatus();
         audio.load();
         playAudioSafe();
-        loadQuranSurah(surahSelect.value);
+        loadQuranTextAndTimings(surahSelect.value);
     }
 
     function filterReciters(term = "") {
