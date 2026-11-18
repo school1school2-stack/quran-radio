@@ -91,8 +91,9 @@
     <div class="sections-container">
         <button class="mode-btn active-mode" id="allMode">📖 المصحف المرتل</button>
         <button class="mode-btn" id="mojawadMode">🎤 المصحف المجود</button>
+        <button class="mode-btn" id="cowMode">🐄 سورة البقرة</button>
         <button class="mode-btn" id="childMode">👶 قسم الأطفال</button>
-        <button class="mode-btn" id="tafsirMode">📚 مختصر التفسير</button>
+        <button class="mode-btn" id="tafsirMode" style="grid-column: span 2;">📚 مختصر التفسير</button>
     </div>
 
     <!-- قسم القراء العاديين -->
@@ -137,6 +138,7 @@
         <span class="close-modal" onclick="toggleModal(false)">&times;</span>
         <h3 style="color:var(--accent); margin-top: 0;">🌟 مميزات الإذاعة</h3>
         <ul class="feat-list">
+            <li>⭐ أيقونة مستقلة لتلاوات سورة البقرة بصوت جميع المشايخ.</li>
             <li>⭐ تصفح التفسير بنظام القائمتين بدقة متناهية وسلاسة.</li>
             <li>⭐ ضبط ترتيب وتصحيح سور القرآن (بما فيها سورة الرحمن وما بعدها).</li>
             <li>⭐ استكمال الاستماع تلقائياً من حيث توقفت.</li>
@@ -461,13 +463,17 @@
                     tafsirMainSurahSelect.value = lastSave.surahId || 1;
                     updatePartDropdown(lastSave.surahId || 1);
                     tafsirPartSelect.value = lastSave.fileCode;
+                } else if (currentMode === 'البقرة') {
+                    filterReciters();
+                    reciterSelect.value = lastSave.server;
+                    surahSelect.value = "002";
                 } else {
                     filterReciters();
                     loadSurahs(currentMode === 'معلم');
                     reciterSelect.value = lastSave.server;
                     surahSelect.value = lastSave.surahNum;
                 }
-                audio.src = lastSave.audioUrl || getAudioUrl(lastSave.server, lastSave.surahNum);
+                audio.src = lastSave.audioUrl || getAudioUrl(lastSave.server, lastSave.surahNum || "002");
                 audio.load();
                 audio.currentTime = lastSave.time;
                 repeatStatus.innerText = "🔄 تم استعادة آخر موقع تلقائياً";
@@ -482,11 +488,12 @@
     function saveCurrentProgress() {
         if (!audio.src || audio.paused) return;
         let activeServer = (currentMode === 'تفسير') ? tafsirTypeSelect.value : reciterSelect.value;
-        let activeSurahId = tafsirMainSurahSelect.value;
+        let activeSurahId = (currentMode === 'البقرة') ? "002" : surahSelect.value;
         let activeFileCode = tafsirPartSelect.value;
         localStorage.setItem('lastQuranSession', JSON.stringify({
             server: activeServer,
             surahId: activeSurahId,
+            surahNum: activeSurahId,
             fileCode: activeFileCode,
             audioUrl: audio.src,
             time: audio.currentTime,
@@ -499,6 +506,7 @@
         if (m === 'مجود') return 'mojawadMode';
         if (m === 'معلم') return 'childMode';
         if (m === 'تفسير') return 'tafsirMode';
+        if (m === 'البقرة') return 'cowMode';
         return 'allMode'; 
     }
     
@@ -589,8 +597,10 @@
     }
 
     function autoPlayTrack() {
-        if(!reciterSelect.value || !surahSelect.value) return;
-        audio.src = getAudioUrl(reciterSelect.value, surahSelect.value);
+        if(!reciterSelect.value) return;
+        let targetSurah = (currentMode === 'البقرة') ? "002" : surahSelect.value;
+        if (!targetSurah) return;
+        audio.src = getAudioUrl(reciterSelect.value, targetSurah);
         currentRepeat = 1;
         updateStatus();
         checkFavStatus();
@@ -602,7 +612,7 @@
         reciterSelect.innerHTML = '<option value="">-- اختر القارئ --</option>';
         const cleanTerm = normalizeArabic(term.trim());
 
-        if (term === "") {
+        if (term === "" && currentMode !== 'البقرة') {
             let favGroup = document.createElement('optgroup'); 
             favGroup.label = "⭐ القراء المفضلون";
             favorites.filter(f => f.mode === currentMode).forEach(f => {
@@ -676,6 +686,11 @@
                 tafsirPartSelect.selectedIndex = 0;
             }
             playTafsirAudio();
+        } else if (currentMode === 'البقرة') {
+            if (reciterSelect.selectedIndex < reciterSelect.options.length - 1) {
+                reciterSelect.selectedIndex++;
+                autoPlayTrack();
+            }
         } else {
             if(surahSelect.selectedIndex === surahSelect.options.length - 1) {
                 if(reciterSelect.selectedIndex < reciterSelect.options.length - 1) {
@@ -699,6 +714,11 @@
                 tafsirPartSelect.selectedIndex = tafsirPartSelect.options.length - 1;
             }
             playTafsirAudio();
+        } else if (currentMode === 'البقرة') {
+            if (reciterSelect.selectedIndex > 1) {
+                reciterSelect.selectedIndex--;
+                autoPlayTrack();
+            }
         } else {
             if(surahSelect.selectedIndex > 0) { surahSelect.selectedIndex--; autoPlayTrack(); } 
         }
@@ -767,13 +787,15 @@
     
     function toggleModeUI() {
         const isTafsir = (currentMode === 'تفسير');
+        const isCow = (currentMode === 'البقرة');
         document.getElementById('normalReciterSection').style.display = isTafsir ? 'none' : 'block';
         document.getElementById('tafsirSection').style.display = isTafsir ? 'block' : 'none';
-        document.getElementById('pageTitle').innerText = isTafsir ? "تفسير القرآن الكريم" : "إذاعة القرآن الكريم";
+        surahSelect.style.display = isCow ? 'none' : 'block';
+        document.getElementById('pageTitle').innerText = isTafsir ? "تفسير القرآن الكريم" : (isCow ? "سورة البقرة - لجميع المشايخ" : "إذاعة القرآن الكريم");
         favBtn.style.display = isTafsir ? 'none' : 'flex';
     }
 
-    const modes = { 'allMode': 'مرتل', 'mojawadMode': 'مجود', 'childMode': 'معلم', 'tafsirMode': 'تفسير' };
+    const modes = { 'allMode': 'مرتل', 'mojawadMode': 'مجود', 'cowMode': 'البقرة', 'childMode': 'معلم', 'tafsirMode': 'تفسير' };
     Object.keys(modes).forEach(id => {
         document.getElementById(id).onclick = function() {
             currentMode = modes[id]; 
@@ -783,7 +805,7 @@
             if (currentMode === 'تفسير') {
                 playTafsirAudio();
             } else {
-                loadSurahs(currentMode === 'معلم'); 
+                if (currentMode !== 'البقرة') loadSurahs(currentMode === 'معلم'); 
                 filterReciters();
                 audio.pause(); 
                 playBtn.innerText = "▶";
